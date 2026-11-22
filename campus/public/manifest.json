@@ -1,0 +1,42 @@
+{
+  "name": "BIET",
+  "short_name": "BIET",
+  "description": "Bapuji Institute of Engineering and Technology, Davangere",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#050d1f",
+  "theme_color": "#0f2148",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/biet-logo.png",
+      "sizes": "192x192 512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Satellite Map & Navigation",
+      "short_name": "Map",
+      "description": "Navigate 63-acre campus in real-world satellite view",
+      "url": "/#map",
+      "icons": [{ "src": "/biet-logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Faculty Directory",
+      "short_name": "Faculty",
+      "description": "Live cabin availability of 316+ professors",
+      "url": "/#faculty",
+      "icons": [{ "src": "/biet-logo.png", "sizes": "96x96" }]
+    },
+    {
+      "name": "Targeted Emergency SOS",
+      "short_name": "SOS",
+      "description": "Targeted emergency dispatch to Security, Doctors & Mentors",
+      "url": "/#emergency",
+      "icons": [{ "src": "/biet-logo.png", "sizes": "96x96" }]
+    }
+  ]
+}

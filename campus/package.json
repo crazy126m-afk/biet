@@ -1,0 +1,15 @@
+{
+  "name": "biet",
+  "version": "3.2.0",
+  "description": "BIET Davangere Official App",
+  "scripts": {
+    "build": "echo Web build ready",
+    "cap:sync": "npx cap sync android",
+    "cap:open": "npx cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0"
+  }
+}

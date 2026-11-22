@@ -1,0 +1,10 @@
+{
+  "appId": "edu.bietdvg.app",
+  "appName": "BIET",
+  "webDir": "public",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  }
+}

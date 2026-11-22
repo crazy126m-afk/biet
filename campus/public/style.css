@@ -1,0 +1,261 @@
+/* ============================================================
+   BIET Davangere - Smart Campus 360 Custom Styles & Animations
+   Gen-Z Glassmorphism, 3D Canvas, Mobile App Shell & Neons
+   ============================================================ */
+
+:root {
+  --bg-dark: #050d1f;
+  --bg-card: rgba(10, 23, 51, 0.85);
+  --bg-card-hover: rgba(15, 33, 72, 0.95);
+  --border-glass: rgba(203, 162, 62, 0.18);
+  --border-neon-gold: rgba(203, 162, 62, 0.45);
+  --border-neon-purple: rgba(52, 87, 152, 0.5);
+  --border-neon-cyan: rgba(56, 189, 248, 0.45);
+  --border-neon-rose: rgba(244, 63, 94, 0.5);
+  --accent-biet-navy: #0f2148;
+  --accent-biet-blue: #1f4178;
+  --accent-biet-gold: #cba23e;
+  --accent-purple: #345798;
+  --accent-pink: #cba23e;
+  --accent-cyan: #38bdf8;
+  --accent-emerald: #1f8b3e;
+  --accent-amber: #cba23e;
+  --accent-rose: #f43f5e;
+}
+
+/* Global Reset & Base */
+body {
+  background-color: var(--bg-dark);
+  color: #f1f5f9;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  overflow-x: hidden;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #0a0c14;
+}
+::-webkit-scrollbar-thumb {
+  background: #272d42;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-purple);
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.glass-panel-interactive {
+  background: var(--bg-card);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-glass);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-panel-interactive:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-neon-purple);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px 0 rgba(139, 92, 246, 0.15);
+}
+
+.glass-input {
+  background: rgba(10, 12, 20, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s ease;
+}
+.glass-input:focus {
+  outline: none;
+  border-color: var(--accent-purple);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+  background: rgba(15, 18, 30, 0.9);
+}
+
+/* 3D Map Viewport */
+#three-canvas-container {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  position: relative;
+  border-radius: 1rem;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 50%, #151a30 0%, #0a0c14 100%);
+}
+
+#three-canvas {
+  width: 100% !important;
+  height: 100% !important;
+  display: block;
+}
+
+/* Animations */
+@keyframes pulseRed {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(244, 63, 94, 0);
+  }
+}
+.pulse-red {
+  animation: pulseRed 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes pulseGreen {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+  }
+}
+.pulse-green {
+  animation: pulseGreen 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+@keyframes sirenFlash {
+  0%, 100% {
+    background-color: rgba(244, 63, 94, 0);
+  }
+  50% {
+    background-color: rgba(244, 63, 94, 0.35);
+  }
+}
+.siren-active-overlay {
+  animation: sirenFlash 0.5s infinite;
+  pointer-events: none;
+}
+
+/* Floating Real-time Notification Pop-up */
+@keyframes slideNotification {
+  0% {
+    transform: translate(-50%, -120%);
+    opacity: 0;
+  }
+  15% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  85% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -120%);
+    opacity: 0;
+  }
+}
+
+.notification-popup-animate {
+  animation: slideNotification 6s forwards ease-in-out;
+}
+
+/* Gradient Texts & Neon Glows */
+.text-gradient-purple-pink {
+  background: linear-gradient(135deg, #a78bfa 0%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-cyan-blue {
+  background: linear-gradient(135deg, #38bdf8 0%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-emerald-cyan {
+  background: linear-gradient(135deg, #34d399 0%, #22d3ee 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.neon-glow-purple {
+  box-shadow: 0 0 25px rgba(139, 92, 246, 0.4);
+}
+
+.neon-glow-rose {
+  box-shadow: 0 0 25px rgba(244, 63, 94, 0.45);
+}
+
+.neon-glow-cyan {
+  box-shadow: 0 0 25px rgba(6, 182, 212, 0.4);
+}
+
+/* Bottom Nav Safe Padding for Mobile */
+.pb-mobile-nav {
+  padding-bottom: 5.5rem;
+}
+
+@media (min-width: 1024px) {
+  .pb-mobile-nav {
+    padding-bottom: 2rem;
+  }
+}
+
+/* Active Nav Glow */
+.nav-btn.active {
+  color: #a78bfa;
+  background: rgba(139, 92, 246, 0.15);
+  border-color: rgba(139, 92, 246, 0.4);
+}
+.nav-btn.active svg {
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.6));
+}
+
+/* Map Route Path Glowing Dash */
+@keyframes marchDashes {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+.animated-route-line {
+  stroke-dasharray: 8, 8;
+  animation: marchDashes 1.5s linear infinite;
+}
+
+/* Leaflet Map Dark Styling */
+.leaflet-container {
+  background-color: #0a0c14 !important;
+  font-family: inherit !important;
+}
+.leaflet-popup-content-wrapper {
+  background: rgba(18, 22, 37, 0.95) !important;
+  color: #f1f5f9 !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+.leaflet-popup-tip {
+  background: rgba(18, 22, 37, 0.95) !important;
+}
+
+/* Chatbot Floating Animation */
+@keyframes floatWidget {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+.floating-widget {
+  animation: floatWidget 3s ease-in-out infinite;
+}
