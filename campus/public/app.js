@@ -765,22 +765,238 @@ function renderFaculty(faculty) {
 }
 
 function populateFacultySelect(faculty) {
-  const sel = document.getElementById('faculty-switch-prof-id');
-  if (sel) {
-    sel.innerHTML = faculty.map(f => `<option value="${f.id}">${f.name} (${f.department})</option>`).join('');
-  }
-
-  const authSel = document.getElementById('auth-faculty-id');
-  if (authSel) {
-    authSel.innerHTML = faculty.map(f => `<option value="${f.id}">${f.name} — ${f.department} (${f.designation})</option>`).join('');
-  }
-
   const sosTeacherSel = document.getElementById('sos-specific-teacher');
   if (sosTeacherSel) {
     sosTeacherSel.innerHTML = '<option value="">-- None (Only general responders selected above) --</option>' +
       faculty.map(f => `<option value="${f.name} [${f.department}]">${f.name} — ${f.department} (${f.cabin})</option>`).join('');
   }
+
+  // Pre-select first professor if not already selected
+  if (faculty && faculty.length > 0) {
+    if (!document.getElementById('auth-faculty-id').value) selectAuthFaculty(faculty[0].id);
+    if (document.getElementById('faculty-switch-prof-id') && !document.getElementById('faculty-switch-prof-id').value) selectFacultySwitch(faculty[0].id);
+    if (document.getElementById('set-pin-faculty-id') && !document.getElementById('set-pin-faculty-id').value) selectSetPinFaculty(faculty[0].id);
+  }
 }
+
+// ==========================================
+// SEARCHABLE FACULTY AUTOCOMPLETE LOGIC
+// ==========================================
+function renderFacultyDropdownItems(list, dropdownEl, context) {
+  if (!dropdownEl) return;
+  if (!list || list.length === 0) {
+    dropdownEl.innerHTML = '<div class="p-3 text-center text-slate-400 text-xs">No matching professor found</div>';
+    dropdownEl.classList.remove('hidden');
+    return;
+  }
+
+  dropdownEl.innerHTML = list.map(f => {
+    const avatar = f.avatar || '/biet-logo.png';
+    const clickHandler = context === 'auth' 
+      ? `selectAuthFaculty(${f.id})` 
+      : (context === 'switch' ? `selectFacultySwitch(${f.id})` : `selectSetPinFaculty(${f.id})`);
+    
+    return `
+      <div onclick="${clickHandler}" class="p-2 rounded-xl hover:bg-white/10 flex items-center gap-2.5 cursor-pointer transition border border-transparent hover:border-[#cba23e]/40 group">
+        <img src="${avatar}" class="w-8 h-8 rounded-lg object-cover bg-black/40 border border-white/10 shrink-0" onerror="this.src='/biet-logo.png'">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-white text-xs truncate group-hover:text-[#cba23e]">${f.name}</span>
+            <span class="text-[10px] text-slate-400 font-mono shrink-0 ml-1">${f.cabin || ''}</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-[10px] text-slate-300">
+            <span class="text-[#cba23e] truncate">${f.department}</span>
+            <span>•</span>
+            <span class="text-slate-400 truncate">${f.designation || 'Faculty'}</span>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+  dropdownEl.classList.remove('hidden');
+}
+
+function handleFacultyAuthSearch(val) {
+  const q = (val || '').toLowerCase().trim();
+  const dropdown = document.getElementById('auth-faculty-dropdown');
+  if (!dropdown) return;
+
+  if (!q) {
+    renderFacultyDropdownItems(allFaculty.slice(0, 10), dropdown, 'auth');
+    return;
+  }
+
+  const filtered = allFaculty.filter(f => 
+    (f.name && f.name.toLowerCase().includes(q)) ||
+    (f.department && f.department.toLowerCase().includes(q)) ||
+    (f.designation && f.designation.toLowerCase().includes(q)) ||
+    (f.cabin && f.cabin.toLowerCase().includes(q))
+  );
+  renderFacultyDropdownItems(filtered.slice(0, 15), dropdown, 'auth');
+}
+
+function selectAuthFaculty(profId) {
+  const f = allFaculty.find(p => p.id === profId);
+  if (!f) return;
+
+  const idInput = document.getElementById('auth-faculty-id');
+  const searchBox = document.getElementById('auth-faculty-search-box');
+  const card = document.getElementById('auth-faculty-selected-card');
+  const dropdown = document.getElementById('auth-faculty-dropdown');
+  const passInput = document.getElementById('auth-faculty-pass');
+
+  if (idInput) idInput.value = f.id;
+  if (dropdown) dropdown.classList.add('hidden');
+  if (searchBox) searchBox.classList.add('hidden');
+
+  if (card) {
+    document.getElementById('auth-faculty-selected-name').textContent = f.name;
+    document.getElementById('auth-faculty-selected-cabin').textContent = f.cabin || 'Cabin';
+    document.getElementById('auth-faculty-selected-dept').textContent = f.department;
+    document.getElementById('auth-faculty-selected-desig').textContent = f.designation || 'Faculty';
+    document.getElementById('auth-faculty-selected-img').src = f.avatar || '/biet-logo.png';
+    card.classList.remove('hidden');
+  }
+
+  if (passInput) {
+    passInput.focus();
+  }
+}
+
+function clearFacultyAuthSelection() {
+  const idInput = document.getElementById('auth-faculty-id');
+  const searchBox = document.getElementById('auth-faculty-search-box');
+  const card = document.getElementById('auth-faculty-selected-card');
+  const searchInput = document.getElementById('auth-faculty-search');
+
+  if (idInput) idInput.value = '';
+  if (card) card.classList.add('hidden');
+  if (searchBox) searchBox.classList.remove('hidden');
+  if (searchInput) {
+    searchInput.value = '';
+    searchInput.focus();
+    handleFacultyAuthSearch('');
+  }
+}
+
+function handleFacultySwitchSearch(val) {
+  const q = (val || '').toLowerCase().trim();
+  const dropdown = document.getElementById('faculty-switch-dropdown');
+  if (!dropdown) return;
+  if (!q) {
+    renderFacultyDropdownItems(allFaculty.slice(0, 10), dropdown, 'switch');
+    return;
+  }
+  const filtered = allFaculty.filter(f => 
+    (f.name && f.name.toLowerCase().includes(q)) ||
+    (f.department && f.department.toLowerCase().includes(q)) ||
+    (f.cabin && f.cabin.toLowerCase().includes(q))
+  );
+  renderFacultyDropdownItems(filtered.slice(0, 15), dropdown, 'switch');
+}
+
+function selectFacultySwitch(profId) {
+  const f = allFaculty.find(p => p.id === profId);
+  if (!f) return;
+  const idInput = document.getElementById('faculty-switch-prof-id');
+  const searchBox = document.getElementById('faculty-switch-search-box');
+  const card = document.getElementById('faculty-switch-selected-card');
+  const dropdown = document.getElementById('faculty-switch-dropdown');
+  const pinInput = document.getElementById('faculty-switch-pin');
+
+  if (idInput) idInput.value = f.id;
+  if (dropdown) dropdown.classList.add('hidden');
+  if (searchBox) searchBox.classList.add('hidden');
+
+  if (card) {
+    document.getElementById('faculty-switch-selected-name').textContent = f.name;
+    document.getElementById('faculty-switch-selected-dept').textContent = `${f.department} (${f.cabin || ''})`;
+    document.getElementById('faculty-switch-selected-img').src = f.avatar || '/biet-logo.png';
+    card.classList.remove('hidden');
+  }
+  if (pinInput) pinInput.focus();
+}
+
+function clearFacultySwitchSelection() {
+  const idInput = document.getElementById('faculty-switch-prof-id');
+  const searchBox = document.getElementById('faculty-switch-search-box');
+  const card = document.getElementById('faculty-switch-selected-card');
+  const searchInput = document.getElementById('faculty-switch-search');
+
+  if (idInput) idInput.value = '';
+  if (card) card.classList.add('hidden');
+  if (searchBox) searchBox.classList.remove('hidden');
+  if (searchInput) {
+    searchInput.value = '';
+    searchInput.focus();
+    handleFacultySwitchSearch('');
+  }
+}
+
+function handleSetPinSearch(val) {
+  const q = (val || '').toLowerCase().trim();
+  const dropdown = document.getElementById('set-pin-dropdown');
+  if (!dropdown) return;
+  if (!q) {
+    renderFacultyDropdownItems(allFaculty.slice(0, 10), dropdown, 'set-pin');
+    return;
+  }
+  const filtered = allFaculty.filter(f => 
+    (f.name && f.name.toLowerCase().includes(q)) ||
+    (f.department && f.department.toLowerCase().includes(q)) ||
+    (f.cabin && f.cabin.toLowerCase().includes(q))
+  );
+  renderFacultyDropdownItems(filtered.slice(0, 15), dropdown, 'set-pin');
+}
+
+function selectSetPinFaculty(profId) {
+  const f = allFaculty.find(p => p.id === profId);
+  if (!f) return;
+  const idInput = document.getElementById('set-pin-faculty-id');
+  const searchBox = document.getElementById('set-pin-search-box');
+  const card = document.getElementById('set-pin-selected-card');
+  const dropdown = document.getElementById('set-pin-dropdown');
+  const pinInput = document.getElementById('set-pin-new');
+
+  if (idInput) idInput.value = f.id;
+  if (dropdown) dropdown.classList.add('hidden');
+  if (searchBox) searchBox.classList.add('hidden');
+
+  if (card) {
+    document.getElementById('set-pin-selected-name').textContent = f.name;
+    document.getElementById('set-pin-selected-dept').textContent = `${f.department} (${f.cabin || ''})`;
+    document.getElementById('set-pin-selected-img').src = f.avatar || '/biet-logo.png';
+    card.classList.remove('hidden');
+  }
+  if (pinInput) pinInput.focus();
+}
+
+function clearSetPinSelection() {
+  const idInput = document.getElementById('set-pin-faculty-id');
+  const searchBox = document.getElementById('set-pin-search-box');
+  const card = document.getElementById('set-pin-selected-card');
+  const searchInput = document.getElementById('set-pin-search');
+
+  if (idInput) idInput.value = '';
+  if (card) card.classList.add('hidden');
+  if (searchBox) searchBox.classList.remove('hidden');
+  if (searchInput) {
+    searchInput.value = '';
+    searchInput.focus();
+    handleSetPinSearch('');
+  }
+}
+
+// Global outside-click listener for professor search dropdowns
+document.addEventListener('click', (e) => {
+  ['auth', 'switch', 'set-pin'].forEach(ctx => {
+    const box = document.getElementById(ctx === 'auth' ? 'auth-faculty-search-box' : (ctx === 'switch' ? 'faculty-switch-search-box' : 'set-pin-search-box'));
+    const dd = document.getElementById(ctx === 'auth' ? 'auth-faculty-dropdown' : (ctx === 'switch' ? 'faculty-switch-dropdown' : 'set-pin-dropdown'));
+    if (dd && box && !box.contains(e.target)) {
+      dd.classList.add('hidden');
+    }
+  });
+});
 
 function selectProfStatus(status) {
   document.getElementById('faculty-selected-status').value = status;
@@ -794,6 +1010,10 @@ function selectProfStatus(status) {
 async function handleFacultyStatusUpdate(e) {
   e.preventDefault();
   const prof_id = document.getElementById('faculty-switch-prof-id').value;
+  if (!prof_id) {
+    alert('Please search and select a professor first.');
+    return;
+  }
   const pin = document.getElementById('faculty-switch-pin').value;
   const status = document.getElementById('faculty-selected-status').value;
   const cabin_note = document.getElementById('faculty-switch-note').value;
@@ -1147,10 +1367,13 @@ async function loadEmergencyContacts() {
   }
 }
 
+let currentLoadedStudent = null;
+
 async function lookupStudentERP(defaultUSN) {
   const usnInput = document.getElementById('erp-usn-input');
   const usn = (defaultUSN || (usnInput ? usnInput.value : '4BD23CS001')).trim().toUpperCase();
   const cont = document.getElementById('erp-student-card');
+  const banner = document.getElementById('erp-student-identity-banner');
   const tableBody = document.getElementById('erp-subjects-body');
   const receiptEl = document.getElementById('erp-receipt-no');
   if (!cont) return;
@@ -1159,8 +1382,39 @@ async function lookupStudentERP(defaultUSN) {
     const res = await fetch(`/api/erp/student/${usn}`);
     const data = await res.json();
     const s = data.student;
+    currentLoadedStudent = s;
     const subjects = data.subjects || [];
     const isSafe = (s.overall_attendance || s.attendance_percentage) >= 75.0;
+
+    // Render Student Identity Banner
+    if (banner) {
+      banner.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-600 to-teal-500 flex items-center justify-center text-white font-extrabold text-lg shadow-lg">
+            ${(s.student_name || 'S').charAt(0)}
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base font-extrabold text-white">${s.student_name || 'BIET Student'}</h3>
+              <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[11px] font-bold border border-emerald-500/30">${s.usn}</span>
+              <span class="px-2 py-0.5 rounded-full bg-white/10 text-slate-300 text-[10px]">Sec ${s.section || 'A'}</span>
+            </div>
+            <p class="text-xs text-slate-300 mt-0.5">
+              <span class="text-purple-300 font-medium">${s.branch}</span> • <span class="text-cyan-300">${s.semester}</span>
+            </p>
+            <p class="text-[11px] text-slate-400 mt-0.5">
+              <i class="fa-solid fa-user-tie text-[10px] mr-1 text-emerald-400"></i> Proctor / Mentor: <strong class="text-slate-200">${s.mentor_name || 'Dr. Nirmala C. R.'}</strong>
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 self-start sm:self-center">
+          <button onclick="openEditStudentProfileModal()" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-semibold border border-white/20 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-user-pen text-emerald-400 text-xs"></i>
+            <span>Edit My Details</span>
+          </button>
+        </div>
+      `;
+    }
 
     cont.innerHTML = `
       <div class="glass-panel p-4 rounded-2xl text-center border ${isSafe ? 'border-emerald-500/30' : 'border-rose-500/40'}">
@@ -1223,6 +1477,78 @@ async function lookupStudentERP(defaultUSN) {
   }
 }
 
+async function openEditStudentProfileModal() {
+  const usnInput = document.getElementById('erp-usn-input');
+  const usn = (usnInput ? usnInput.value : '4BD23CS001').trim().toUpperCase();
+
+  try {
+    const res = await fetch(`/api/erp/student/${usn}`);
+    const data = await res.json();
+    if (data && data.student) {
+      const s = data.student;
+      if (document.getElementById('edit-student-name')) document.getElementById('edit-student-name').value = s.student_name || '';
+      if (document.getElementById('edit-student-usn')) document.getElementById('edit-student-usn').value = s.usn || usn;
+      if (document.getElementById('edit-student-sem')) document.getElementById('edit-student-sem').value = s.semester || '5th Sem';
+      if (document.getElementById('edit-student-branch')) document.getElementById('edit-student-branch').value = s.branch || 'Computer Science & Engineering';
+      if (document.getElementById('edit-student-section')) document.getElementById('edit-student-section').value = s.section || 'A';
+      if (document.getElementById('edit-student-mentor')) document.getElementById('edit-student-mentor').value = s.mentor_name || '';
+      if (document.getElementById('edit-student-attendance')) document.getElementById('edit-student-attendance').value = s.overall_attendance || 85.0;
+      if (document.getElementById('edit-student-cie')) document.getElementById('edit-student-cie').value = s.cie_average || 42.0;
+      if (document.getElementById('edit-student-receipt')) document.getElementById('edit-student-receipt').value = s.fee_receipt_no || `BEA-BIET-2026-${usn.slice(-4)}`;
+    }
+  } catch (e) {
+    console.error("Error pre-populating profile modal:", e);
+    if (document.getElementById('edit-student-usn')) document.getElementById('edit-student-usn').value = usn;
+  }
+  openModal('modal-edit-student-profile');
+}
+
+async function handleSaveStudentProfile(e) {
+  if (e && e.preventDefault) e.preventDefault();
+  const usn = document.getElementById('edit-student-usn').value.trim().toUpperCase();
+  const studentName = document.getElementById('edit-student-name').value.trim();
+  const semester = document.getElementById('edit-student-sem').value;
+  const branch = document.getElementById('edit-student-branch').value;
+  const section = document.getElementById('edit-student-section').value.trim().toUpperCase();
+  const mentorName = document.getElementById('edit-student-mentor').value.trim();
+  const attendance = parseFloat(document.getElementById('edit-student-attendance').value);
+  const cie = parseFloat(document.getElementById('edit-student-cie').value);
+  const receipt = document.getElementById('edit-student-receipt').value.trim();
+
+  try {
+    const res = await fetch('/api/erp/student/update', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usn: usn,
+        student_name: studentName,
+        semester: semester,
+        branch: branch,
+        section: section,
+        mentor_name: mentorName,
+        overall_attendance: attendance,
+        cie_average: cie,
+        fee_receipt_no: receipt
+      })
+    });
+    const result = await res.json();
+    if (result.success) {
+      closeModal('modal-edit-student-profile');
+      playChimeSound();
+      if (document.getElementById('erp-usn-input')) {
+        document.getElementById('erp-usn-input').value = usn;
+      }
+      await lookupStudentERP(usn);
+      alert(`✅ Profile updated! Displaying real college record for ${studentName} (${usn}).`);
+    } else {
+      alert(`⚠️ ${result.error || 'Failed to update student profile.'}`);
+    }
+  } catch (err) {
+    console.error("Error saving student profile:", err);
+    alert("Network error updating profile.");
+  }
+}
+
 function switchErpTab(tab) {
   const inappView = document.getElementById('erp-tab-inapp-view');
   const frameView = document.getElementById('erp-tab-frame-view');
@@ -1254,9 +1580,12 @@ async function syncBietUpdates() {
   }
 }
 
-function downloadHallTicketMock() {
-  const studentName = (currentUser && currentUser.name) ? currentUser.name : 'Aakash V. Patil';
-  const studentUsn = (currentUser && currentUser.usn) ? currentUser.usn : '4BD23CS001';
+function downloadHallTicket() {
+  const studentName = (currentLoadedStudent && currentLoadedStudent.student_name) || (currentUser && currentUser.name) || 'Aakash V. Patil';
+  const studentUsn = (currentLoadedStudent && currentLoadedStudent.usn) || (currentUser && currentUser.usn) || '4BD23CS001';
+  const branch = (currentLoadedStudent && currentLoadedStudent.branch) || 'Computer Science & Engineering';
+  const semester = (currentLoadedStudent && currentLoadedStudent.semester) || '5th Sem B.E.';
+  const feeReceipt = (currentLoadedStudent && currentLoadedStudent.fee_receipt_no) || (document.getElementById('erp-receipt-no') ? document.getElementById('erp-receipt-no').textContent : 'BEA-BIET-2026-8891');
 
   const win = window.open('', '_blank');
   win.document.write(`
@@ -1283,9 +1612,9 @@ function downloadHallTicketMock() {
           <div class="stamp">ELIGIBLE FOR EXAM</div>
           <p><strong>Student Name:</strong> ${studentName}</p>
           <p><strong>USN:</strong> ${studentUsn}</p>
-          <p><strong>Branch:</strong> Computer Science & Engineering (B.E. 5th Sem)</p>
+          <p><strong>Branch & Semester:</strong> ${branch} (${semester})</p>
           <p><strong>Examination Center:</strong> BIET Davangere (College Code: 4BD)</p>
-          <p><strong>Fee Status:</strong> Paid in Full (Receipt: BEA-BIET-2026-8891)</p>
+          <p><strong>Fee Status:</strong> Paid in Full (Receipt: ${feeReceipt})</p>
         </div>
         <table>
           <thead>
@@ -1310,6 +1639,10 @@ function downloadHallTicketMock() {
       </body>
     </html>
   `);
+}
+
+function downloadHallTicketMock() {
+  return downloadHallTicket();
 }
 
 // 3D Isometric View Backup
@@ -1481,17 +1814,13 @@ function switchAuthTab(role) {
   } else if (role === 'faculty') {
     if (tabFaculty) tabFaculty.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1';
     if (fieldsFaculty) fieldsFaculty.classList.remove('hidden');
-    populateFacultyAuthDropdown();
+    if (!document.getElementById('auth-faculty-id').value && allFaculty.length > 0) {
+      selectAuthFaculty(allFaculty[0].id);
+    }
   } else if (role === 'admin') {
     if (tabAdmin) tabAdmin.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1';
     if (fieldsAdmin) fieldsAdmin.classList.remove('hidden');
   }
-}
-
-function populateFacultyAuthDropdown() {
-  const sel = document.getElementById('auth-faculty-id');
-  if (!sel || allFaculty.length === 0) return;
-  sel.innerHTML = allFaculty.map(f => `<option value="${f.id}">${f.name} — ${f.department} (${f.designation})</option>`).join('');
 }
 
 async function handleUnifiedAuthLogin(e) {
@@ -1505,6 +1834,11 @@ async function handleUnifiedAuthLogin(e) {
     password = document.getElementById('auth-student-pass').value.trim();
   } else if (role === 'faculty') {
     identifier = document.getElementById('auth-faculty-id').value;
+    if (!identifier) {
+      alert("Please search and select a professor first.");
+      clearFacultyAuthSelection();
+      return;
+    }
     password = document.getElementById('auth-faculty-pass').value.trim();
   } else if (role === 'admin') {
     identifier = 'admin@bietdvg.edu';
@@ -1735,11 +2069,11 @@ function openModal(id) { document.getElementById(id).classList.remove('hidden');
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 function openResetPinModal() {
-  const sel = document.getElementById('set-pin-faculty-id');
-  if (sel && allFaculty.length > 0) {
-    sel.innerHTML = allFaculty.map(f => `<option value="${f.id}">${f.name} — ${f.department} (${f.cabin})</option>`).join('');
-    const curSelected = document.getElementById('auth-faculty-id')?.value;
-    if (curSelected) sel.value = curSelected;
+  const curSelected = document.getElementById('auth-faculty-id')?.value;
+  if (curSelected) {
+    selectSetPinFaculty(parseInt(curSelected));
+  } else if (allFaculty && allFaculty.length > 0) {
+    selectSetPinFaculty(allFaculty[0].id);
   }
   openModal('modal-faculty-set-pin');
 }
