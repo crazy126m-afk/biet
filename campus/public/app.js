@@ -65,6 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFaculty();
   loadLostFound();
   loadEmergencyContacts();
+  loadQuestionBanks();
   if (currentUser && currentUser.role === 'student' && currentUser.usn) {
     lookupStudentERP(currentUser.usn);
   } else {
@@ -310,7 +311,7 @@ function clearNotifications() {
 // ==========================================
 function switchView(viewName) {
   currentView = viewName;
-  const views = ['alerts', 'map', 'lostfound', 'faculty', 'erp', 'emergency'];
+  const views = ['alerts', 'map', 'lostfound', 'faculty', 'erp', 'emergency', 'questionbank'];
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
@@ -1841,10 +1842,8 @@ function initUserSession() {
       currentUser = null;
     }
   } else {
-    // If not logged in, prompt user with role selection gateway after a short delay!
-    setTimeout(() => {
-      openModal('modal-auth-login');
-    }, 600);
+    currentUser = null;
+    updateAuthUI();
   }
 }
 
@@ -2203,4 +2202,334 @@ async function handleSetFacultyPinSubmit(e) {
       type: 'general'
     });
   }
+}
+
+// ==========================================
+// 14. VTU & BIET QUESTION BANKS & PYQ LOGIC
+// ==========================================
+let allQuestionBanks = [];
+let currentMCQList = [];
+let currentMCQIndex = 0;
+let currentMCQSelectedOpt = null;
+let currentMCQScore = 0;
+let activeQBDept = 'All';
+
+async function loadQuestionBanks() {
+  const container = document.getElementById('qb-cards-grid');
+  if (!container) return;
+  try {
+    const res = await fetch('/api/academics/question-banks');
+    const data = await res.json();
+    if (data.success && data.items) {
+      allQuestionBanks = data.items;
+      renderQuestionBanks(allQuestionBanks);
+    }
+  } catch (err) {
+    console.error('Error loading question banks:', err);
+  }
+}
+
+function renderQuestionBanks(items) {
+  const container = document.getElementById('qb-cards-grid');
+  const countEl = document.getElementById('qb-count-indicator');
+  if (!container) return;
+
+  if (countEl) {
+    countEl.textContent = `Showing ${items.length} verified academic papers & banks`;
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-400">
+        <i class="fa-solid fa-folder-open text-3xl mb-2 text-slate-500"></i>
+        <p class="text-sm font-semibold">No question papers or banks found matching your filter.</p>
+        <button onclick="setQBDeptFilter('All')" class="mt-2 text-xs text-[#cba23e] hover:underline font-semibold">Reset all filters</button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = items.map(item => {
+    const isPYQ = item.type === 'PYQ';
+    const isModel = item.type === 'Model Paper';
+    const badgeColor = isPYQ ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' :
+                       isModel ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30' :
+                       'bg-emerald-500/20 text-emerald-300 border-emerald-500/30';
+    
+    return `
+      <div class="glass-panel p-5 rounded-3xl border border-white/10 hover:border-[#cba23e]/50 transition flex flex-col justify-between gap-3 shadow-lg group">
+        <div class="space-y-2.5">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <span class="px-2.5 py-1 rounded-xl bg-[#1f4178]/60 text-[#cba23e] font-mono text-xs font-extrabold border border-[#cba23e]/40 shadow-sm">${item.subject_code}</span>
+            <span class="px-2 py-0.5 rounded-full ${badgeColor} text-[10px] font-bold border">${item.type}</span>
+          </div>
+
+          <div>
+            <h4 class="font-extrabold text-white text-sm group-hover:text-[#cba23e] transition leading-snug">${item.subject_name}</h4>
+            <p class="text-[11px] text-slate-300 mt-0.5 line-clamp-1">${item.title}</p>
+          </div>
+
+          <div class="flex items-center gap-2 text-[10px] text-slate-400 font-medium">
+            <span class="text-[#cba23e]"><i class="fa-solid fa-graduation-cap mr-1"></i>${item.semester}</span>
+            <span>•</span>
+            <span>${item.exam_session}</span>
+            <span>•</span>
+            <span class="text-purple-300 font-mono">${item.downloads_count} downloads</span>
+          </div>
+
+          <div class="p-2.5 rounded-xl bg-white/5 border border-white/5 text-[11px] text-slate-300 line-clamp-2">
+            <i class="fa-solid fa-list-check text-purple-400 mr-1"></i> ${item.module_summary || 'Modules 1 to 5 university questions syllabus covered.'}
+          </div>
+        </div>
+
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+          <button onclick="openModuleQuestionsModal(${item.id})" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5">
+            <i class="fa-solid fa-layer-group text-purple-400 text-xs"></i>
+            <span>Modules</span>
+          </button>
+
+          <div class="flex items-center gap-1.5">
+            <button onclick="openMCQPracticeModal('${item.subject_code}')" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500/40 text-purple-200 hover:text-white text-xs font-bold transition flex items-center gap-1">
+              <i class="fa-solid fa-brain text-[11px]"></i>
+              <span>MCQs</span>
+            </button>
+            <a href="${item.file_url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#1f4178] hover:bg-[#345798] border border-[#cba23e]/50 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-file-pdf text-rose-400 text-[11px]"></i>
+              <span>PDF</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function handleQuestionBankFilter() {
+  const query = (document.getElementById('qb-search-input')?.value || '').trim().toLowerCase();
+  const semester = document.getElementById('qb-semester-filter')?.value || 'All';
+  const type = document.getElementById('qb-type-filter')?.value || 'All';
+
+  let filtered = allQuestionBanks.filter(item => {
+    // Dept
+    if (activeQBDept !== 'All') {
+      const dMatch = item.department.toLowerCase().includes(activeQBDept.toLowerCase()) || item.department === 'All Departments';
+      if (!dMatch) return false;
+    }
+    // Semester
+    if (semester !== 'All' && !item.semester.includes(semester)) {
+      return false;
+    }
+    // Type
+    if (type !== 'All' && item.type !== type) {
+      return false;
+    }
+    // Search query
+    if (query) {
+      const matchCode = item.subject_code.toLowerCase().includes(query);
+      const matchName = item.subject_name.toLowerCase().includes(query);
+      const matchTitle = item.title.toLowerCase().includes(query);
+      const matchMod = (item.module_summary || '').toLowerCase().includes(query);
+      if (!matchCode && !matchName && !matchTitle && !matchMod) return false;
+    }
+    return true;
+  });
+
+  renderQuestionBanks(filtered);
+}
+
+function setQBDeptFilter(dept) {
+  activeQBDept = dept;
+  const pills = document.querySelectorAll('.qb-dept-pill');
+  pills.forEach(p => {
+    if (p.textContent.includes(dept) || (dept === 'All' && p.textContent.includes('All'))) {
+      p.className = 'qb-dept-pill active px-3 py-1.5 rounded-xl bg-[#1f4178] border border-[#cba23e]/50 text-white whitespace-nowrap';
+    } else {
+      p.className = 'qb-dept-pill px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-slate-300 hover:text-white whitespace-nowrap';
+    }
+  });
+  handleQuestionBankFilter();
+}
+
+function openModuleQuestionsModal(id) {
+  const item = allQuestionBanks.find(p => p.id === id);
+  if (!item) return;
+
+  document.getElementById('mq-modal-subcode').textContent = item.subject_code;
+  document.getElementById('mq-modal-session').textContent = `${item.semester} • ${item.exam_session}`;
+  document.getElementById('mq-modal-title').textContent = `${item.subject_name} (${item.title})`;
+
+  const modules = (item.module_summary || '').split('|');
+  const body = document.getElementById('mq-modal-body');
+
+  body.innerHTML = modules.map((modStr, idx) => {
+    const parts = modStr.split(':');
+    const modTitle = parts[0] ? parts[0].trim() : `Module ${idx + 1}`;
+    const topics = parts[1] ? parts[1].trim() : modStr.trim();
+    
+    return `
+      <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="font-extrabold text-white text-xs text-[#cba23e] flex items-center gap-1.5">
+            <i class="fa-solid fa-bookmark text-xs"></i> ${modTitle}
+          </span>
+          <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px] font-mono">10 Marks + 10 Marks (OR Choice)</span>
+        </div>
+        <p class="text-slate-300 text-[11px] leading-relaxed"><strong class="text-slate-200">Key Syllabus:</strong> ${topics}</p>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1 text-[11px]">
+          <div class="p-2 rounded-xl bg-white/5 text-slate-300">
+            <span class="text-cyan-300 font-bold block mb-0.5">Question A (10 M):</span>
+            Analytical derivation, architecture, or core concept with formal proof.
+          </div>
+          <div class="p-2 rounded-xl bg-white/5 text-slate-300">
+            <span class="text-cyan-300 font-bold block mb-0.5">Question B (10 M):</span>
+            Step-by-step numerical problem or design implementation.
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  openModal('modal-module-questions');
+}
+
+// Interactive MCQ Mode Logic
+async function openMCQPracticeModal(subjectCode) {
+  try {
+    const url = subjectCode && subjectCode !== 'ALL' ? `/api/academics/mcqs?subject_code=${subjectCode}` : '/api/academics/mcqs';
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.success && data.mcqs && data.mcqs.length > 0) {
+      currentMCQList = data.mcqs;
+      currentMCQIndex = 0;
+      currentMCQScore = 0;
+      currentMCQSelectedOpt = null;
+      renderCurrentMCQ();
+      openModal('modal-mcq-practice');
+    } else {
+      showPopUpNotification({
+        title: 'MCQ Bank Updating',
+        message: 'MCQs for this specific subject are being compiled from latest VTU tests.',
+        type: 'general'
+      });
+    }
+  } catch (err) {
+    console.error('Error loading MCQs:', err);
+  }
+}
+
+function renderCurrentMCQ() {
+  const container = document.getElementById('mcq-quiz-container');
+  if (!container) return;
+
+  if (currentMCQIndex >= currentMCQList.length) {
+    // Quiz finished
+    const pct = Math.round((currentMCQScore / currentMCQList.length) * 100);
+    container.innerHTML = `
+      <div class="p-6 rounded-3xl bg-white/5 border border-white/10 text-center space-y-4">
+        <div class="w-16 h-16 rounded-3xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300 text-3xl mx-auto shadow-lg">
+          <i class="fa-solid fa-trophy text-[#cba23e]"></i>
+        </div>
+        <div>
+          <h3 class="text-lg font-extrabold text-white">Practice Test Completed!</h3>
+          <p class="text-xs text-slate-300 mt-1">Visvesvaraya Technological University (VTU) Continuous Assessment</p>
+        </div>
+        <div class="p-4 rounded-2xl bg-white/5 border border-white/10 max-w-xs mx-auto">
+          <div class="text-3xl font-extrabold text-[#cba23e] font-mono">${currentMCQScore} / ${currentMCQList.length}</div>
+          <div class="text-xs text-slate-400 mt-1">${pct}% Proficiency Score</div>
+        </div>
+        <div class="pt-2 flex items-center justify-center gap-3">
+          <button onclick="openMCQPracticeModal('ALL')" class="px-5 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition">
+            <i class="fa-solid fa-rotate-right mr-1"></i> Retry Test
+          </button>
+          <button onclick="closeModal('modal-mcq-practice')" class="px-5 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold transition">
+            Close
+          </button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const q = currentMCQList[currentMCQIndex];
+  currentMCQSelectedOpt = null;
+
+  document.getElementById('mcq-badge-subject').textContent = `${q.subject_code} • Mod ${q.module_number}`;
+  document.getElementById('mcq-progress-counter').textContent = `Question ${currentMCQIndex + 1} of ${currentMCQList.length}`;
+  document.getElementById('mcq-question-text').textContent = q.question_text;
+  document.getElementById('mcq-score-tally').textContent = `Score: ${currentMCQScore} / ${currentMCQIndex}`;
+
+  const optContainer = document.getElementById('mcq-options-container');
+  const opts = [
+    { key: 'A', text: q.option_a },
+    { key: 'B', text: q.option_b },
+    { key: 'C', text: q.option_c },
+    { key: 'D', text: q.option_d }
+  ];
+
+  optContainer.innerHTML = opts.map(o => `
+    <button type="button" onclick="selectMCQOption('${o.key}')" id="mcq-opt-${o.key}" class="mcq-opt-btn w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left flex items-start gap-3 transition">
+      <span class="w-6 h-6 rounded-lg bg-white/10 font-bold font-mono text-xs flex items-center justify-center shrink-0 text-slate-300">${o.key}</span>
+      <span class="text-slate-200 text-xs leading-relaxed">${o.text}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('mcq-explanation-card').classList.add('hidden');
+  document.getElementById('btn-submit-mcq').classList.remove('hidden');
+  document.getElementById('btn-next-mcq').classList.add('hidden');
+}
+
+function selectMCQOption(optKey) {
+  currentMCQSelectedOpt = optKey;
+  document.querySelectorAll('.mcq-opt-btn').forEach(b => {
+    b.className = 'mcq-opt-btn w-full p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-left flex items-start gap-3 transition';
+  });
+  const selBtn = document.getElementById(`mcq-opt-${optKey}`);
+  if (selBtn) {
+    selBtn.className = 'mcq-opt-btn w-full p-3 rounded-xl bg-purple-950/60 border border-purple-500 text-left flex items-start gap-3 transition shadow-md';
+  }
+}
+
+function submitCurrentMCQ() {
+  if (!currentMCQSelectedOpt) {
+    alert('Please select an option before checking answer.');
+    return;
+  }
+  const q = currentMCQList[currentMCQIndex];
+  const isCorrect = currentMCQSelectedOpt === q.correct_option;
+  if (isCorrect) currentMCQScore++;
+
+  document.querySelectorAll('.mcq-opt-btn').forEach(b => b.onclick = null);
+
+  const selBtn = document.getElementById(`mcq-opt-${currentMCQSelectedOpt}`);
+  const correctBtn = document.getElementById(`mcq-opt-${q.correct_option}`);
+
+  if (correctBtn) {
+    correctBtn.className = 'mcq-opt-btn w-full p-3 rounded-xl bg-emerald-950/70 border border-emerald-500 text-left flex items-start gap-3 transition';
+  }
+  if (!isCorrect && selBtn) {
+    selBtn.className = 'mcq-opt-btn w-full p-3 rounded-xl bg-rose-950/70 border border-rose-500 text-left flex items-start gap-3 transition';
+  }
+
+  const expCard = document.getElementById('mcq-explanation-card');
+  const verdictTitle = document.getElementById('mcq-verdict-title');
+  const expText = document.getElementById('mcq-explanation-text');
+
+  expCard.classList.remove('hidden');
+  if (isCorrect) {
+    expCard.className = 'p-3.5 rounded-2xl border text-xs bg-emerald-950/40 border-emerald-500/30 text-emerald-300';
+    verdictTitle.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400"></i> <span class="text-white">Correct Answer!</span>';
+  } else {
+    expCard.className = 'p-3.5 rounded-2xl border text-xs bg-rose-950/40 border-rose-500/30 text-rose-300';
+    verdictTitle.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400"></i> <span class="text-white">Incorrect (Correct: Option ${q.correct_option})</span>`;
+  }
+  expText.textContent = q.explanation || 'Refer to VTU syllabus reference textbook for detailed derivation.';
+
+  document.getElementById('mcq-score-tally').textContent = `Score: ${currentMCQScore} / ${currentMCQIndex + 1}`;
+  document.getElementById('btn-submit-mcq').classList.add('hidden');
+  document.getElementById('btn-next-mcq').classList.remove('hidden');
+}
+
+function nextMCQ() {
+  currentMCQIndex++;
+  renderCurrentMCQ();
 }

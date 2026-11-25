@@ -348,6 +348,61 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                 })
             return
 
+        # 11b. API: Academic Question Banks & PYQs Repository
+        if path == "/api/academics/question-banks":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            dept = query.get("department", [None])[0]
+            semester = query.get("semester", [None])[0]
+            res_type = query.get("type", [None])[0]
+            search = query.get("search", [None])[0]
+
+            sql = "SELECT * FROM question_banks WHERE 1=1"
+            params = []
+            if dept and dept.lower() != "all":
+                sql += " AND (department LIKE ? OR department = 'All Departments' OR department = 'Basic Science & Humanities')"
+                params.append(f"%{dept}%")
+            if semester and semester.lower() != "all":
+                sql += " AND semester LIKE ?"
+                params.append(f"%{semester}%")
+            if res_type and res_type.lower() != "all":
+                sql += " AND type = ?"
+                params.append(res_type)
+            if search:
+                sql += " AND (subject_code LIKE ? OR subject_name LIKE ? OR title LIKE ? OR module_summary LIKE ?)"
+                search_param = f"%{search}%"
+                params.extend([search_param, search_param, search_param, search_param])
+
+            sql += " ORDER BY id DESC"
+            cursor.execute(sql, params)
+            items = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            self.send_json({"success": True, "items": items, "count": len(items)})
+            return
+
+        # 11c. API: Interactive MCQs Practice Bank
+        if path == "/api/academics/mcqs":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            subject_code = query.get("subject_code", [None])[0]
+            module = query.get("module", [None])[0]
+
+            sql = "SELECT * FROM mcq_questions WHERE 1=1"
+            params = []
+            if subject_code and subject_code.lower() != "all":
+                sql += " AND subject_code = ?"
+                params.append(subject_code.upper())
+            if module:
+                sql += " AND module_number = ?"
+                params.append(int(module))
+
+            sql += " ORDER BY id ASC"
+            cursor.execute(sql, params)
+            mcqs = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            self.send_json({"success": True, "mcqs": mcqs, "count": len(mcqs)})
+            return
+
         # 12. API: Appointments list (or faculty filtered)
         if path.startswith("/api/faculty/") and path.endswith("/appointments"):
             parts = path.split("/")
@@ -1266,6 +1321,49 @@ def ensure_authentic_data():
         c.execute("UPDATE erp_records SET password = '79754577@Aa' WHERE password IS NULL OR password = 'student123'")
         c.execute("UPDATE professors SET password = '79754577@Aa' WHERE password IS NULL OR password = 'prof123' OR password = 'biet123'")
         c.execute("UPDATE erp_records SET portal_url = 'https://shareu.rovelabs.com/login'")
+
+        # 4. Ensure Academic Question Banks & MCQs exist
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS question_banks (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subject_code TEXT NOT NULL,
+                subject_name TEXT NOT NULL,
+                department TEXT NOT NULL,
+                semester TEXT NOT NULL,
+                scheme TEXT NOT NULL,
+                title TEXT NOT NULL,
+                type TEXT NOT NULL,
+                exam_session TEXT NOT NULL,
+                file_url TEXT NOT NULL,
+                pages_count INTEGER DEFAULT 4,
+                downloads_count INTEGER DEFAULT 120,
+                module_summary TEXT,
+                created_at TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS mcq_questions (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subject_code TEXT NOT NULL,
+                subject_name TEXT NOT NULL,
+                module_number INTEGER DEFAULT 1,
+                question_text TEXT NOT NULL,
+                option_a TEXT NOT NULL,
+                option_b TEXT NOT NULL,
+                option_c TEXT NOT NULL,
+                option_d TEXT NOT NULL,
+                correct_option TEXT NOT NULL,
+                explanation TEXT,
+                difficulty TEXT DEFAULT 'Medium'
+            )
+        """)
+        qb_count = c.execute("SELECT count(*) FROM question_banks").fetchone()[0]
+        if qb_count < 15:
+            try:
+                import seed_all_academic_banks
+                seed_all_academic_banks.seed_academic_banks(DB_PATH)
+            except Exception as e:
+                print("Academic banks seed error:", e)
 
         conn.commit()
         conn.close()
