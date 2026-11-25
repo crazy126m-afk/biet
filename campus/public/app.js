@@ -2204,10 +2204,3 @@ async function handleSetFacultyPinSubmit(e) {
     });
   }
 }
-    showPopUpNotification({
-      title: 'Network Error',
-      message: 'Could not connect to server.',
-      type: 'general'
-    });
-  }
-}
