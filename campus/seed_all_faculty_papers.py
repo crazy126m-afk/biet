@@ -1,19 +1,8 @@
 import sqlite3
 import random
 import hashlib
+import os
 
-conn = sqlite3.connect('data/biet_campus.db')
-c = conn.cursor()
-
-# 1. Fetch all professors
-c.execute("SELECT id, name, department, designation, research_areas FROM professors ORDER BY id ASC")
-profs = c.fetchall()
-print(f"Total professors found: {len(profs)}")
-
-# Clear old papers
-c.execute("DELETE FROM faculty_papers")
-
-# Department templates for papers
 DEPTS_TEMPLATES = {
     "Computer Science & Engineering": [
         ("Deep Residual Framework for Automated Diabetic Retinopathy Classification from Fundus Retinal Images", "IEEE Transactions on Medical Imaging", [2024, 2025], (45, 120), "10.1109/TMI"),
@@ -87,7 +76,6 @@ DEPTS_TEMPLATES = {
     ]
 }
 
-# Specific prominent publications for Key Faculty
 KEY_PROF_PAPERS = {
     "Dr. Nirmala C R": [
         ("Deep Convolutional Neural Network Framework for Automated Brain Tumor Segmentation from Multi-Modal MRI", "IEEE Access", 2024, 68, "https://doi.org/10.1109/ACCESS.2024.3391204"),
@@ -127,90 +115,109 @@ KEY_PROF_PAPERS = {
     ]
 }
 
-total_papers_inserted = 0
+def seed_papers(db_path=None):
+    if not db_path:
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        db_path = os.path.join(base_dir, 'data', 'biet_campus.db')
+        
+    conn = sqlite3.connect(db_path)
+    c = conn.cursor()
 
-for prof in profs:
-    prof_id, prof_name, dept, desig, research = prof
-    
-    # Check if prof has specific named papers
-    matched_key = None
-    for k in KEY_PROF_PAPERS:
-        if k.replace('.', '').lower() in prof_name.replace('.', '').lower() or prof_name.replace('.', '').lower() in k.replace('.', '').lower():
-            matched_key = k
-            break
+    # Ensure table exists
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS faculty_papers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            professor_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            journal TEXT NOT NULL,
+            year INTEGER NOT NULL,
+            citations INTEGER DEFAULT 0,
+            doi_url TEXT,
+            FOREIGN KEY (professor_id) REFERENCES professors(id)
+        )
+    """)
+
+    # 1. Fetch all professors
+    c.execute("SELECT id, name, department, designation, research_areas FROM professors ORDER BY id ASC")
+    profs = c.fetchall()
+    print(f"Total professors found: {len(profs)}")
+
+    # Clear old papers
+    c.execute("DELETE FROM faculty_papers")
+
+    total_papers_inserted = 0
+
+    for prof in profs:
+        prof_id, prof_name, dept, desig, research = prof
+        
+        # Check if prof has specific named papers
+        matched_key = None
+        for k in KEY_PROF_PAPERS:
+            if k.replace('.', '').lower() in prof_name.replace('.', '').lower() or prof_name.replace('.', '').lower() in k.replace('.', '').lower():
+                matched_key = k
+                break
+                
+        if matched_key:
+            papers = KEY_PROF_PAPERS[matched_key]
+            for p in papers:
+                c.execute("""
+                    INSERT INTO faculty_papers (professor_id, title, journal, year, citations, doi_url)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                """, (prof_id, p[0], p[1], p[2], p[3], p[4]))
+                total_papers_inserted += 1
+            continue
+
+        # Otherwise choose appropriate department template
+        template_key = None
+        for d_key in DEPTS_TEMPLATES:
+            if d_key.lower() in dept.lower() or dept.lower() in d_key.lower():
+                template_key = d_key
+                break
+                
+        if not template_key:
+            if any(w in dept.lower() for w in ["computer", "data", "software", "mca", "design", "business"]):
+                template_key = "Computer Science & Engineering"
+            elif any(w in dept.lower() for w in ["electron", "telecom", "sensor", "iot"]):
+                template_key = "Electronics & Communication Engineering"
+            elif any(w in dept.lower() for w in ["electric", "power", "energy"]):
+                template_key = "Electrical & Electronics Engineering"
+            elif any(w in dept.lower() for w in ["mech", "thermal", "robot", "aero"]):
+                template_key = "Mechanical Engineering"
+            elif any(w in dept.lower() for w in ["civil", "struct", "environ"]):
+                template_key = "Civil Engineering"
+            elif any(w in dept.lower() for w in ["textile", "fashion", "fiber"]):
+                template_key = "Textile Technology"
+            elif any(w in dept.lower() for w in ["chem", "poly"]):
+                template_key = "Chemical Engineering"
+            elif any(w in dept.lower() for w in ["bio", "genetic"]):
+                template_key = "Biotechnology"
+            else:
+                template_key = "Applied Sciences"
+
+        templates = DEPTS_TEMPLATES[template_key]
+        random.seed(prof_id * 37 + 11)
+        chosen_templates = random.sample(templates, k=min(3, len(templates)))
+        
+        for idx, t in enumerate(chosen_templates):
+            title_base, journal, year_range, cit_range, doi_prefix = t
+            year = random.choice(year_range)
+            citations = random.randint(cit_range[0], cit_range[1])
+            doi_suffix = f"{prof_id:03d}{year}{idx+1}"
+            doi_url = f"https://doi.org/{doi_prefix}.{doi_suffix}"
             
-    if matched_key:
-        papers = KEY_PROF_PAPERS[matched_key]
-        for p in papers:
             c.execute("""
                 INSERT INTO faculty_papers (professor_id, title, journal, year, citations, doi_url)
                 VALUES (?, ?, ?, ?, ?, ?)
-            """, (prof_id, p[0], p[1], p[2], p[3], p[4]))
+            """, (prof_id, title_base, journal, year, citations, doi_url))
             total_papers_inserted += 1
-        continue
 
-    # Otherwise choose appropriate department template
-    template_key = None
-    for d_key in DEPTS_TEMPLATES:
-        if d_key.lower() in dept.lower() or dept.lower() in d_key.lower():
-            template_key = d_key
-            break
-            
-    if not template_key:
-        if any(w in dept.lower() for w in ["computer", "data", "software", "mca", "design", "business"]):
-            template_key = "Computer Science & Engineering"
-        elif any(w in dept.lower() for w in ["electron", "telecom", "sensor", "iot"]):
-            template_key = "Electronics & Communication Engineering"
-        elif any(w in dept.lower() for w in ["electric", "power", "energy"]):
-            template_key = "Electrical & Electronics Engineering"
-        elif any(w in dept.lower() for w in ["mechanic", "automobile", "thermal"]):
-            template_key = "Mechanical Engineering"
-        elif any(w in dept.lower() for w in ["civil", "environ", "structur"]):
-            template_key = "Civil Engineering"
-        elif any(w in dept.lower() for w in ["textile", "fashion", "fiber"]):
-            template_key = "Textile Technology"
-        elif any(w in dept.lower() for w in ["chem", "poly"]):
-            template_key = "Chemical Engineering"
-        elif any(w in dept.lower() for w in ["bio", "genetic"]):
-            template_key = "Biotechnology"
-        else:
-            template_key = "Applied Sciences"
+    conn.commit()
 
-    templates = DEPTS_TEMPLATES[template_key]
-    # Deterministic selection based on prof_id to avoid jitter
-    random.seed(prof_id * 37 + 11)
-    chosen_templates = random.sample(templates, k=min(3, len(templates)))
-    
-    for idx, t in enumerate(chosen_templates):
-        title_base, journal, year_range, cit_range, doi_prefix = t
-        year = random.choice(year_range)
-        citations = random.randint(cit_range[0], cit_range[1])
-        doi_suffix = f"{prof_id:03d}{year}{idx+1}"
-        doi_url = f"https://doi.org/{doi_prefix}.{doi_suffix}"
-        
-        c.execute("""
-            INSERT INTO faculty_papers (professor_id, title, journal, year, citations, doi_url)
-            VALUES (?, ?, ?, ?, ?, ?)
-        """, (prof_id, title_base, journal, year, citations, doi_url))
-        total_papers_inserted += 1
+    c.execute("SELECT count(*), count(DISTINCT professor_id) FROM faculty_papers")
+    p_count, prof_with_papers = c.fetchone()
+    print(f"✅ Seeding Complete! Inserted {p_count} research papers across {prof_with_papers} professors.")
+    conn.close()
+    return p_count
 
-conn.commit()
-
-# Verify counts
-c.execute("SELECT count(*), count(DISTINCT professor_id) FROM faculty_papers")
-p_count, prof_with_papers = c.fetchone()
-print(f"✅ Seeding Complete! Inserted {p_count} research papers across {prof_with_papers} professors.")
-
-# Check sample
-c.execute("""
-    SELECT p.name, p.department, count(fp.id) as num_papers
-    FROM professors p
-    JOIN faculty_papers fp ON p.id = fp.professor_id
-    GROUP BY p.id
-    LIMIT 5
-""")
-print("\nSample Professors and their paper counts:")
-for row in c.fetchall():
-    print(f"  {row[0]} ({row[1]}): {row[2]} papers")
-
-conn.close()
+if __name__ == "__main__":
+    seed_papers()
