@@ -325,6 +325,17 @@ function switchView(viewName) {
   const activeBtn = document.getElementById(`nav-${viewName}`);
   if (activeBtn) activeBtn.classList.add('active');
 
+  // Sync desktop navigation bar state
+  document.querySelectorAll('[id^="desktop-nav-"]').forEach(btn => {
+    btn.classList.remove('bg-white/15', 'text-white', 'font-bold');
+    btn.classList.add('text-slate-300');
+  });
+  const activeDesktopBtn = document.getElementById(`desktop-nav-${viewName}`);
+  if (activeDesktopBtn) {
+    activeDesktopBtn.classList.add('bg-white/15', 'text-white', 'font-bold');
+    activeDesktopBtn.classList.remove('text-slate-300');
+  }
+
   if (viewName === 'map') {
     setTimeout(() => {
       if (realSatMap) realSatMap.invalidateSize();

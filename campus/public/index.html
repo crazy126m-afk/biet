@@ -100,6 +100,31 @@
         </div>
       </div>
 
+      <!-- Desktop Navigation Menu Bar -->
+      <nav class="hidden lg:flex items-center gap-1 bg-white/5 border border-white/10 rounded-2xl p-1 text-xs">
+        <button onclick="switchView('alerts')" id="desktop-nav-alerts" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-tower-broadcast mr-1 text-[#cba23e]"></i> Alerts
+        </button>
+        <button onclick="switchView('questionbank')" id="desktop-nav-questionbank" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-book-bookmark mr-1 text-purple-400"></i> PYQ & MCQ
+        </button>
+        <button onclick="switchView('faculty')" id="desktop-nav-faculty" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-chalkboard-user mr-1 text-blue-400"></i> Faculty
+        </button>
+        <button onclick="switchView('lostfound')" id="desktop-nav-lostfound" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-box-open mr-1 text-pink-400"></i> Lost & Found
+        </button>
+        <button onclick="switchView('erp')" id="desktop-nav-erp" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-graduation-cap mr-1 text-emerald-400"></i> ERP
+        </button>
+        <button onclick="switchView('map')" id="desktop-nav-map" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-map-location-dot mr-1 text-cyan-400"></i> Map
+        </button>
+        <button onclick="switchView('emergency')" id="desktop-nav-emergency" class="px-3 py-1.5 rounded-xl font-bold text-rose-400 hover:bg-rose-500/20 transition">
+          <i class="fa-solid fa-shield-heart mr-1"></i> SOS
+        </button>
+      </nav>
+
       <!-- Action Buttons & Badges -->
       <div class="flex items-center gap-2">
         <div class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white/5 border border-white/10 text-xs font-mono text-slate-300">
@@ -242,15 +267,35 @@
         </div>
       </div>
 
-      <!-- Quick Launch Shortcuts -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-        <button onclick="switchView('map')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg shrink-0">
-            <i class="fa-solid fa-satellite"></i>
+      <!-- Quick Launch Shortcuts (6 Modules) -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+        <button onclick="switchView('questionbank')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-purple-500/30 bg-purple-950/20 hover:bg-purple-900/30">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-book-bookmark"></i>
           </div>
           <div>
-            <span class="text-xs font-bold text-white block">Real-World Map</span>
-            <span class="text-[10px] text-slate-400 block">Live Direction & GPS</span>
+            <span class="text-xs font-bold text-white block">PYQ & MCQs</span>
+            <span class="text-[10px] text-purple-300 block">VTU Question Bank</span>
+          </div>
+        </button>
+
+        <button onclick="switchView('erp')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-900/30">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">Academic ERP</span>
+            <span class="text-[10px] text-emerald-300 block">USN Marks & Attendance</span>
+          </div>
+        </button>
+
+        <button onclick="switchView('faculty')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-chalkboard-user"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">Faculty Directory</span>
+            <span class="text-[10px] text-slate-400 block">316 Profs & Papers</span>
           </div>
         </button>
 
@@ -260,17 +305,17 @@
           </div>
           <div>
             <span class="text-xs font-bold text-white block">Lost & Found</span>
-            <span class="text-[10px] text-slate-400 block">Post & Claim Gear</span>
+            <span class="text-[10px] text-slate-400 block">Campus Desk & Items</span>
           </div>
         </button>
 
-        <button onclick="switchView('faculty')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg shrink-0">
-            <i class="fa-solid fa-chalkboard-user"></i>
+        <button onclick="switchView('map')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-satellite"></i>
           </div>
           <div>
-            <span class="text-xs font-bold text-white block">Faculty Directory</span>
-            <span class="text-[10px] text-slate-400 block">Live Cabin Availability</span>
+            <span class="text-xs font-bold text-white block">Satellite Map</span>
+            <span class="text-[10px] text-slate-400 block">GPS & Buildings</span>
           </div>
         </button>
 
@@ -280,7 +325,7 @@
           </div>
           <div>
             <span class="text-xs font-bold text-white block">Targeted SOS</span>
-            <span class="text-[10px] text-slate-400 block">Medical, Safety & Guard</span>
+            <span class="text-[10px] text-slate-400 block">Security & Medical</span>
           </div>
         </button>
       </div>
@@ -1020,7 +1065,7 @@
   <!-- ========================================== -->
   <!-- MOBILE BOTTOM NAVIGATION BAR -->
   <!-- ========================================== -->
-  <nav class="fixed bottom-0 inset-x-0 z-40 bg-[#0a0c14]/95 backdrop-blur-xl border-t border-white/10 px-2 py-1.5 flex items-center justify-around sm:hidden">
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-[#0a0c14]/95 backdrop-blur-xl border-t border-white/10 px-2 py-1.5 flex items-center justify-around sm:max-w-xl sm:mx-auto sm:bottom-4 sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl sm:shadow-black">
     <button onclick="switchView('alerts')" id="nav-alerts" class="nav-btn active flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-newspaper text-base"></i>
       <span>Alerts</span>
@@ -1815,6 +1860,6 @@
   </div>
 
   <!-- Main JavaScript Logic -->
-  <script src="/app.js?v=4.1.0"></script>
+  <script src="/app.js?v=4.2.0"></script>
 </body>
 </html>
