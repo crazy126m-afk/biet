@@ -180,8 +180,8 @@ def init_db():
         pending_dues REAL DEFAULT 0.0,
         fee_receipt_no TEXT DEFAULT 'BEA-BIET-2026-8891',
         hall_ticket_status TEXT DEFAULT 'Eligible & Downloadable',
-        portal_url TEXT DEFAULT 'https://academics.rovelabs.com/login',
-        password TEXT DEFAULT 'student123'
+        portal_url TEXT DEFAULT 'https://shareu.rovelabs.com/login',
+        password TEXT DEFAULT '79754577@Aa'
     )
     """)
 
@@ -755,10 +755,10 @@ def init_db():
 
     # --- ROVELABS ERP MASTER STUDENT RECORDS (Full Structure) ---
     erp_students = [
-        ("4BD23CS001", "Aakash V. Patil", "5th Sem", "Computer Science & Engineering", "A", "Dr. Nirmala C. R.", 88.5, 43.5, 8.65, 8.72, 84, 0.0, "BEA-BIET-2026-8891", "Eligible & Downloadable", "https://academics.rovelabs.com/login", "student123"),
-        ("4BD23CS042", "Kavya Murthy", "5th Sem", "Computer Science & Engineering", "B", "Dr. Jyothi G. C.", 92.0, 47.0, 9.15, 9.04, 84, 0.0, "BEA-BIET-2026-8892", "Eligible & Downloadable", "https://academics.rovelabs.com/login", "student123"),
-        ("4BD23EC018", "Rohan Shenoy", "5th Sem", "Electronics & Communication Engg", "A", "Dr. G. S. Sunitha", 84.0, 39.0, 8.10, 8.25, 82, 0.0, "BEA-BIET-2026-8893", "Eligible & Downloadable", "https://academics.rovelabs.com/login", "student123"),
-        ("4BD22ME009", "Varun Deshpande", "7th Sem", "Mechanical Engineering", "A", "Dr. G. Manavendra", 79.5, 36.5, 7.80, 8.02, 126, 0.0, "BEA-BIET-2026-8894", "Eligible & Downloadable", "https://academics.rovelabs.com/login", "student123")
+        ("4BD23CS001", "Student (4BD23CS001)", "5th Sem", "Computer Science & Engineering", "A", "Dr. Nirmala C. R.", 88.5, 43.5, 8.65, 8.72, 84, 0.0, "BEA-BIET-2026-8891", "Eligible & Downloadable", "https://shareu.rovelabs.com/login", "79754577@Aa"),
+        ("4BD23CS042", "Kavya Murthy", "5th Sem", "Computer Science & Engineering", "B", "Dr. Jyothi G. C.", 92.0, 47.0, 9.15, 9.04, 84, 0.0, "BEA-BIET-2026-8892", "Eligible & Downloadable", "https://shareu.rovelabs.com/login", "79754577@Aa"),
+        ("4BD23EC018", "Rohan Shenoy", "5th Sem", "Electronics & Communication Engg", "A", "Dr. G. S. Sunitha", 84.0, 39.0, 8.10, 8.25, 82, 0.0, "BEA-BIET-2026-8893", "Eligible & Downloadable", "https://shareu.rovelabs.com/login", "79754577@Aa"),
+        ("4BD22ME009", "Varun Deshpande", "7th Sem", "Mechanical Engineering", "A", "Dr. G. Manavendra", 79.5, 36.5, 7.80, 8.02, 126, 0.0, "BEA-BIET-2026-8894", "Eligible & Downloadable", "https://shareu.rovelabs.com/login", "79754577@Aa")
     ]
     cursor.executemany("""
     INSERT INTO erp_records (usn, student_name, semester, branch, section, mentor_name, overall_attendance, cie_average, sgpa_current, cgpa_overall, credits_earned, pending_dues, fee_receipt_no, hall_ticket_status, portal_url, password)
@@ -825,33 +825,48 @@ def init_db():
     lost_found_data = [
         (
             "found",
-            "Apple AirPods Pro (2nd Gen) in Dark Green Spigen Case",
-            "Electronics",
-            "Babbage Block - 2nd Floor Staircase (near Room CS-204)",
-            "2026-11-20 14:15",
-            "AirPods found on window ledge near lab entrance. Kept safely with finder, connect Bluetooth to verify ownership.",
-            "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=500",
-            "Rohit Patil (7th Sem ISE)",
-            "+91 98440 91823",
-            "rohit_ise@bietdvg.edu",
-            "919844091823",
+            "VTU Official Odd Semester Examination Hall Ticket (Center 4BD)",
+            "ID & Cards",
+            "Examination Hall Complex - MV Block Room 104",
+            "2026-11-23 09:30",
+            "VTU laminated hall ticket found after morning session. Deposited safely at the Central Examination Section (Room PR-03). Collect with valid ID.",
+            "https://images.unsplash.com/photo-1589330694653-dad6ef0140be?w=500",
+            "BIET Examination Control Section",
+            "+91 8192-223461",
+            "exam@bietdvg.edu",
+            "918192223461",
             "open",
-            "2026-11-20 14:30"
+            "2026-11-23 10:00"
         ),
         (
-            "lost",
-            "College ID Card & SBI Debit Card in Navy BIET Lanyard",
+            "found",
+            "BIET RFID Smart Campus Student Identity Card",
             "ID & Cards",
-            "Campus Canteen / Dosa Counter Area",
-            "2026-11-20 11:45",
-            "Lost my official BIET Student ID (USN: 4BD23CS064 - Sandeep Kulkarni) with SBI card during 11 AM break. Please contact urgently!",
-            "https://images.unsplash.com/photo-1589330694653-dad6ef0140be?w=500",
-            "Sandeep Kulkarni (5th Sem CSE)",
-            "+91 97410 54321",
-            "sandeep_cs@bietdvg.edu",
-            "919741054321",
+            "Central Library - Reference & Periodicals Section",
+            "2026-11-22 16:45",
+            "Found student smart card on 1st-floor reading table. Kept safely at the Library Circulation Desk. Collect upon verification.",
+            "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500",
+            "Central Library Circulation Desk",
+            "+91 8192-223460",
+            "library@bietdvg.edu",
+            "918192223460",
             "open",
-            "2026-11-20 12:10"
+            "2026-11-22 17:00"
+        ),
+        (
+            "found",
+            "Workshop & Engineering Graphics Manual Record Book",
+            "Academics",
+            "Mechanical Lab Complex - Machine Shop Section",
+            "2026-11-21 14:15",
+            "Found workshop record manual after practical batch. Available for collection at Mechanical Department Office.",
+            "https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=500",
+            "Mechanical Department Lab Incharge",
+            "+91 8192-223463",
+            "mech@bietdvg.edu",
+            "918192223463",
+            "open",
+            "2026-11-21 15:00"
         )
     ]
     cursor.executemany("""

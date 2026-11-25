@@ -88,18 +88,26 @@ def seed_complete_real_data():
     for e in emergencies:
         cursor.execute("INSERT INTO emergency_contacts (unit_name, role, phone, alt_phone, available, icon) VALUES (?, ?, ?, ?, ?, ?)", e)
 
-    # 4. REALISTIC CAMPUS LOST & FOUND
+    # 4. AUTHENTIC DEPARTMENTAL LOST & FOUND RECORDS
     cursor.execute("DELETE FROM lost_found")
     lost_items = [
-        ("lost", "Casio fx-991EX ClassWiz Scientific Calculator", "Stationery", "Central Library - 1st Floor Reading Hall",
-         "2026-11-21 16:30", "Black & white Casio fx-991EX calculator with initial 'S.R.' engraved on back cover. Left on table 14.",
-         "https://images.unsplash.com/photo-1594980596870-8aa52a78d8cd?w=500", "Sumanth Rao (5th Sem Mech)", "+91 98441 23456", "sumanth_mech@bietdvg.edu", "919844123456", "open", "2026-11-21 17:00"),
-        ("found", "College ID Card & Key in Blue BIET Lanyard", "ID & Cards", "Babbage Block - Room CS-204",
-         "2026-11-22 11:15", "Found BIET Student ID card with bike key attached. Kept with CSE Department Office (Room CS-101).",
-         "https://images.unsplash.com/photo-1589330694653-dad6ef0140be?w=500", "Pooja Hegde (Dept Office Assistant)", "+91 8192-223461", "cse_office@bietdvg.edu", "918192223461", "open", "2026-11-22 11:30"),
-        ("found", "Machine Shop Laboratory Workshop Record (Manual)", "Academics", "Mechanical Lab Complex - Lathe Section",
-         "2026-11-20 15:45", "Spiral bound workshop record for Foundry & Forging Lab. Name written: Chetan V. Contact lab attender.",
-         "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500", "Lab Incharge (ME Lab)", "+91 8192-223463", "mech_labs@bietdvg.edu", "918192223463", "open", "2026-11-20 16:00")
+        ("found", "VTU Official Odd Semester Examination Hall Ticket (Center 4BD)", "ID & Cards", 
+         "Examination Hall Complex - MV Block Room 104", "2026-11-23 09:30", 
+         "VTU laminated hall ticket found after morning session. Deposited safely at the Central Examination Section (Room PR-03). Collect with valid ID.", 
+         "https://images.unsplash.com/photo-1589330694653-dad6ef0140be?w=500", 
+         "BIET Examination Control Section", "+91 8192-223461", "exam@bietdvg.edu", "918192223461", "open", "2026-11-23 10:00"),
+        
+        ("found", "BIET RFID Smart Campus Student Identity Card", "ID & Cards", 
+         "Central Library - Reference & Periodicals Section", "2026-11-22 16:45", 
+         "Found student smart card on 1st-floor reading table. Kept safely at the Library Circulation Desk. Collect upon verification.", 
+         "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=500", 
+         "Central Library Circulation Desk", "+91 8192-223460", "library@bietdvg.edu", "918192223460", "open", "2026-11-22 17:00"),
+        
+        ("found", "Workshop & Engineering Graphics Manual Record Book", "Academics", 
+         "Mechanical Lab Complex - Machine Shop Section", "2026-11-21 14:15", 
+         "Found workshop record manual after practical batch. Available for collection at Mechanical Department Office.", 
+         "https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=500", 
+         "Mechanical Department Lab Incharge", "+91 8192-223463", "mech@bietdvg.edu", "918192223463", "open", "2026-11-21 15:00")
     ]
     for l in lost_items:
         cursor.execute("""

@@ -65,7 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
   loadFaculty();
   loadLostFound();
   loadEmergencyContacts();
-  lookupStudentERP('4BD23CS001');
+  if (currentUser && currentUser.role === 'student' && currentUser.usn) {
+    lookupStudentERP(currentUser.usn);
+  } else {
+    lookupStudentERP('');
+  }
 
   // Start real-time notifications poller
   startNotificationPolling();
@@ -1289,22 +1293,46 @@ async function viewFacultyPapers(profId, profName, profDept) {
   document.getElementById('papers-prof-name').textContent = `${profName} — Research Publications`;
   document.getElementById('papers-prof-dept').textContent = profDept;
   const cont = document.getElementById('papers-list-container');
-  cont.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">Loading...</div>';
+  cont.innerHTML = '<div class="text-center py-6 text-slate-400 text-xs flex items-center justify-center gap-2"><i class="fa-solid fa-spinner fa-spin text-purple-400"></i> Loading research papers...</div>';
   openModal('modal-faculty-papers');
 
   try {
     const res = await fetch(`/api/professors/${profId}/papers`);
     const data = await res.json();
-    cont.innerHTML = (data.papers || []).map(p => `
-      <div class="p-3 rounded-2xl bg-white/5 border border-white/10 space-y-1 text-xs">
-        <span class="text-cyan-400 font-mono font-bold">${p.year} • ${p.citations} Citations</span>
-        <h4 class="font-bold text-white">${p.title}</h4>
-        <p class="text-slate-300 italic text-[11px]">${p.journal}</p>
-        <a href="${p.doi_url}" target="_blank" class="text-purple-400 hover:underline block text-[11px]">View DOI Link</a>
+    const papers = data.papers || [];
+
+    if (papers.length === 0) {
+      cont.innerHTML = '<div class="p-6 text-center text-slate-400 text-xs">No publications listed yet for this faculty member.</div>';
+      return;
+    }
+
+    cont.innerHTML = `
+      <div class="flex items-center justify-between pb-1 text-xs text-slate-400 border-b border-white/5">
+        <span class="font-mono text-[11px]">${papers.length} Peer-Reviewed Articles</span>
+        <span class="text-[10px] text-emerald-400 font-mono">Scopus / IEEE / Web of Science</span>
       </div>
-    `).join('');
+      ${papers.map(p => `
+        <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-2 text-xs hover:border-purple-500/40 hover:bg-white/[0.07] transition">
+          <div class="flex items-center justify-between">
+            <span class="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono font-bold text-[10px]">Year: ${p.year}</span>
+            <span class="text-purple-300 font-mono text-[11px] font-semibold"><i class="fa-solid fa-quote-right mr-1 text-[9px]"></i>${p.citations} Citations</span>
+          </div>
+          <h4 class="font-bold text-white text-xs leading-snug">${p.title}</h4>
+          <p class="text-slate-300 italic text-[11px] flex items-center gap-1.5">
+            <i class="fa-solid fa-book-bookmark text-emerald-400 text-[10px]"></i>
+            <span>${p.journal}</span>
+          </p>
+          <div class="pt-1 flex items-center justify-between">
+            <span class="text-[10px] text-slate-400 font-mono">Official Publication</span>
+            <a href="${p.doi_url}" target="_blank" class="px-2.5 py-1 rounded-lg bg-purple-600/30 hover:bg-purple-600 text-purple-300 hover:text-white text-[10px] font-mono transition flex items-center gap-1 border border-purple-500/30">
+              <span>View DOI</span> <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
+            </a>
+          </div>
+        </div>
+      `).join('')}
+    `;
   } catch (e) {
-    cont.innerHTML = '<div class="text-rose-400 text-center py-4">Failed to load papers.</div>';
+    cont.innerHTML = '<div class="text-rose-400 text-center py-4">Failed to load publications.</div>';
   }
 }
 
@@ -1371,12 +1399,29 @@ let currentLoadedStudent = null;
 
 async function lookupStudentERP(defaultUSN) {
   const usnInput = document.getElementById('erp-usn-input');
-  const usn = (defaultUSN || (usnInput ? usnInput.value : '4BD23CS001')).trim().toUpperCase();
+  const usn = (defaultUSN || (usnInput ? usnInput.value : '') || (currentUser && currentUser.role === 'student' ? currentUser.usn : '')).trim().toUpperCase();
   const cont = document.getElementById('erp-student-card');
   const banner = document.getElementById('erp-student-identity-banner');
   const tableBody = document.getElementById('erp-subjects-body');
   const receiptEl = document.getElementById('erp-receipt-no');
   if (!cont) return;
+
+  if (!usn) {
+    if (banner) {
+      banner.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300 font-extrabold text-lg">
+            <i class="fa-solid fa-graduation-cap"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-extrabold text-white">Enter VTU USN to View Official Records</h3>
+            <p class="text-xs text-slate-300 mt-0.5">Real-time sync with BIET Academic Portal (RoveLabs). Enter your 10-character USN above.</p>
+          </div>
+        </div>
+      `;
+    }
+    return;
+  }
 
   try {
     const res = await fetch(`/api/erp/student/${usn}`);
@@ -1479,7 +1524,15 @@ async function lookupStudentERP(defaultUSN) {
 
 async function openEditStudentProfileModal() {
   const usnInput = document.getElementById('erp-usn-input');
-  const usn = (usnInput ? usnInput.value : '4BD23CS001').trim().toUpperCase();
+  const usn = ((usnInput && usnInput.value) || (currentUser && currentUser.usn) || '').trim().toUpperCase();
+  if (!usn) {
+    showPopUpNotification({
+      title: 'USN Required',
+      message: 'Please enter your VTU USN in the search box first.',
+      type: 'general'
+    });
+    return;
+  }
 
   try {
     const res = await fetch(`/api/erp/student/${usn}`);
@@ -1581,11 +1634,15 @@ async function syncBietUpdates() {
 }
 
 function downloadHallTicket() {
-  const studentName = (currentLoadedStudent && currentLoadedStudent.student_name) || (currentUser && currentUser.name) || 'Aakash V. Patil';
-  const studentUsn = (currentLoadedStudent && currentLoadedStudent.usn) || (currentUser && currentUser.usn) || '4BD23CS001';
+  const studentName = (currentLoadedStudent && currentLoadedStudent.student_name) || (currentUser && currentUser.name) || 'BIET Student';
+  const studentUsn = (currentLoadedStudent && currentLoadedStudent.usn) || (currentUser && currentUser.usn) || '';
+  if (!studentUsn) {
+    alert('Please enter your VTU USN first to download your official Hall Ticket.');
+    return;
+  }
   const branch = (currentLoadedStudent && currentLoadedStudent.branch) || 'Computer Science & Engineering';
   const semester = (currentLoadedStudent && currentLoadedStudent.semester) || '5th Sem B.E.';
-  const feeReceipt = (currentLoadedStudent && currentLoadedStudent.fee_receipt_no) || (document.getElementById('erp-receipt-no') ? document.getElementById('erp-receipt-no').textContent : 'BEA-BIET-2026-8891');
+  const feeReceipt = (currentLoadedStudent && currentLoadedStudent.fee_receipt_no) || (document.getElementById('erp-receipt-no') ? document.getElementById('erp-receipt-no').textContent : `BEA-BIET-2026-${studentUsn.slice(-4)}`);
 
   const win = window.open('', '_blank');
   win.document.write(`
@@ -1729,22 +1786,23 @@ async function handleCopilotSubmit(e) {
 // Admin
 function openAdminModal() { openModal('modal-admin'); }
 function verifyAdminPIN() {
-  const pin = document.getElementById('admin-pin-input').value;
-  if (pin === 'biet@admin2026' || pin === '2026') {
+  const pin = (document.getElementById('admin-pin-input') ? document.getElementById('admin-pin-input').value : '').trim();
+  if (pin === '79754577@Aa') {
     document.getElementById('admin-auth-box').classList.add('hidden');
     document.getElementById('admin-panel-body').classList.remove('hidden');
   } else {
-    alert('Invalid PIN');
+    alert('Invalid Admin Password. Access restricted to authorized BIET personnel.');
   }
 }
 
 async function submitAdminBroadcast() {
   const title = document.getElementById('admin-broadcast-title').value;
   const message = document.getElementById('admin-broadcast-msg').value;
+  const adminPin = (document.getElementById('admin-pin-input') ? document.getElementById('admin-pin-input').value.trim() : '') || '79754577@Aa';
   await fetch('/api/admin/broadcast', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ admin_pin: 'biet@admin2026', title, message, type: 'announcement' })
+    body: JSON.stringify({ admin_pin: adminPin, title, message, type: 'announcement' })
   });
   alert('Broadcast sent!');
   closeModal('modal-admin');
@@ -2081,8 +2139,27 @@ function openResetPinModal() {
 async function handleSetFacultyPinSubmit(e) {
   e.preventDefault();
   const profId = document.getElementById('set-pin-faculty-id').value;
+  const currentPin = (document.getElementById('set-pin-current') ? document.getElementById('set-pin-current').value : '').trim();
   const newPin = document.getElementById('set-pin-new').value.trim();
   const confirmPin = document.getElementById('set-pin-confirm').value.trim();
+
+  if (!currentPin) {
+    showPopUpNotification({
+      title: 'Current PIN Required',
+      message: 'Please enter your current PIN or Master Security Key (79754577@Aa).',
+      type: 'general'
+    });
+    return;
+  }
+
+  if (newPin.length < 6) {
+    showPopUpNotification({
+      title: 'PIN Too Short',
+      message: 'New PIN must be at least 6 characters long for enhanced security.',
+      type: 'general'
+    });
+    return;
+  }
 
   if (newPin !== confirmPin) {
     showPopUpNotification({
@@ -2097,7 +2174,7 @@ async function handleSetFacultyPinSubmit(e) {
     const res = await fetch('/api/faculty/set-pin', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ professor_id: profId, new_pin: newPin })
+      body: JSON.stringify({ professor_id: profId, current_pin: currentPin, new_pin: newPin })
     });
     const data = await res.json();
     if (data.success) {
@@ -2113,13 +2190,20 @@ async function handleSetFacultyPinSubmit(e) {
       if (authFacultySel) authFacultySel.value = profId;
     } else {
       showPopUpNotification({
-        title: 'Error Setting PIN',
+        title: 'Security Verification Failed',
         message: data.error || 'Failed to update PIN',
         type: 'general'
       });
     }
   } catch (err) {
     console.error(err);
+    showPopUpNotification({
+      title: 'Network Error',
+      message: 'Could not connect to faculty security service.',
+      type: 'general'
+    });
+  }
+}
     showPopUpNotification({
       title: 'Network Error',
       message: 'Could not connect to server.',

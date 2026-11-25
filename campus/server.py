@@ -437,10 +437,10 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                 # Check known student or allow any standard VTU USN format
                 if student:
                     student_dict = dict(student)
-                    # password check (default 'student123' or empty)
-                    if student_dict.get("password") and password and student_dict["password"] != password and password != "student123":
+                    # password check (default '79754577@Aa' or student custom)
+                    if student_dict.get("password") and password and student_dict["password"] != password and password != "79754577@Aa":
                         conn.close()
-                        self.send_json({"success": False, "error": "Invalid student password. Default is: student123"}, 401)
+                        self.send_json({"success": False, "error": "Invalid student password. Default is: 79754577@Aa"}, 401)
                         return
                     conn.close()
                     self.send_json({
@@ -460,6 +460,10 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 elif len(usn) >= 7 and "4BD" in usn:
                     # Auto-register new valid USN profile
+                    if password and password != "79754577@Aa":
+                        conn.close()
+                        self.send_json({"success": False, "error": "Invalid student password. Default is: 79754577@Aa"}, 401)
+                        return
                     conn.close()
                     self.send_json({
                         "success": True,
@@ -496,10 +500,10 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
                 prof_dict = dict(prof)
-                # Verify password/PIN
-                if password != "prof123" and password != "biet123" and password != prof_dict.get("password"):
+                # Verify password/PIN (Default: 79754577@Aa or private saved PIN)
+                if password != "79754577@Aa" and password != prof_dict.get("password"):
                     conn.close()
-                    self.send_json({"success": False, "error": "Invalid Faculty PIN/Password. Default is: prof123"}, 401)
+                    self.send_json({"success": False, "error": "Invalid Faculty PIN/Password. Default is: 79754577@Aa"}, 401)
                     return
 
                 conn.close()
@@ -524,9 +528,9 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             # --- CASE C: ADMIN / SECURITY DESK LOGIN ---
             elif role == "admin":
-                if password != "biet@admin2026" and password != "2026":
+                if password != "79754577@Aa":
                     conn.close()
-                    self.send_json({"success": False, "error": "Invalid Administrator Master PIN."}, 401)
+                    self.send_json({"success": False, "error": "Invalid Administrator Master Password."}, 401)
                     return
 
                 conn.close()
@@ -737,8 +741,8 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
         # 6. API: Admin Instant Notification Broadcast
         if path == "/api/admin/broadcast":
             pin = body.get("admin_pin", "")
-            if pin != "biet@admin2026" and pin != "2026":
-                self.send_json({"success": False, "error": "Unauthorized Admin PIN"}, 401)
+            if pin != "79754577@Aa":
+                self.send_json({"success": False, "error": "Unauthorized: Invalid Admin Master Password"}, 401)
                 return
 
             title = body.get("title", "Campus Bulletin")
@@ -873,30 +877,48 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # 10. API: Faculty PIN Set / Reset
+        # 7. API: Faculty PIN Set / Reset (Enhanced Security)
         if path == "/api/faculty/set-pin":
             prof_id = body.get("professor_id")
+            current_auth = (body.get("current_pin") or body.get("master_key") or "").strip()
             new_pin = (body.get("new_pin") or "").strip()
 
-            if not new_pin or len(new_pin) < 4:
-                self.send_json({"success": False, "error": "New PIN must be at least 4 characters long."}, 400)
+            if not new_pin or len(new_pin) < 6:
+                self.send_json({"success": False, "error": "New password must be at least 6 characters long."}, 400)
                 return
 
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT id, name, email FROM professors WHERE id = ?", (prof_id,))
+            cursor.execute("SELECT id, name, email, password FROM professors WHERE id = ?", (prof_id,))
             prof = cursor.fetchone()
             if not prof:
                 conn.close()
                 self.send_json({"success": False, "error": "Faculty record not found."}, 404)
                 return
 
+            prof_dict = dict(prof)
+            saved_pin = prof_dict.get("password") or "79754577@Aa"
+            # Strict authorization check: Must match professor's current PIN OR Master Key (79754577@Aa)
+            if current_auth != saved_pin and current_auth != "79754577@Aa":
+                conn.close()
+                self.send_json({"success": False, "error": "Security Authorization Failed: Current Faculty Password or Master Key (79754577@Aa) is required to authorize password change."}, 401)
+                return
+
             cursor.execute("UPDATE professors SET password = ? WHERE id = ?", (new_pin, prof_id))
             conn.commit()
             conn.close()
 
+            LIVE_NOTIFICATIONS.append({
+                "id": f"pin-update-{prof_id}-{int(datetime.now().timestamp())}",
+                "title": f"🔐 Faculty Credential Updated",
+                "message": f"Secure passcode updated for {prof_dict['name']}.",
+                "type": "security",
+                "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+            })
+
             self.send_json({
                 "success": True,
-                "message": f"Private PIN successfully set for {prof['name']}! You can now log in using your new PIN."
+                "message": f"Security credential updated successfully for {prof_dict['name']}! Please login with your new password."
             })
             return
 
@@ -917,7 +939,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             except:
                 cie_average = 42.0
             fee_receipt_no = (body.get("fee_receipt_no") or f"BEA-BIET-2026-{usn[-4:]}").strip()
-            password = (body.get("password") or "student123").strip()
+            password = (body.get("password") or "79754577@Aa").strip()
 
             if not usn:
                 self.send_json({"success": False, "error": "USN is required."}, 400)
