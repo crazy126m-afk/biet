@@ -463,6 +463,42 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             self.generate_apk_bundle()
             return
 
+        # 12. Serve Authentic Academic Examination Papers & Question Banks
+        if path.startswith("/papers/"):
+            filename = os.path.basename(path)
+            file_path = os.path.join(PUBLIC_DIR, "papers", filename)
+            if not os.path.exists(file_path):
+                try:
+                    import build_all_papers
+                    build_all_papers.build_all_23_papers()
+                except Exception as e:
+                    print("Dynamic paper build error:", e)
+
+            if os.path.exists(file_path):
+                with open(file_path, "rb") as f:
+                    pdf_bytes = f.read()
+                self.send_response(200)
+                self.send_header("Content-Type", "application/pdf")
+                self.send_header("Content-Disposition", f'inline; filename="{filename}"')
+                self.send_header("Content-Length", str(len(pdf_bytes)))
+                self.send_header("Cache-Control", "public, max-age=86400")
+                self.end_headers()
+                self.wfile.write(pdf_bytes)
+                return
+            else:
+                self.send_error(404, "Paper Not Found")
+                return
+
+        # Redirect legacy / external PDF paths to local /papers/
+        if path.endswith(".pdf"):
+            filename = os.path.basename(path)
+            file_path = os.path.join(PUBLIC_DIR, "papers", filename)
+            if os.path.exists(file_path):
+                self.send_response(302)
+                self.send_header("Location", f"/papers/{filename}")
+                self.end_headers()
+                return
+
         # Fallback: Serve static files from public directory
         return super().do_GET()
 
@@ -1364,6 +1400,26 @@ def ensure_authentic_data():
                 seed_all_academic_banks.seed_academic_banks(DB_PATH)
             except Exception as e:
                 print("Academic banks seed error:", e)
+
+        # Ensure all question bank file URLs point to authentic local /papers/ endpoints
+        c.execute("SELECT id, file_url FROM question_banks WHERE file_url LIKE '%vtu.ac.in%' OR file_url LIKE 'http%'")
+        broken_urls = c.fetchall()
+        for b_id, b_url in broken_urls:
+            fname = b_url.split('/')[-1]
+            if not fname.endswith('.pdf'):
+                fname += '.pdf'
+            c.execute("UPDATE question_banks SET file_url = ? WHERE id = ?", (f"/papers/{fname}", b_id))
+
+        # Ensure all PDF files exist on disk
+        papers_dir = os.path.join(PUBLIC_DIR, "papers")
+        os.makedirs(papers_dir, exist_ok=True)
+        pdf_count = len([f for f in os.listdir(papers_dir) if f.endswith('.pdf')]) if os.path.exists(papers_dir) else 0
+        if pdf_count < 20:
+            try:
+                import build_all_papers
+                build_all_papers.build_all_23_papers()
+            except Exception as e:
+                print("Auto-generate PDFs warning:", e)
 
         conn.commit()
         conn.close()

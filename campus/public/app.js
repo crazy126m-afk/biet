@@ -2304,7 +2304,7 @@ function renderQuestionBanks(items) {
               <i class="fa-solid fa-brain text-[11px]"></i>
               <span>MCQs</span>
             </button>
-            <a href="${item.file_url}" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#1f4178] hover:bg-[#345798] border border-[#cba23e]/50 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm">
+            <a href="${(item.file_url && item.file_url.startsWith('/papers/')) ? item.file_url : '/papers/' + (item.file_url ? item.file_url.split('/').pop() : item.subject_code + '.pdf')}" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#1f4178] hover:bg-[#345798] border border-[#cba23e]/50 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="View & Download Official Examination PDF">
               <i class="fa-solid fa-file-pdf text-rose-400 text-[11px]"></i>
               <span>PDF</span>
             </a>
