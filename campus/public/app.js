@@ -845,6 +845,65 @@ function renderFaculty(faculty) {
   }).join('');
 }
 
+
+// SOS Real-Time Faculty / Mentor Search Autocomplete
+function handleSOSTeacherSearch(val) {
+  const q = (val || '').toLowerCase().trim();
+  const dropdown = document.getElementById('sos-teacher-dropdown');
+  if (!dropdown) return;
+
+  if (!q) {
+    renderFacultyDropdownItems(allFaculty.slice(0, 10), dropdown, 'sos');
+    return;
+  }
+
+  const filtered = allFaculty.filter(f => 
+    (f.name && f.name.toLowerCase().includes(q)) ||
+    (f.department && f.department.toLowerCase().includes(q)) ||
+    (f.designation && f.designation.toLowerCase().includes(q)) ||
+    (f.cabin && f.cabin.toLowerCase().includes(q))
+  );
+  renderFacultyDropdownItems(filtered.slice(0, 15), dropdown, 'sos');
+}
+
+function selectSOSTeacher(profId) {
+  const f = allFaculty.find(p => p.id === profId);
+  if (!f) return;
+
+  const idInput = document.getElementById('sos-specific-teacher');
+  const searchBox = document.getElementById('sos-teacher-search-box');
+  const card = document.getElementById('sos-teacher-selected-card');
+  const dropdown = document.getElementById('sos-teacher-dropdown');
+
+  if (idInput) idInput.value = `${f.name} [${f.department} - Cabin: ${f.cabin || 'Dept'}]`;
+  if (dropdown) dropdown.classList.add('hidden');
+  if (searchBox) searchBox.classList.add('hidden');
+
+  if (card) {
+    document.getElementById('sos-teacher-selected-name').textContent = f.name;
+    document.getElementById('sos-teacher-selected-cabin').textContent = f.cabin || 'Dept';
+    document.getElementById('sos-teacher-selected-dept').textContent = f.department;
+    document.getElementById('sos-teacher-selected-desig').textContent = f.designation || 'Faculty';
+    document.getElementById('sos-teacher-selected-img').src = f.avatar || '/biet-logo.png';
+    card.classList.remove('hidden');
+  }
+}
+
+function clearSOSTeacherSelection() {
+  const idInput = document.getElementById('sos-specific-teacher');
+  const searchBox = document.getElementById('sos-teacher-search-box');
+  const card = document.getElementById('sos-teacher-selected-card');
+  const searchInput = document.getElementById('sos-teacher-search');
+
+  if (idInput) idInput.value = '';
+  if (card) card.classList.add('hidden');
+  if (searchBox) searchBox.classList.remove('hidden');
+  if (searchInput) {
+    searchInput.value = '';
+    searchInput.focus();
+  }
+}
+
 function populateFacultySelect(faculty) {
   const sosTeacherSel = document.getElementById('sos-specific-teacher');
   if (sosTeacherSel) {
@@ -875,7 +934,7 @@ function renderFacultyDropdownItems(list, dropdownEl, context) {
     const avatar = f.avatar || '/biet-logo.png';
     const clickHandler = context === 'auth' 
       ? `selectAuthFaculty(${f.id})` 
-      : (context === 'switch' ? `selectFacultySwitch(${f.id})` : `selectSetPinFaculty(${f.id})`);
+      : (context === 'switch' ? `selectFacultySwitch(${f.id})` : (context === 'sos' ? `selectSOSTeacher(${f.id})` : `selectSetPinFaculty(${f.id})`));
     
     return `
       <div onclick="${clickHandler}" class="p-2 rounded-xl hover:bg-white/10 flex items-center gap-2.5 cursor-pointer transition border border-transparent hover:border-[#cba23e]/40 group">
@@ -2527,7 +2586,7 @@ async function submitAdminBroadcast() {
 // PWA
 function initServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js?v=5.8').then(reg => {
+    navigator.serviceWorker.register('/sw.js?v=5.9').then(reg => {
       reg.update().catch(() => {});
     }).catch(() => {});
   }
