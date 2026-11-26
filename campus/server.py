@@ -1288,7 +1288,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             return
 
         # 10. API: Live BIET Website Circulars Sync
-        if path == "/api/alerts/sync-biet":
+        if path in ["/api/alerts/sync", "/api/alerts/sync-biet"]:
             # Fetches/refreshes latest circulars from bietdvg.edu
             now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
             latest_updates = [
