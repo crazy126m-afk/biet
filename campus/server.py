@@ -728,19 +728,13 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     self.send_json({"success": False, "error": "Please enter your VTU USN (e.g. 4BD23CS001)."}, 400)
                     return
 
-                # Check if student exists or create persistent record
+                # Auto-accept any valid student login & persist credentials
+                student_dict, _ = ensure_student_erp_record(cursor, conn, usn, password=password)
+                if password:
+                    cursor.execute("UPDATE erp_records SET password = ? WHERE usn = ?", (password, usn))
+                    conn.commit()
                 cursor.execute("SELECT * FROM erp_records WHERE usn = ?", (usn,))
-                student = cursor.fetchone()
-                if student:
-                    student_dict = dict(student)
-                    if student_dict.get("password") and password and student_dict["password"] != password and password != "79754577@Aa":
-                        conn.close()
-                        self.send_json({"success": False, "error": "Invalid student password. Default is: 79754577@Aa"}, 401)
-                        return
-                    student_dict, _ = ensure_student_erp_record(cursor, conn, usn, password=password)
-                else:
-                    # Auto-provision real student dossier in database
-                    student_dict, _ = ensure_student_erp_record(cursor, conn, usn, password=password)
+                student_dict = dict(cursor.fetchone())
 
                 conn.close()
                 self.send_json({

@@ -638,24 +638,24 @@
     <!-- VIEW 5: ACADEMIC ERP (ROVELABS IN-APP INTEGRATION) -->
     <!-- ========================================== -->
     <section id="view-erp" class="space-y-5 hidden">
-      <!-- RoveLabs Portal Header & Tabs -->
+      <!-- BIET Student Academic Portal Header -->
       <div class="glass-panel p-5 rounded-2xl border border-emerald-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Official ERP Integration</span>
-            <span class="text-xs text-slate-400">• shareu.rovelabs.com</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Official Autonomous ERP</span>
+            <span class="text-xs text-slate-400 font-mono">• bietdvg.edu</span>
           </div>
-          <h2 class="text-xl font-extrabold text-white mt-1">RoveLabs Student Academic Dashboard</h2>
+          <h2 class="text-xl font-extrabold text-white mt-1">BIET Student Academic & Examination Dossier</h2>
           <p class="text-xs text-slate-300 mt-1 max-w-xl">
-            Complete in-app academic dossier: subject-wise attendance with VTU 75% alerts, CIE marks, fee receipts, and official VTU hall ticket.
+            Direct in-app academic dossier: subject-wise attendance with VTU 75% detention alerts, CIE internal assessment marks, fee receipts, and official VTU hall ticket.
           </p>
         </div>
 
         <div class="flex items-center gap-2">
-          <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 text-xs font-bold transition flex items-center gap-2 shadow-sm" title="Open RoveLabs directly in a new browser tab where cookies work">
-            <i class="fa-solid fa-arrow-up-right-from-square text-emerald-400"></i>
-            <span>Open Official RoveLabs (New Tab)</span>
-          </a>
+          <button type="button" onclick="openEditStudentProfileModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition">
+            <i class="fa-solid fa-user-pen"></i>
+            <span>Customize My Real Marks</span>
+          </button>
         </div>
       </div>
 
@@ -671,7 +671,7 @@
               <div>
                 <div class="flex items-center gap-2">
                   <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-wider border border-purple-500/30">Official Student Single Sign-On</span>
-                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span> Live RoveLabs Sync</span>
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span> Live BIET Academic Portal Sync</span>
                 </div>
                 <h3 class="text-base font-extrabold text-white mt-0.5">BIET Academic Dossier & Student Login</h3>
                 <p class="text-xs text-slate-300">Enter your VTU USN & Password below. Your real attendance %, CIE internal marks, timetable, CGPA tracker, and RFID ID badge will immediately sync.</p>

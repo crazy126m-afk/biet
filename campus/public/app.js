@@ -1598,7 +1598,7 @@ async function lookupStudentERP(defaultUSN) {
           </div>
           <div>
             <h3 class="text-base font-extrabold text-white">Enter VTU USN to View Official Records</h3>
-            <p class="text-xs text-slate-300 mt-0.5">Real-time sync with BIET Academic Portal (RoveLabs). Enter your 10-character USN above.</p>
+            <p class="text-xs text-slate-300 mt-0.5">Real-time sync with BIET Academic Portal. Enter your 10-character USN above.</p>
           </div>
         </div>
       `;
