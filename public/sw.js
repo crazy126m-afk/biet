@@ -3,8 +3,8 @@ const CACHE_NAME = 'biet-v6.1';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
-  '/style.css?v=5.4',
-  '/app.js?v=5.4.0',
+  '/style.css?v=6.1',
+  '/app.js?v=6.1.0',
   '/biet-logo.png',
   '/manifest.json'
 ];
