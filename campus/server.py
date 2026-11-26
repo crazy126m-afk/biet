@@ -883,7 +883,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                 # Verify password/PIN (Default: biet@1234 or private saved PIN - Master Key is restricted to Admin only)
                 if password != "biet@1234" and password != prof_dict.get("password"):
                     conn.close()
-                    self.send_json({"success": False, "error": "Invalid Faculty PIN/Password."}, 401)
+                    self.send_json({"success": False, "error": "Wrong password! Please check your faculty password and try again."}, 401)
                     return
 
                 conn.close()
@@ -914,7 +914,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                 expected_admin_pass = row["value"] if row else "79754577@Aa"
                 if password != expected_admin_pass and password != "79754577@Aa":
                     conn.close()
-                    self.send_json({"success": False, "error": "Invalid Administrator Master Password."}, 401)
+                    self.send_json({"success": False, "error": "Wrong password! Invalid administrator credentials."}, 401)
                     return
 
                 conn.close()

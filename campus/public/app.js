@@ -2270,7 +2270,11 @@ async function verifyAdminPIN() {
       loadAdminDashboardData();
       playChimeSound();
     } else {
-      alert('Invalid Admin Master Password. Access restricted to authorized BIET personnel.');
+      alert('Wrong password! Access restricted to authorized BIET personnel.');
+      if (document.getElementById('admin-pin-input')) {
+        document.getElementById('admin-pin-input').value = '';
+        document.getElementById('admin-pin-input').focus();
+      }
     }
   } catch (err) {
     console.error(err);
@@ -2521,7 +2525,7 @@ async function submitAdminBroadcast() {
 // PWA
 function initServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js?v=5.5').then(reg => {
+    navigator.serviceWorker.register('/sw.js?v=5.7').then(reg => {
       reg.update().catch(() => {});
     }).catch(() => {});
   }
@@ -2592,6 +2596,9 @@ function switchAuthTab(role) {
 
 async function handleUnifiedAuthLogin(e) {
   e.preventDefault();
+  const errBox = document.getElementById('auth-login-error');
+  if (errBox) errBox.classList.add('hidden');
+
   const role = document.getElementById('auth-role').value;
   let identifier = '';
   let password = '';
@@ -2603,10 +2610,20 @@ async function handleUnifiedAuthLogin(e) {
       clearFacultyAuthSelection();
       return;
     }
-    password = document.getElementById('auth-faculty-pass').value.trim();
+    password = (document.getElementById('auth-faculty-pass')?.value || '').trim();
+    if (!password) {
+      alert("Please enter your password.");
+      document.getElementById('auth-faculty-pass')?.focus();
+      return;
+    }
   } else if (role === 'admin') {
     identifier = 'admin@bietdvg.edu';
-    password = document.getElementById('auth-admin-pass').value.trim();
+    password = (document.getElementById('auth-admin-pass')?.value || '').trim();
+    if (!password) {
+      alert("Please enter the administrator password.");
+      document.getElementById('auth-admin-pass')?.focus();
+      return;
+    }
   }
 
   try {
@@ -2639,19 +2656,23 @@ async function handleUnifiedAuthLogin(e) {
         });
       }
     } else {
-      showPopUpNotification({
-        title: 'Authentication Failed',
-        message: data.error || 'Invalid credentials provided.',
-        type: 'general'
-      });
+      const errMsg = data.error || 'Wrong password! Please check your credentials and try again.';
+      alert(errMsg);
+      if (errBox) {
+        errBox.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400"></i> <span>${errMsg}</span>`;
+        errBox.classList.remove('hidden');
+      }
+      if (role === 'faculty' && document.getElementById('auth-faculty-pass')) {
+        document.getElementById('auth-faculty-pass').value = '';
+        document.getElementById('auth-faculty-pass').focus();
+      } else if (role === 'admin' && document.getElementById('auth-admin-pass')) {
+        document.getElementById('auth-admin-pass').value = '';
+        document.getElementById('auth-admin-pass').focus();
+      }
     }
   } catch (err) {
     console.error(err);
-    showPopUpNotification({
-      title: 'Network Error',
-      message: 'Could not connect to authentication service.',
-      type: 'general'
-    });
+    alert('Network error connecting to authentication service. Please try again.');
   }
 }
 
@@ -2864,7 +2885,16 @@ async function deleteAppointment(appId) {
   }
 }
 
-function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function openModal(id) {
+  const el = document.getElementById(id);
+  if (el) el.classList.remove('hidden');
+  if (id === 'modal-auth-login') {
+    if (document.getElementById('auth-faculty-pass')) document.getElementById('auth-faculty-pass').value = '';
+    if (document.getElementById('auth-admin-pass')) document.getElementById('auth-admin-pass').value = '';
+    const errBox = document.getElementById('auth-login-error');
+    if (errBox) errBox.classList.add('hidden');
+  }
+}
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
 function openChangePasswordModal(role = 'faculty') {
@@ -2902,14 +2932,14 @@ function switchChangePassTab(role) {
     if (tabFaculty) tabFaculty.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1.5';
     if (tabAdmin) tabAdmin.className = 'py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5';
     if (facultyPicker) facultyPicker.classList.remove('hidden');
-    if (currentLabel) currentLabel.textContent = 'Current Password / PIN (Default: biet@1234) *';
-    if (securityHint) securityHint.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i> Security Protocol: Authorization requires current active password (default: <code>biet@1234</code>) or Master Key (<code>79754577@Aa</code>).';
+    if (currentLabel) currentLabel.textContent = 'Current Password / PIN *';
+    if (securityHint) securityHint.innerHTML = '';
   } else if (role === 'admin') {
     if (tabAdmin) tabAdmin.className = 'py-2 rounded-xl bg-rose-600 text-white font-bold transition flex items-center justify-center gap-1.5';
     if (tabFaculty) tabFaculty.className = 'py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5';
     if (facultyPicker) facultyPicker.classList.add('hidden');
-    if (currentLabel) currentLabel.textContent = 'Current Admin Master PIN (Default: 79754577@Aa) *';
-    if (securityHint) securityHint.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i> Security Protocol: Authorization requires current Administrator PIN (default: <code>79754577@Aa</code>).';
+    if (currentLabel) currentLabel.textContent = 'Current Administrator PIN *';
+    if (securityHint) securityHint.innerHTML = '';
   }
 }
 
@@ -2923,7 +2953,7 @@ async function handleChangePasswordSubmit(e) {
   if (!currentPin) {
     showPopUpNotification({
       title: 'Current PIN Required',
-      message: role === 'admin' ? 'Please enter current Admin PIN.' : 'Please enter current Faculty PIN (default: biet@1234).',
+      message: role === 'admin' ? 'Please enter current Admin PIN.' : 'Please enter current Faculty Password / PIN.',
       type: 'general'
     });
     return;
