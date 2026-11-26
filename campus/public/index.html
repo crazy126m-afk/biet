@@ -123,9 +123,11 @@
         <button onclick="switchView('lostfound')" id="desktop-nav-lostfound" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-box-open mr-1 text-pink-400"></i> Lost & Found
         </button>
-        <button onclick="switchView('portal')" id="desktop-nav-portal" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
-          <i class="fa-solid fa-graduation-cap mr-1 text-emerald-400"></i> Student Portal
-        </button>
+        <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" id="desktop-nav-portal" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition flex items-center gap-1.5" title="Open Official BIET Student Portal">
+          <i class="fa-solid fa-graduation-cap text-emerald-400"></i>
+          <span>Student Portal</span>
+          <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-slate-400"></i>
+        </a>
         <button onclick="switchView('map')" id="desktop-nav-map" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-map-location-dot mr-1 text-cyan-400"></i> Map
         </button>
@@ -631,73 +633,7 @@
       </div>
     </section>
 
-    <!-- ========================================== -->
-    <!-- VIEW 5: ACADEMIC ERP (ROVELABS IN-APP INTEGRATION) -->
-    <!-- ========================================== -->
-        <!-- ========================================== -->
-    <!-- VIEW: BIET STUDENT ACADEMIC CLOUD PORTAL (SHAREU) -->
-    <!-- ========================================== -->
-    <section id="view-portal" class="space-y-5 hidden">
-      <!-- Portal Top Header -->
-      <div class="glass-panel p-5 rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-[#071329] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
-        <div class="flex items-center gap-3.5">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-emerald-500/20">
-            <i class="fa-solid fa-graduation-cap"></i>
-          </div>
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">Official Student Portal</span>
-              <span class="text-xs text-slate-400 font-mono flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span> shareu.rovelabs.com</span>
-            </div>
-            <h2 class="text-xl font-black text-white mt-0.5">BIET Student Academic Cloud Portal</h2>
-            <p class="text-xs text-slate-300">Official college portal for live student attendance, internal assessment (IA) marks, and academic evaluations.</p>
-          </div>
-        </div>
 
-        <!-- 1-Click Direct Launch Button -->
-        <div class="flex items-center gap-2.5 flex-wrap">
-          <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/30 transition">
-            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-            <span>Open in Fullscreen Tab</span>
-          </a>
-          <button type="button" onclick="document.getElementById('portal-live-frame').src='https://shareu.rovelabs.com/login'" class="px-3 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold border border-white/15 transition flex items-center gap-1.5" title="Reload Portal">
-            <i class="fa-solid fa-rotate-right"></i>
-          </button>
-        </div>
-      </div>
-
-      <!-- Quick Helpful Guide Card -->
-      <div class="glass-panel p-4 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02]">
-        <div class="flex items-center gap-2.5 text-xs text-slate-300">
-          <i class="fa-solid fa-mobile-screen-button text-cyan-400 text-base"></i>
-          <span><strong>Mobile & Desktop Optimized:</strong> RoveLabs SHAREU is designed for mobile viewports. The phone simulator below renders the real mobile login interface directly inside the app, or you can open it fullscreen!</span>
-        </div>
-        <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-emerald-400 hover:underline shrink-0 flex items-center gap-1">
-          <span>Direct Web Link</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
-        </a>
-      </div>
-
-      <!-- Smartphone Frame Container (Forces Mobile Viewport so RoveLabs Renders Perfectly!) -->
-      <div class="py-2 flex justify-center">
-        <div class="w-full max-w-[420px] rounded-[42px] border-4 border-slate-700/80 bg-slate-950 p-3 shadow-2xl shadow-emerald-950/40 relative">
-          <!-- Top Speaker / Camera Notch Pill -->
-          <div class="flex items-center justify-center gap-2 pb-2">
-            <span class="w-12 h-3.5 bg-slate-800 rounded-full"></span>
-            <span class="w-3 h-3 bg-slate-800 rounded-full"></span>
-          </div>
-
-          <!-- The Live Portal IFrame -->
-          <div class="rounded-[28px] overflow-hidden bg-white shadow-inner relative" style="height: 680px;">
-            <iframe id="portal-live-frame" src="https://shareu.rovelabs.com/login" class="w-full h-full border-0" title="BIET Official Student Portal (SHAREU)" allow="camera; microphone; geolocation; clipboard-write; fullscreen"></iframe>
-          </div>
-
-          <!-- Bottom Home Indicator Bar -->
-          <div class="pt-2 flex justify-center">
-            <span class="w-28 h-1 bg-slate-700 rounded-full"></span>
-          </div>
-        </div>
-      </div>
-    </section>
 
     <!-- ========================================== -->
     <!-- VIEW: VTU & BIET ACADEMIC QUESTION BANK & MCQS -->
@@ -1266,10 +1202,10 @@
       <i class="fa-solid fa-chalkboard-user text-base"></i>
       <span>Faculty</span>
     </button>
-    <button onclick="switchView('portal')" id="nav-portal" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-graduation-cap text-base"></i>
-      <span>Portal</span>
-    </button>
+    <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" id="nav-portal" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 hover:text-emerald-300 text-[10px] font-medium transition" title="Open Official BIET Student Portal">
+      <i class="fa-solid fa-graduation-cap text-base text-emerald-400"></i>
+      <span class="flex items-center gap-0.5">Portal <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-400"></i></span>
+    </a>
     <button onclick="switchView('questionbank')" id="nav-questionbank" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-book-bookmark text-base"></i>
       <span>PYQ & MCQ</span>

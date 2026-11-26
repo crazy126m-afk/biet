@@ -310,8 +310,12 @@ function clearNotifications() {
 // 5. VIEW SWITCHER
 // ==========================================
 function switchView(viewName) {
+  if (viewName === 'portal') {
+    window.open('https://shareu.rovelabs.com/login', '_blank');
+    return;
+  }
   currentView = viewName;
-  const views = ['alerts', 'map', 'lostfound', 'faculty', 'portal', 'emergency', 'questionbank', 'placements', 'gpa', 'cheatsheets'];
+  const views = ['alerts', 'map', 'lostfound', 'faculty', 'emergency', 'questionbank', 'placements', 'gpa', 'cheatsheets'];
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
@@ -2100,12 +2104,10 @@ async function handleUnifiedAuthLogin(e) {
       if (role === 'student') {
         showPopUpNotification({
           title: `🎓 Welcome, ${currentUser.name}!`,
-          message: `Logged in as Student (${currentUser.usn}). Academic dossier synced.`,
+          message: `Logged in as Student (${currentUser.usn}).`,
           type: 'general'
         });
         updateErpAuthStatus();
-        switchView('portal');
-        await lookupStudentERP(currentUser.usn);
         syncAcademicPreferences(currentUser);
       } else if (role === 'faculty') {
         showPopUpNotification({
