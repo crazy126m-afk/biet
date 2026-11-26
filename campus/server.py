@@ -859,10 +859,10 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
                 prof_dict = dict(prof)
-                # Verify password/PIN (Default: 79754577@Aa or private saved PIN)
-                if password != "79754577@Aa" and password != prof_dict.get("password"):
+                # Verify password/PIN (Default: biet@1234 or private saved PIN or master key)
+                if password != "biet@1234" and password != prof_dict.get("password") and password != "79754577@Aa":
                     conn.close()
-                    self.send_json({"success": False, "error": "Invalid Faculty PIN/Password. Default is: 79754577@Aa"}, 401)
+                    self.send_json({"success": False, "error": "Invalid Faculty PIN/Password. Default is: biet@1234"}, 401)
                     return
 
                 conn.close()
@@ -887,7 +887,11 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             # --- CASE C: ADMIN / SECURITY DESK LOGIN ---
             elif role == "admin":
-                if password != "79754577@Aa":
+                cursor.execute("CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT)")
+                cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
+                row = cursor.fetchone()
+                expected_admin_pass = row["value"] if row else "79754577@Aa"
+                if password != expected_admin_pass and password != "79754577@Aa":
                     conn.close()
                     self.send_json({"success": False, "error": "Invalid Administrator Master Password."}, 401)
                     return
@@ -1235,8 +1239,100 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
+        # Cancel Appointment (by Faculty or Admin)
+        if path.startswith("/api/appointments/") and path.endswith("/cancel"):
+            app_id = path.split("/")[3]
+            reason = (body.get("reason") or "Cancelled by faculty").strip()
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("UPDATE appointments SET status = 'Cancelled' WHERE id = ?", (app_id,))
+            cursor.execute("SELECT a.*, p.name as professor_name FROM appointments a LEFT JOIN professors p ON a.professor_id = p.id WHERE a.id = ?", (app_id,))
+            app_row = cursor.fetchone()
+            conn.commit()
+            conn.close()
+
+            if app_row:
+                LIVE_NOTIFICATIONS.append({
+                    "id": f"app-cancel-{app_id}-{int(datetime.now().timestamp())}",
+                    "title": "❌ Consultation Slot Cancelled",
+                    "message": f"Appointment #{app_id} with {app_row['student_name']} was cancelled.",
+                    "type": "general",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+                })
+            self.send_json({"success": True, "message": f"Appointment #{app_id} marked as Cancelled."})
+            return
+
+        # API: Change Password / PIN for Faculty or Admin
+        if path == "/api/auth/change-password":
+            role = (body.get("role") or "faculty").lower()
+            current_pass = (body.get("current_password") or "").strip()
+            new_pass = (body.get("new_password") or "").strip()
+
+            if not new_pass or len(new_pass) < 6:
+                self.send_json({"success": False, "error": "New password must be at least 6 characters long."}, 400)
+                return
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT)")
+
+            if role == "faculty":
+                prof_id = body.get("professor_id")
+                if not prof_id:
+                    conn.close()
+                    self.send_json({"success": False, "error": "Please select a professor."}, 400)
+                    return
+                cursor.execute("SELECT id, name, password FROM professors WHERE id = ?", (prof_id,))
+                prof = cursor.fetchone()
+                if not prof:
+                    conn.close()
+                    self.send_json({"success": False, "error": "Faculty record not found."}, 404)
+                    return
+                prof_dict = dict(prof)
+                saved_pass = prof_dict.get("password") or "biet@1234"
+                if current_pass != saved_pass and current_pass != "biet@1234" and current_pass != "79754577@Aa":
+                    conn.close()
+                    self.send_json({"success": False, "error": "Current Faculty Password is incorrect (Default is biet@1234)."}, 401)
+                    return
+                cursor.execute("UPDATE professors SET password = ? WHERE id = ?", (new_pass, prof_id))
+                conn.commit()
+                conn.close()
+                LIVE_NOTIFICATIONS.append({
+                    "id": f"pin-update-{prof_id}-{int(datetime.now().timestamp())}",
+                    "title": "🔐 Faculty Password Changed",
+                    "message": f"Password successfully updated for {prof_dict['name']}.",
+                    "type": "security",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+                })
+                self.send_json({"success": True, "message": f"Password updated successfully for {prof_dict['name']}!"})
+                return
+
+            elif role == "admin":
+                cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
+                row = cursor.fetchone()
+                admin_expected = row["value"] if row else "79754577@Aa"
+                if current_pass != admin_expected and current_pass != "79754577@Aa":
+                    conn.close()
+                    self.send_json({"success": False, "error": "Current Admin PIN is incorrect."}, 401)
+                    return
+                cursor.execute("INSERT OR REPLACE INTO app_settings (key, value) VALUES ('admin_password', ?)", (new_pass,))
+                conn.commit()
+                conn.close()
+                LIVE_NOTIFICATIONS.append({
+                    "id": f"admin-pass-{int(datetime.now().timestamp())}",
+                    "title": "🛡️ Admin Master PIN Changed",
+                    "message": "Campus administrator master PIN was updated successfully.",
+                    "type": "security",
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M")
+                })
+                self.send_json({"success": True, "message": "Admin Master PIN updated successfully!"})
+                return
+
+            conn.close()
+            self.send_json({"success": False, "error": "Unknown role type."}, 400)
+            return
+
         # 10. API: Faculty PIN Set / Reset
-        # 7. API: Faculty PIN Set / Reset (Enhanced Security)
         if path == "/api/faculty/set-pin":
             prof_id = body.get("professor_id")
             current_auth = (body.get("current_pin") or body.get("master_key") or "").strip()
@@ -1256,11 +1352,11 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                 return
 
             prof_dict = dict(prof)
-            saved_pin = prof_dict.get("password") or "79754577@Aa"
-            # Strict authorization check: Must match professor's current PIN OR Master Key (79754577@Aa)
-            if current_auth != saved_pin and current_auth != "79754577@Aa":
+            saved_pin = prof_dict.get("password") or "biet@1234"
+            # Strict authorization check: Must match professor's current PIN OR biet@1234 OR Master Key (79754577@Aa)
+            if current_auth != saved_pin and current_auth != "biet@1234" and current_auth != "79754577@Aa":
                 conn.close()
-                self.send_json({"success": False, "error": "Security Authorization Failed: Current Faculty Password or Master Key (79754577@Aa) is required to authorize password change."}, 401)
+                self.send_json({"success": False, "error": "Security Authorization Failed: Current Faculty Password (default: biet@1234) or Master Key is required to authorize password change."}, 401)
                 return
 
             cursor.execute("UPDATE professors SET password = ? WHERE id = ?", (new_pin, prof_id))
@@ -1434,6 +1530,17 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"success": True, "message": "Lost & Found post removed"})
             return
 
+        # 3. Delete Appointment
+        if path.startswith("/api/appointments/"):
+            app_id = path.split("/")[3]
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM appointments WHERE id = ?", (app_id,))
+            conn.commit()
+            conn.close()
+            self.send_json({"success": True, "message": f"Appointment #{app_id} removed"})
+            return
+
         self.send_json({"error": "Endpoint not found"}, 404)
 
     # ==========================
@@ -1603,7 +1710,9 @@ def ensure_authentic_data():
         # 3. Ensure authentic student names & passwords (79754577@Aa)
         c.execute("UPDATE erp_records SET student_name = 'Student (4BD23CS001)' WHERE usn = '4BD23CS001' AND student_name LIKE '%Aakash%'")
         c.execute("UPDATE erp_records SET password = '79754577@Aa' WHERE password IS NULL OR password = 'student123'")
-        c.execute("UPDATE professors SET password = '79754577@Aa' WHERE password IS NULL OR password = 'prof123' OR password = 'biet123'")
+        c.execute("UPDATE professors SET password = 'biet@1234' WHERE password IS NULL OR password = 'prof123' OR password = 'biet123' OR password = '79754577@Aa'")
+        c.execute("CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT)")
+        c.execute("INSERT OR IGNORE INTO app_settings (key, value) VALUES ('admin_password', '79754577@Aa')")
         c.execute("UPDATE erp_records SET portal_url = 'https://shareu.rovelabs.com/login'")
         c.execute("""
             UPDATE professors

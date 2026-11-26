@@ -53,6 +53,9 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Load core data
   loadAlerts();
+  autoSilentSyncAlerts();
+  setInterval(autoSilentSyncAlerts, 120000);
+  window.addEventListener('focus', autoSilentSyncAlerts);
   loadLocations();
   loadFaculty();
   loadLostFound();
@@ -1232,15 +1235,74 @@ async function loadAlerts() {
     const res = await fetch('/api/alerts');
     const data = await res.json();
     allAlerts = data.alerts || [];
-    renderAlerts(allAlerts);
+    filterAlerts(currentAlertFilter || 'all');
   } catch (e) {
     console.error(e);
+  }
+}
+
+async function autoSilentSyncAlerts() {
+  try {
+    const res = await fetch('/api/alerts/sync', { method: 'POST' });
+    const data = await res.json();
+    if (data && data.success) {
+      const alertsRes = await fetch('/api/alerts');
+      const alertsData = await alertsRes.json();
+      allAlerts = alertsData.alerts || [];
+      filterAlerts(currentAlertFilter || 'all');
+    }
+  } catch (e) {
+    // Silent background sync
+  }
+}
+
+let currentAlertFilter = 'all';
+
+function filterAlerts(category) {
+  currentAlertFilter = (category || 'all').toLowerCase();
+
+  // Update active pill styling
+  document.querySelectorAll('.alert-pill').forEach(btn => {
+    btn.classList.remove('bg-purple-600', 'text-white');
+    btn.classList.add('bg-white/5', 'text-slate-300');
+  });
+
+  const activeBtn = Array.from(document.querySelectorAll('.alert-pill')).find(btn => {
+    const txt = btn.textContent.toLowerCase();
+    if (currentAlertFilter === 'all') return txt.trim() === 'all';
+    return txt.includes(currentAlertFilter);
+  });
+  if (activeBtn) {
+    activeBtn.classList.add('bg-purple-600', 'text-white');
+    activeBtn.classList.remove('bg-white/5', 'text-slate-300');
+  }
+
+  if (currentAlertFilter === 'all') {
+    renderAlerts(allAlerts);
+  } else {
+    const filtered = allAlerts.filter(a => {
+      const cat = (a.category || '').toLowerCase();
+      const prio = (a.priority || '').toLowerCase();
+      const title = (a.title || '').toLowerCase();
+      return cat.includes(currentAlertFilter) || prio.includes(currentAlertFilter) || title.includes(currentAlertFilter);
+    });
+    renderAlerts(filtered);
   }
 }
 
 function renderAlerts(alerts) {
   const container = document.getElementById('alerts-grid');
   if (!container) return;
+
+  if (!alerts || alerts.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-8 text-center text-slate-400 text-xs">
+        <i class="fa-solid fa-bullhorn text-lg mb-1 block text-slate-500"></i>
+        No announcements in this category right now.
+      </div>
+    `;
+    return;
+  }
 
   container.innerHTML = alerts.map(a => `
     <div class="glass-panel p-4 rounded-2xl border border-white/10 space-y-2">
@@ -2388,6 +2450,9 @@ function updateAuthUI() {
         <div class="flex items-center gap-1.5 bg-rose-950/40 border border-rose-500/40 rounded-xl px-2.5 py-1">
           <i class="fa-solid fa-shield-halved text-rose-400 text-xs"></i>
           <span class="text-xs font-bold text-white">Admin Control</span>
+          <button onclick="openChangePasswordModal('admin')" title="Change Admin PIN" class="text-[10px] bg-rose-600/30 hover:bg-rose-600 text-rose-200 px-2 py-0.5 rounded-lg border border-rose-500/40 ml-1 transition">
+            <i class="fa-solid fa-key text-[9px]"></i> PIN
+          </button>
           <button onclick="logoutUser()" title="Logout" class="text-slate-400 hover:text-rose-400 ml-1">
             <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
           </button>
@@ -2451,11 +2516,21 @@ async function loadFacultyAppointments() {
       return;
     }
 
-    listEl.innerHTML = apps.map(a => `
-      <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 text-xs">
+    listEl.innerHTML = apps.map(a => {
+      const isCancelled = (a.status || '').toLowerCase() === 'cancelled';
+      const statusBadge = isCancelled
+        ? '<span class="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-[10px] font-bold">Cancelled</span>'
+        : `<span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">${a.status}</span>`;
+
+      const actionBtn = isCancelled
+        ? `<button onclick="deleteAppointment(${a.id})" class="px-2 py-1 rounded-lg bg-white/5 hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 text-xs font-semibold flex items-center gap-1 transition"><i class="fa-solid fa-trash text-[10px]"></i> Remove</button>`
+        : `<button onclick="cancelAppointment(${a.id})" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-xs font-semibold flex items-center gap-1 transition"><i class="fa-solid fa-ban text-[10px]"></i> Cancel Slot</button>`;
+
+      return `
+      <div class="p-3.5 rounded-2xl bg-white/5 border border-white/10 space-y-1.5 text-xs ${isCancelled ? 'opacity-65' : ''}">
         <div class="flex items-center justify-between font-bold">
           <span class="text-white">${a.student_name} (${a.student_usn})</span>
-          <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">${a.status}</span>
+          ${statusBadge}
         </div>
         <div class="text-slate-300 text-[11px] flex items-center gap-3">
           <span><i class="fa-regular fa-calendar text-purple-400"></i> ${a.date}</span>
@@ -2464,41 +2539,118 @@ async function loadFacultyAppointments() {
         <p class="text-slate-200 mt-1">Reason: "${a.reason}"</p>
         <div class="pt-2 flex items-center justify-between text-[11px] border-t border-white/5">
           <span class="text-slate-400">Email: ${a.student_email}</span>
-          <a href="tel:${a.student_phone}" class="text-purple-400 hover:underline">
-            <i class="fa-solid fa-phone"></i> Call Student
-          </a>
+          <div class="flex items-center gap-2">
+            ${a.student_phone ? `<a href="tel:${a.student_phone}" class="text-purple-400 hover:underline"><i class="fa-solid fa-phone"></i> Call</a>` : ''}
+            ${actionBtn}
+          </div>
         </div>
       </div>
-    `).join('');
+      `;
+    }).join('');
   } catch (e) {
     console.error(e);
+  }
+}
+
+async function cancelAppointment(appId) {
+  if (!confirm("Are you sure you want to cancel this consultation slot?")) return;
+  try {
+    const res = await fetch(`/api/appointments/${appId}/cancel`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reason: "Cancelled by faculty" })
+    });
+    const data = await res.json();
+    if (data.success) {
+      playChimeSound();
+      showPopUpNotification({
+        title: "Appointment Cancelled",
+        message: data.message || `Consultation slot #${appId} cancelled.`,
+        type: 'general'
+      });
+      loadFacultyAppointments();
+    } else {
+      alert(data.error || "Failed to cancel appointment");
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Network error cancelling appointment");
+  }
+}
+
+async function deleteAppointment(appId) {
+  if (!confirm("Permanently delete this appointment record?")) return;
+  try {
+    const res = await fetch(`/api/appointments/${appId}`, { method: 'DELETE' });
+    const data = await res.json();
+    if (data.success) {
+      loadFacultyAppointments();
+    }
+  } catch (err) {
+    console.error(err);
   }
 }
 
 function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
-function openResetPinModal() {
-  const curSelected = document.getElementById('auth-faculty-id')?.value;
-  if (curSelected) {
-    selectSetPinFaculty(parseInt(curSelected));
-  } else if (allFaculty && allFaculty.length > 0) {
-    selectSetPinFaculty(allFaculty[0].id);
+function openChangePasswordModal(role = 'faculty') {
+  switchChangePassTab(role);
+  if (role === 'faculty') {
+    if (currentUser && currentUser.role === 'faculty') {
+      selectSetPinFaculty(currentUser.id);
+    } else {
+      const curSelected = document.getElementById('auth-faculty-id')?.value;
+      if (curSelected) {
+        selectSetPinFaculty(parseInt(curSelected));
+      } else if (allFaculty && allFaculty.length > 0) {
+        selectSetPinFaculty(allFaculty[0].id);
+      }
+    }
   }
   openModal('modal-faculty-set-pin');
 }
 
-async function handleSetFacultyPinSubmit(e) {
+function openResetPinModal() {
+  openChangePasswordModal('faculty');
+}
+
+function switchChangePassTab(role) {
+  const roleInput = document.getElementById('change-pass-role');
+  if (roleInput) roleInput.value = role;
+
+  const tabFaculty = document.getElementById('chpass-tab-faculty');
+  const tabAdmin = document.getElementById('chpass-tab-admin');
+  const facultyPicker = document.getElementById('chpass-faculty-picker-section');
+  const currentLabel = document.getElementById('chpass-current-label');
+  const securityHint = document.getElementById('chpass-security-hint');
+
+  if (role === 'faculty') {
+    if (tabFaculty) tabFaculty.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1.5';
+    if (tabAdmin) tabAdmin.className = 'py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5';
+    if (facultyPicker) facultyPicker.classList.remove('hidden');
+    if (currentLabel) currentLabel.textContent = 'Current Password / PIN (Default: biet@1234) *';
+    if (securityHint) securityHint.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i> Security Protocol: Authorization requires current active password (default: <code>biet@1234</code>) or Master Key (<code>79754577@Aa</code>).';
+  } else if (role === 'admin') {
+    if (tabAdmin) tabAdmin.className = 'py-2 rounded-xl bg-rose-600 text-white font-bold transition flex items-center justify-center gap-1.5';
+    if (tabFaculty) tabFaculty.className = 'py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5';
+    if (facultyPicker) facultyPicker.classList.add('hidden');
+    if (currentLabel) currentLabel.textContent = 'Current Admin Master PIN (Default: 79754577@Aa) *';
+    if (securityHint) securityHint.innerHTML = '<i class="fa-solid fa-shield-halved mr-1"></i> Security Protocol: Authorization requires current Administrator PIN (default: <code>79754577@Aa</code>).';
+  }
+}
+
+async function handleChangePasswordSubmit(e) {
   e.preventDefault();
-  const profId = document.getElementById('set-pin-faculty-id').value;
-  const currentPin = (document.getElementById('set-pin-current') ? document.getElementById('set-pin-current').value : '').trim();
-  const newPin = document.getElementById('set-pin-new').value.trim();
-  const confirmPin = document.getElementById('set-pin-confirm').value.trim();
+  const role = document.getElementById('change-pass-role')?.value || 'faculty';
+  const currentPin = (document.getElementById('set-pin-current')?.value || '').trim();
+  const newPin = (document.getElementById('set-pin-new')?.value || '').trim();
+  const confirmPin = (document.getElementById('set-pin-confirm')?.value || '').trim();
 
   if (!currentPin) {
     showPopUpNotification({
       title: 'Current PIN Required',
-      message: 'Please enter your current PIN or Master Security Key (79754577@Aa).',
+      message: role === 'admin' ? 'Please enter current Admin PIN.' : 'Please enter current Faculty PIN (default: biet@1234).',
       type: 'general'
     });
     return;
@@ -2507,7 +2659,7 @@ async function handleSetFacultyPinSubmit(e) {
   if (newPin.length < 6) {
     showPopUpNotification({
       title: 'PIN Too Short',
-      message: 'New PIN must be at least 6 characters long for enhanced security.',
+      message: 'New password must be at least 6 characters long.',
       type: 'general'
     });
     return;
@@ -2515,35 +2667,56 @@ async function handleSetFacultyPinSubmit(e) {
 
   if (newPin !== confirmPin) {
     showPopUpNotification({
-      title: 'PIN Mismatch',
-      message: 'New PIN and Confirm PIN do not match.',
+      title: 'Password Mismatch',
+      message: 'New Password and Confirm Password do not match.',
       type: 'general'
     });
     return;
   }
 
+  const payload = {
+    role,
+    current_password: currentPin,
+    new_password: newPin
+  };
+
+  let profId = null;
+  if (role === 'faculty') {
+    profId = document.getElementById('set-pin-faculty-id')?.value;
+    if (!profId) {
+      alert("Please select a professor first.");
+      return;
+    }
+    payload.professor_id = profId;
+  }
+
   try {
-    const res = await fetch('/api/faculty/set-pin', {
+    const res = await fetch('/api/auth/change-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ professor_id: profId, current_pin: currentPin, new_pin: newPin })
+      body: JSON.stringify(payload)
     });
     const data = await res.json();
     if (data.success) {
+      playChimeSound();
       showPopUpNotification({
-        title: '🔑 Private PIN Activated!',
+        title: '🔑 Password Updated!',
         message: data.message,
-        type: 'faculty_update'
+        type: 'general'
       });
       closeModal('modal-faculty-set-pin');
-      const passInput = document.getElementById('auth-faculty-pass');
-      if (passInput) passInput.value = newPin;
-      const authFacultySel = document.getElementById('auth-faculty-id');
-      if (authFacultySel) authFacultySel.value = profId;
+
+      if (role === 'faculty') {
+        const passInput = document.getElementById('auth-faculty-pass');
+        if (passInput) passInput.value = newPin;
+      } else if (role === 'admin') {
+        const adminPassInput = document.getElementById('auth-admin-pass');
+        if (adminPassInput) adminPassInput.value = newPin;
+      }
     } else {
       showPopUpNotification({
-        title: 'Security Verification Failed',
-        message: data.error || 'Failed to update PIN',
+        title: 'Verification Failed',
+        message: data.error || 'Failed to update password',
         type: 'general'
       });
     }
@@ -2551,10 +2724,14 @@ async function handleSetFacultyPinSubmit(e) {
     console.error(err);
     showPopUpNotification({
       title: 'Network Error',
-      message: 'Could not connect to faculty security service.',
+      message: 'Could not connect to security service.',
       type: 'general'
     });
   }
+}
+
+function handleSetFacultyPinSubmit(e) {
+  return handleChangePasswordSubmit(e);
 }
 
 // ==========================================

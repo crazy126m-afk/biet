@@ -60,7 +60,7 @@ def init_db():
         research_areas TEXT NOT NULL,
         avatar TEXT NOT NULL,
         experience TEXT NOT NULL,
-        password TEXT DEFAULT 'prof123'
+        password TEXT DEFAULT 'biet@1234'
     )
     """)
 
@@ -244,7 +244,7 @@ def init_db():
             "Artificial Intelligence, Big Data Analytics, Cloud Computing, Mobile Agents",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/nirmala-c-r.jpg",
             "31+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Dr. Gururaj T.",
@@ -261,7 +261,7 @@ def init_db():
             "Data Structures, Graph Theory, High Performance Computing",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/gururaj-t.jpg",
             "20+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Dr. Jyothi G. C.",
@@ -278,7 +278,7 @@ def init_db():
             "Machine Learning, Pattern Recognition, Compiler Design",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/jyothi-g-c.jpg",
             "18+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Prof. M. S. Abdul Razak",
@@ -295,7 +295,7 @@ def init_db():
             "Computer Networks, Network Security, Operating Systems",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/abdul-razak.jpg",
             "22+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Prof. Santhosh K. C.",
@@ -312,7 +312,7 @@ def init_db():
             "Software Architecture, Agile Methodologies, Web Technologies",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/santhosh-k-c.jpg",
             "16+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Dr. Naresh Patel K. M.",
@@ -329,7 +329,7 @@ def init_db():
             "Deep Learning, Biomedical Signal Analysis, IoT Sensor Networks",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/naresh-patel.jpg",
             "17+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Prof. Radhika Patil",
@@ -346,7 +346,7 @@ def init_db():
             "Database Management Systems, Python Programming, Data Mining",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/radhika-patil.jpg",
             "12+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Prof. Waseem Khan",
@@ -363,7 +363,7 @@ def init_db():
             "Full Stack Web Development, Cloud DevOps, Cybersecurity",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/waseem-khan.jpg",
             "10+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === INFORMATION SCIENCE & ENGINEERING (ISE) ===
@@ -382,7 +382,7 @@ def init_db():
             "Cybersecurity, Cryptography, Network Protocols, Data Mining",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/poornima-b.jpg",
             "25+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Prof. Rekha C.",
@@ -399,7 +399,7 @@ def init_db():
             "Software Testing, Distributed Systems, Cloud Architecture",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/rekha-c.jpg",
             "19+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Prof. Arunkumar G. Hiremath",
@@ -416,7 +416,7 @@ def init_db():
             "Mobile App Development, Android SDK, Flutter, Web Technologies",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/arunkumar-hiremath.jpg",
             "17+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === ARTIFICIAL INTELLIGENCE & MACHINE LEARNING (AIML) ===
@@ -435,7 +435,7 @@ def init_db():
             "Vision Transformers, Autonomous UAVs, Deep Learning, Generative AI",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/mallikarjuna-s-b.jpg",
             "20+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Dr. Puneetha H. B.",
@@ -452,7 +452,7 @@ def init_db():
             "Natural Language Processing, Large Language Models, Robotics",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/puneetha-h-b.jpg",
             "15+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === DATA SCIENCE (CSE-DS) ===
@@ -471,7 +471,7 @@ def init_db():
             "Predictive Health Analytics, Distributed Big Data, Statistical Learning",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/pradeep-n.jpg",
             "18+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === COMPUTER SCIENCE & DESIGN (CSD) ===
@@ -490,7 +490,7 @@ def init_db():
             "Human Centered Computing, Augmented Reality, UI/UX Design Systems",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/chetana-prakash.jpg",
             "19+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === ELECTRONICS & COMMUNICATION ENGINEERING (ECE) ===
@@ -509,7 +509,7 @@ def init_db():
             "VLSI Design, Signal Processing, 5G Wireless Networks, Embedded Systems",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/sunitha-g-s.jpg",
             "28+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Dr. Leela G. H.",
@@ -526,7 +526,7 @@ def init_db():
             "RF Systems, Microstrip Antennas, Satellite Communications",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/leela-g-h.jpg",
             "24+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Prof. Ganesh V.",
@@ -543,7 +543,7 @@ def init_db():
             "Cadence EDA, Digital System Design, Microcontrollers",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/ganesh-v.jpg",
             "18+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === MECHANICAL ENGINEERING (ME) ===
@@ -562,7 +562,7 @@ def init_db():
             "Computational Fluid Dynamics (CFD), Biofuels, Thermal Power Engineering",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/manavendra-g.jpg",
             "26+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Dr. S. Kumarappa",
@@ -579,7 +579,7 @@ def init_db():
             "Alternative Fuels, Emission Control, Combustion Engineering",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/kumarappa-s.jpg",
             "25+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === CIVIL ENGINEERING (CV) ===
@@ -598,7 +598,7 @@ def init_db():
             "Earthquake Resistant Structures, Geopolymer Concrete, Soil Mechanics",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/chidananda-g.jpg",
             "24+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
         (
             "Dr. S. Suresh",
@@ -615,7 +615,7 @@ def init_db():
             "Foundation Engineering, Slope Stability, Soil Dynamics",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/suresh-s.jpg",
             "22+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === ELECTRICAL & ELECTRONICS ENGINEERING (EEE) ===
@@ -634,7 +634,7 @@ def init_db():
             "Smart Grids, Power Quality Optimization, Electric Vehicle Drives",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/anjaneya-l-h.jpg",
             "22+ Years Experience",
-            "prof123"
+            "biet@1234"
         ),
 
         # === PRINCIPAL & CHIEF EXECUTIVE ===
@@ -653,7 +653,7 @@ def init_db():
             "Environmental Engineering, Water Resource Systems, Campus Governance",
             "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/jayantha-k-s.jpg",
             "35+ Years Experience",
-            "prof123"
+            "biet@1234"
         )
     ]
     cursor.executemany("""

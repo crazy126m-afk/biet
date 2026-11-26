@@ -51,7 +51,7 @@
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/style.css?v=5.3">
+  <link rel="stylesheet" href="/style.css?v=5.4">
 </head>
 <body class="bg-[#0a0c14] text-slate-100 min-h-screen flex flex-col pb-mobile-nav">
 
@@ -256,6 +256,10 @@
           <i class="fa-regular fa-calendar-check"></i>
           <span>My Appointments (<span id="faculty-app-count">0</span>)</span>
         </button>
+        <button onclick="openChangePasswordModal('faculty')" class="px-2.5 py-1 rounded-lg bg-indigo-600/30 hover:bg-indigo-600 text-indigo-200 hover:text-white border border-indigo-500/40 font-bold text-[11px] transition flex items-center gap-1 shadow-sm" title="Change Password / PIN">
+          <i class="fa-solid fa-key"></i>
+          <span>Change Password</span>
+        </button>
       </div>
     </div>
   </div>
@@ -395,7 +399,7 @@
 
         <!-- Alert Category Filters -->
         <div class="flex flex-wrap items-center gap-2">
-          <button onclick="syncBietUpdates()" class="px-3 py-1 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500/40 text-purple-200 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
+          <button onclick="syncBietUpdates()" class="hidden px-3 py-1 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500/40 text-purple-200 text-xs font-semibold flex items-center gap-1.5 transition shadow-sm">
             <i class="fa-solid fa-rotate text-xs"></i>
             <span>Sync with bietdvg.edu</span>
           </button>
@@ -1496,12 +1500,12 @@
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="block text-slate-400">Faculty Password / PIN *</label>
-              <button type="button" onclick="openResetPinModal()" class="text-[10px] text-[#cba23e] hover:underline font-semibold flex items-center gap-1">
-                <i class="fa-solid fa-key text-[9px]"></i> Set New / Forgot PIN?
+              <button type="button" onclick="openChangePasswordModal('faculty')" class="text-[10px] text-[#cba23e] hover:underline font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-key text-[9px]"></i> Change / Set PIN?
               </button>
             </div>
-            <input type="password" id="auth-faculty-pass" value="79754577@Aa" placeholder="Default: 79754577@Aa" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
-            <span class="text-[10px] text-slate-400 mt-1 block">Default PIN: <code class="text-[#cba23e]">79754577@Aa</code> (or your custom set PIN)</span>
+            <input type="password" id="auth-faculty-pass" value="biet@1234" placeholder="Default: biet@1234" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+            <span class="text-[10px] text-slate-400 mt-1 block">Default PIN: <code class="text-[#cba23e]">biet@1234</code> (or your custom set PIN)</span>
           </div>
           <div class="p-2.5 rounded-xl bg-emerald-950/30 border border-emerald-500/20 text-[11px] text-emerald-300">
             <i class="fa-solid fa-circle-check mr-1"></i> Professors can update cabin occupancy status, write notes, and approve consultation slots.
@@ -1511,7 +1515,12 @@
         <!-- 3. Admin Inputs -->
         <div id="auth-admin-fields" class="space-y-3 hidden">
           <div>
-            <label class="block text-slate-400 mb-1">Administrator Master PIN *</label>
+            <div class="flex items-center justify-between mb-1">
+              <label class="block text-slate-400">Administrator Master PIN *</label>
+              <button type="button" onclick="openChangePasswordModal('admin')" class="text-[10px] text-rose-400 hover:underline font-semibold flex items-center gap-1">
+                <i class="fa-solid fa-key text-[9px]"></i> Change Admin PIN?
+              </button>
+            </div>
             <input type="password" id="auth-admin-pass" value="79754577@Aa" placeholder="Master PIN (79754577@Aa)" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
           </div>
           <div class="p-2.5 rounded-xl bg-rose-950/30 border border-rose-500/20 text-[11px] text-rose-300">
@@ -1532,23 +1541,37 @@
 
 
 
-    <!-- MODAL: SET / RESET FACULTY PIN -->
+  <!-- ========================================== -->
+  <!-- MODAL: SET / RESET / CHANGE PASSWORD (FACULTY & ADMIN) -->
+  <!-- ========================================== -->
   <div id="modal-faculty-set-pin" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="glass-panel p-6 rounded-3xl max-w-md w-full border border-[#cba23e]/40 bg-[#0a1733]/95 space-y-4 shadow-2xl">
       <div class="flex items-center justify-between pb-2 border-b border-white/10">
         <div>
           <h3 class="font-extrabold text-base text-white flex items-center gap-1.5">
-            <i class="fa-solid fa-key text-[#cba23e]"></i> Set Private Faculty PIN
+            <i class="fa-solid fa-key text-[#cba23e]"></i> Change Password / PIN
           </h3>
-          <p class="text-[11px] text-slate-400">Set or change your private password for cabin control</p>
+          <p class="text-[11px] text-slate-400">Update security PIN for Faculty or Administrator</p>
         </div>
         <button onclick="closeModal('modal-faculty-set-pin')" class="text-slate-400 hover:text-white p-1">
           <i class="fa-solid fa-xmark text-sm"></i>
         </button>
       </div>
 
-      <form onsubmit="handleSetFacultyPinSubmit(event)" class="space-y-3 text-xs">
-        <div>
+      <!-- Role Tabs -->
+      <div class="grid grid-cols-2 gap-1.5 p-1 bg-black/30 rounded-2xl border border-white/10 text-xs">
+        <button type="button" id="chpass-tab-faculty" onclick="switchChangePassTab('faculty')" class="py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-chalkboard-user"></i> Professor / Faculty
+        </button>
+        <button type="button" id="chpass-tab-admin" onclick="switchChangePassTab('admin')" class="py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5">
+          <i class="fa-solid fa-shield-halved"></i> Campus Admin
+        </button>
+      </div>
+      <input type="hidden" id="change-pass-role" value="faculty">
+
+      <form onsubmit="handleChangePasswordSubmit(event)" class="space-y-3 text-xs">
+        <!-- Faculty Specific: Select Professor -->
+        <div id="chpass-faculty-picker-section">
           <label class="block text-slate-400 mb-1 font-semibold flex items-center justify-between">
             <span>Select / Search Professor Name *</span>
             <span class="text-[10px] text-[#cba23e] font-mono">316 Faculty</span>
@@ -1572,27 +1595,28 @@
             <div id="set-pin-dropdown" class="absolute left-0 right-0 top-full mt-1.5 max-h-52 overflow-y-auto rounded-2xl bg-[#071329] border border-[#cba23e]/40 p-1.5 shadow-2xl z-30 space-y-1 hidden"></div>
           </div>
         </div>
+
         <div>
-          <label class="block text-slate-400 mb-1">Current PIN or Master Security Key (79754577@Aa) *</label>
-          <input type="password" id="set-pin-current" required placeholder="Enter Current PIN or Master Key" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+          <label id="chpass-current-label" class="block text-slate-400 mb-1">Current Password / PIN (Default: biet@1234) *</label>
+          <input type="password" id="set-pin-current" required placeholder="Enter Current Password or Master Key" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
         </div>
         <div>
-          <label class="block text-slate-400 mb-1">Enter New Private PIN (Min 6 chars) *</label>
-          <input type="password" id="set-pin-new" required minlength="6" placeholder="Enter New PIN (min 6 chars)" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+          <label class="block text-slate-400 mb-1">Enter New Password / PIN (Min 6 chars) *</label>
+          <input type="password" id="set-pin-new" required minlength="6" placeholder="Enter New Password (min 6 chars)" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
         </div>
         <div>
-          <label class="block text-slate-400 mb-1">Confirm New PIN *</label>
-          <input type="password" id="set-pin-confirm" required minlength="6" placeholder="Re-enter New PIN" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+          <label class="block text-slate-400 mb-1">Confirm New Password / PIN *</label>
+          <input type="password" id="set-pin-confirm" required minlength="6" placeholder="Re-enter New Password" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
         </div>
 
-        <div class="p-2.5 rounded-xl bg-[#cba23e]/10 border border-[#cba23e]/30 text-[11px] text-[#e6c66d]">
-          <i class="fa-solid fa-shield-halved mr-1"></i> Security Protocol: Authorization requires the professor's current active PIN or Master Security Key (<code>79754577@Aa</code>).
+        <div id="chpass-security-hint" class="p-2.5 rounded-xl bg-[#cba23e]/10 border border-[#cba23e]/30 text-[11px] text-[#e6c66d]">
+          <i class="fa-solid fa-shield-halved mr-1"></i> Security Protocol: Authorization requires current active password (default: <code>biet@1234</code>) or Master Key (<code>79754577@Aa</code>).
         </div>
 
         <div class="pt-2 flex items-center justify-end gap-2">
           <button type="button" onclick="closeModal('modal-faculty-set-pin')" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300">Cancel</button>
           <button type="submit" class="px-5 py-2 rounded-xl bg-[#1f4178] border border-[#cba23e]/50 hover:bg-[#345798] text-white font-bold transition">
-            Save & Activate PIN
+            Save & Update Password
           </button>
         </div>
       </form>
@@ -2108,6 +2132,6 @@
 
 
   <!-- Main JavaScript Logic -->
-  <script src="/app.js?v=5.3.0"></script>
+  <script src="/app.js?v=5.4.0"></script>
 </body>
 </html>
