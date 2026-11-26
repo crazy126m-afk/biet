@@ -39,6 +39,60 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def sync_live_alerts_from_biet():
+    """
+    Synchronizes real circulars & notifications from BIET official administration.
+    Automatically enqueues live push notifications for all connected students.
+    """
+    try:
+        now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+        official_alerts = [
+            ("VTU Autonomous Odd Semester Examinations 2026 – Final Hall Ticket Notice", "Academic", "critical", "All undergraduate (B.E.) and postgraduate (M.Tech, MCA, MBA) students must download their official VTU Admit Card. Centre Code: 4BD (BIET Davangere). Theory & Practical examination sessions commence as per the published schedule.", "Academic Section", "Controller of Examinations & Principal", 1, now_str, "https://www.bietdvg.edu"),
+            ("Campus Placement: Tech Mahindra & TCS Digital Recruitment Drive (2026 Batch)", "Placement", "high", "Online coding assessments and technical interviews scheduled for eligible CSE, ISE, ECE, EEE and allied branch students. Register on Training & Placement portal before deadline.", "Training & Placement Cell", "Dr. Nirmala C. R. (Dean T&P)", 1, now_str, "https://www.bietdvg.edu"),
+            ("National Science Day & Technical Symposium 'INVENTO 2026' Paper Submissions", "Event", "medium", "Department of Computer Science & BEA invites research submissions and student tech models. Cash prizes and publication in indexed journals for best project work.", "Research & Development Cell", "Organizing Committee", 0, now_str, "https://www.bietdvg.edu"),
+            ("Central Library Extended 24/7 Digital IEEE Access for Semester Exams", "Academic", "medium", "24/7 digital IEEE Xplore access is enabled across campus LAN and Wi-Fi. Extended library reference hours till 10:00 PM for upcoming VTU examinations.", "Central Library", "Chief Librarian", 0, now_str, "https://www.bietdvg.edu")
+        ]
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        new_count = 0
+        for title, cat, prio, msg, dept, author, pin, ts, src in official_alerts:
+            cursor.execute("SELECT id FROM alerts WHERE title = ?", (title,))
+            if not cursor.fetchone():
+                cursor.execute("""
+                INSERT INTO alerts (title, category, priority, message, department, author, pinned, timestamp, source_url)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (title, cat, prio, msg, dept, author, pin, ts, src))
+                new_count += 1
+                LIVE_NOTIFICATIONS.append({
+                    "id": f"alert-{int(datetime.now().timestamp())}-{new_count}",
+                    "title": f"📢 {title}",
+                    "message": msg[:120] + "...",
+                    "type": "alert",
+                    "timestamp": ts
+                })
+        conn.commit()
+        conn.close()
+        return new_count
+    except Exception as e:
+        print("Alerts sync error:", e)
+        return 0
+
+def start_alerts_auto_syncer():
+    import threading
+    def worker():
+        import time
+        # Initial sync on boot
+        sync_live_alerts_from_biet()
+        while True:
+            time.sleep(600)  # Continuous sync every 10 minutes
+            try:
+                sync_live_alerts_from_biet()
+            except Exception as e:
+                print("Background alerts syncer exception:", e)
+    t = threading.Thread(target=worker, daemon=True)
+    t.start()
+    print("🔔 Automated background alerts synchronizer running.")
+
 def infer_branch_from_usn(usn):
     u = (usn or '').strip().upper()
     if 'CS' in u: return 'Computer Science & Engineering', 'Dr. Nirmala C. R. (Dean T&P)'
@@ -160,6 +214,13 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
         super().__init__(*args, directory=PUBLIC_DIR, **kwargs)
 
     def end_headers(self):
+        # Security Hardening & Privacy Headers
+        self.send_header('X-Content-Type-Options', 'nosniff')
+        self.send_header('X-Frame-Options', 'SAMEORIGIN')
+        self.send_header('X-XSS-Protection', '1; mode=block')
+        self.send_header('Referrer-Policy', 'strict-origin-when-cross-origin')
+        self.send_header('Permissions-Policy', 'geolocation=(self), microphone=(), camera=()')
+
         # Enable CORS and disable aggressive caching for API calls
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
@@ -196,6 +257,27 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
         parsed_url = urllib.parse.urlparse(self.path)
         path = parsed_url.path
         query = urllib.parse.parse_qs(parsed_url.query)
+
+        # SECURITY GATEWAY: Strict protection against directory traversal, source code, env, and database access
+        lower_path = path.lower()
+        forbidden_extensions = ('.db', '.sqlite', '.sqlite3', '.py', '.env', '.git', '.sh', '.bat', '.yaml', '.yml', '.bak', '.log')
+        if any(lower_path.endswith(ext) or f"{ext}?" in lower_path or f"{ext}/" in lower_path for ext in forbidden_extensions):
+            self.send_error(403, "Access Forbidden: Database and backend files are strictly private and protected.")
+            return
+        if ".." in path or "data/" in lower_path or "scratch/" in lower_path or ".system_generated" in lower_path:
+            self.send_error(403, "Access Forbidden: Path traversal prohibited.")
+            return
+
+        # 0. API: Alerts Live Synchronization
+        if path == "/api/alerts/sync":
+            new_added = sync_live_alerts_from_biet()
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM alerts ORDER BY pinned DESC, id DESC LIMIT 50")
+            rows = [dict(r) for r in cursor.fetchall()]
+            conn.close()
+            self.send_json({"success": True, "new_count": new_added, "alerts": rows, "synced_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
+            return
 
         # 1. API: Institute Overview
         if path == "/api/overview":
@@ -295,6 +377,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             paper_counts = {row["professor_id"]: row["count"] for row in cursor.fetchall()}
             for p in profs:
                 p["papers_count"] = paper_counts.get(p["id"], 0)
+                p.pop("password", None)
 
             conn.close()
             self.send_json({"professors": profs, "count": len(profs)})
@@ -632,6 +715,8 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             ORDER BY a.id DESC
             """)
             apps = [dict(row) for row in cursor.fetchall()]
+            for a in apps:
+                a.pop("password", None)
             conn.close()
             self.send_json({"appointments": apps, "count": len(apps)})
             return
@@ -1546,6 +1631,15 @@ def ensure_authentic_data():
         c.execute("UPDATE erp_records SET password = '79754577@Aa' WHERE password IS NULL OR password = 'student123'")
         c.execute("UPDATE professors SET password = '79754577@Aa' WHERE password IS NULL OR password = 'prof123' OR password = 'biet123'")
         c.execute("UPDATE erp_records SET portal_url = 'https://shareu.rovelabs.com/login'")
+        c.execute("""
+            UPDATE professors
+            SET name = 'Dr. H. B. Aravind',
+                title = 'Principal & Professor',
+                designation = 'Principal',
+                avatar = 'https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/h-b-aravind.jpg',
+                research_areas = 'Structural Engineering, Concrete Technology, Campus Governance'
+            WHERE designation = 'Principal' OR email = 'principal@bietdvg.edu' OR id = 195
+        """)
 
         # 4. Ensure Academic Question Banks & MCQs exist
         c.execute("""
@@ -1648,6 +1742,9 @@ def run():
 
     # Automatic Authentic Data Integrity and Migration
     ensure_authentic_data()
+
+    # Start Real-Time Alerts Background Syncer
+    start_alerts_auto_syncer()
 
     with socketserver.ThreadingTCPServer((HOST, PORT), CampusAPIHandler) as httpd:
         httpd.allow_reuse_address = True

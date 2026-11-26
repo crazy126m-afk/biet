@@ -55,6 +55,36 @@
 </head>
 <body class="bg-[#0a0c14] text-slate-100 min-h-screen flex flex-col pb-mobile-nav">
 
+  <!-- Premium Animated App Open Splash Screen -->
+  <div id="app-splash-screen" class="fixed inset-0 z-50 bg-[#050d1f] flex flex-col items-center justify-center p-6 transition-opacity duration-700">
+    <div class="relative flex flex-col items-center text-center max-w-sm space-y-5">
+      <!-- Golden Pulse Halo & Official Logo -->
+      <div class="relative w-28 h-28 flex items-center justify-center">
+        <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#cba23e]/40 via-purple-600/30 to-cyan-500/30 blur-2xl animate-pulse"></div>
+        <div class="relative w-24 h-24 rounded-3xl p-2 bg-[#0a1733] border-2 border-[#cba23e] shadow-2xl shadow-[#cba23e]/30 flex items-center justify-center">
+          <img src="/biet-logo.png" alt="BIET Davangere Official Emblem" class="w-full h-full object-contain filter drop-shadow">
+        </div>
+      </div>
+      
+      <!-- Brand Details -->
+      <div class="space-y-1">
+        <span class="px-3 py-1 rounded-full bg-[#cba23e]/20 text-[#e6c66d] border border-[#cba23e]/40 font-mono text-[10px] font-bold tracking-widest uppercase">
+          ESTD 1979 • VTU Autonomous
+        </span>
+        <h1 class="text-2xl font-black text-white tracking-tight pt-2">
+          BIET DAVANGERE
+        </h1>
+        <p class="text-xs text-slate-300 font-medium">Bapuji Institute of Engineering & Technology</p>
+      </div>
+
+      <!-- Golden Animated Loading Bar -->
+      <div class="w-48 h-1.5 bg-white/10 rounded-full overflow-hidden mt-4 relative">
+        <div class="h-full bg-gradient-to-r from-[#cba23e] via-amber-400 to-[#cba23e] rounded-full animate-loading-bar w-full"></div>
+      </div>
+      <p class="text-[10px] text-slate-400 font-mono tracking-wider">SMART CAMPUS 360 • SECURE APP</p>
+    </div>
+  </div>
+
   <!-- Emergency Siren Visual Flash Overlay -->
   <div id="siren-overlay" class="fixed inset-0 z-50 pointer-events-none hidden"></div>
 
@@ -290,15 +320,15 @@
           </div>
         </button>
 
-        <button onclick="switchView('timetable')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-cyan-500/30 bg-cyan-950/20 hover:bg-cyan-900/30">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg shrink-0">
-            <i class="fa-solid fa-calendar-days"></i>
+        <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-900/30">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-graduation-cap"></i>
           </div>
           <div>
-            <span class="text-xs font-bold text-white block">Live Timetable</span>
-            <span class="text-[10px] text-cyan-300 block">Class & Lab Routine</span>
+            <span class="text-xs font-bold text-white block flex items-center gap-1">Student Portal <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-emerald-400"></i></span>
+            <span class="text-[10px] text-emerald-300 block">Attendance & IA Marks</span>
           </div>
-        </button>
+        </a>
 
         <button onclick="switchView('gpa')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-900/30">
           <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
@@ -547,10 +577,12 @@
 
       <!-- Filters & Search -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center gap-1.5" id="lf-type-pills">
-          <button onclick="filterLostFound('all')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-purple-600 text-white transition lf-pill">All Items</button>
-          <button onclick="filterLostFound('found')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition lf-pill">🟢 Found Items</button>
-          <button onclick="filterLostFound('lost')" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition lf-pill">🔴 Lost Items</button>
+        <div class="flex flex-wrap items-center gap-1.5" id="lf-type-pills">
+          <button onclick="filterLostFound('all')" id="lf-pill-all" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-purple-600 text-white transition lf-pill">All Items</button>
+          <button onclick="filterLostFound('found')" id="lf-pill-found" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition lf-pill">🟢 Found</button>
+          <button onclick="filterLostFound('lost')" id="lf-pill-lost" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition lf-pill">🔴 Lost</button>
+          <button onclick="filterLostFound('ID')" id="lf-pill-id" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition lf-pill">🪪 ID Cards</button>
+          <button onclick="filterLostFound('Academics')" id="lf-pill-academics" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition lf-pill">📚 Books & Manuals</button>
         </div>
 
         <div class="relative sm:w-72">
@@ -723,6 +755,68 @@
     <!-- VIEW 6: TARGETED EMERGENCY SOS SYSTEM -->
     <!-- ========================================== -->
     <section id="view-emergency" class="space-y-6 hidden">
+
+      <!-- Immediate 1-Tap Emergency Speed Dial Banner -->
+      <div class="glass-panel p-5 rounded-3xl border-2 border-rose-500/50 bg-gradient-to-r from-rose-950/50 via-red-950/30 to-[#0a0c14] space-y-4 shadow-2xl">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-rose-600/30 border border-rose-500/50 flex items-center justify-center text-rose-400 text-2xl shrink-0">
+              <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+            </div>
+            <div>
+              <h2 class="text-lg font-black text-white flex items-center gap-2">
+                Immediate Emergency Speed Dial
+                <span class="px-2 py-0.5 rounded-full bg-rose-500 text-white text-[9px] font-bold uppercase tracking-wider">24x7 Live</span>
+              </h2>
+              <p class="text-xs text-slate-300">Tap any hotline to instantly call campus security, hospital, or police without waiting.</p>
+            </div>
+          </div>
+          <!-- Panic Siren Mode Button -->
+          <button type="button" onclick="togglePanicSiren()" id="btn-panic-siren" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-500 hover:to-red-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-lg shadow-rose-600/40 transition active:scale-95 shrink-0">
+            <i class="fa-solid fa-volume-high text-base"></i>
+            <span id="panic-siren-label">Sound Panic Siren</span>
+          </button>
+        </div>
+
+        <!-- 5 Direct Call Hotlines -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2.5 pt-1">
+          <a href="tel:+918192223460" class="p-3 rounded-2xl glass-panel-interactive border border-rose-500/30 bg-rose-900/20 hover:bg-rose-900/40 flex flex-col items-center text-center gap-1">
+            <i class="fa-solid fa-shield-halved text-rose-400 text-xl"></i>
+            <span class="text-xs font-bold text-white">Security Gate 1</span>
+            <span class="text-[10px] text-rose-300 font-mono">08192-223460</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-rose-500/30 text-rose-200 mt-0.5 font-semibold">📞 Call Gate</span>
+          </a>
+
+          <a href="tel:08192220000" class="p-3 rounded-2xl glass-panel-interactive border border-red-500/30 bg-red-900/20 hover:bg-red-900/40 flex flex-col items-center text-center gap-1">
+            <i class="fa-solid fa-truck-medical text-red-400 text-xl"></i>
+            <span class="text-xs font-bold text-white">Bapuji Hospital</span>
+            <span class="text-[10px] text-red-300 font-mono">08192-220000</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-red-500/30 text-red-200 mt-0.5 font-semibold">🚑 Trauma Care</span>
+          </a>
+
+          <a href="tel:112" class="p-3 rounded-2xl glass-panel-interactive border border-blue-500/30 bg-blue-900/20 hover:bg-blue-900/40 flex flex-col items-center text-center gap-1">
+            <i class="fa-solid fa-building-shield text-blue-400 text-xl"></i>
+            <span class="text-xs font-bold text-white">Police Control</span>
+            <span class="text-[10px] text-blue-300 font-mono">112 (National)</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-blue-500/30 text-blue-200 mt-0.5 font-semibold">👮 Dial 112</span>
+          </a>
+
+          <a href="tel:1091" class="p-3 rounded-2xl glass-panel-interactive border border-pink-500/30 bg-pink-900/20 hover:bg-pink-900/40 flex flex-col items-center text-center gap-1">
+            <i class="fa-solid fa-person-dress text-pink-400 text-xl"></i>
+            <span class="text-xs font-bold text-white">Women Safety</span>
+            <span class="text-[10px] text-pink-300 font-mono">1091 Helpline</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-pink-500/30 text-pink-200 mt-0.5 font-semibold">🛡️ Women Cell</span>
+          </a>
+
+          <a href="tel:+919448033441" class="p-3 rounded-2xl glass-panel-interactive border border-amber-500/30 bg-amber-900/20 hover:bg-amber-900/40 flex flex-col items-center text-center gap-1">
+            <i class="fa-solid fa-hand text-amber-400 text-xl"></i>
+            <span class="text-xs font-bold text-white">Chief Warden</span>
+            <span class="text-[10px] text-amber-300 font-mono">94480 33441</span>
+            <span class="text-[9px] px-2 py-0.5 rounded-full bg-amber-500/30 text-amber-200 mt-0.5 font-semibold">🏫 Anti-Ragging</span>
+          </a>
+        </div>
+      </div>
+
       <!-- TARGETED DISPATCH FORM -->
       <div class="glass-panel p-6 rounded-3xl border border-rose-500/30 bg-rose-950/20 space-y-5">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-rose-500/20">
@@ -1183,46 +1277,96 @@
   </main>
 
   <!-- ========================================== -->
-  <!-- MOBILE BOTTOM NAVIGATION BAR -->
+  <!-- MOBILE BOTTOM NAVIGATION BAR (TOUCH OPTIMIZED) -->
   <!-- ========================================== -->
-  <nav class="fixed bottom-0 inset-x-0 z-40 bg-[#0a0c14]/95 backdrop-blur-xl border-t border-white/10 px-2 py-1.5 flex items-center justify-around sm:max-w-xl sm:mx-auto sm:bottom-4 sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl sm:shadow-black">
-    <button onclick="switchView('alerts')" id="nav-alerts" class="nav-btn active flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-newspaper text-base"></i>
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-[#0a0c14]/95 backdrop-blur-xl border-t border-white/10 px-3 py-2 flex items-center justify-around sm:max-w-xl sm:mx-auto sm:bottom-4 sm:rounded-2xl sm:border sm:border-white/15 sm:shadow-2xl sm:shadow-black safe-bottom-dock">
+    <button onclick="switchView('alerts')" id="nav-alerts" class="nav-btn active flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 text-[10px] font-medium transition active:scale-95">
+      <i class="fa-solid fa-tower-broadcast text-lg"></i>
       <span>Alerts</span>
     </button>
-    <button onclick="switchView('map')" id="nav-map" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-satellite text-base"></i>
-      <span>Map</span>
-    </button>
-    <button onclick="switchView('lostfound')" id="nav-lostfound" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-box-open text-base"></i>
-      <span>Lost&Found</span>
-    </button>
-    <button onclick="switchView('faculty')" id="nav-faculty" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-chalkboard-user text-base"></i>
-      <span>Faculty</span>
-    </button>
-    <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" id="nav-portal" class="flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 hover:text-emerald-300 text-[10px] font-medium transition" title="Open Official BIET Student Portal">
-      <i class="fa-solid fa-graduation-cap text-base text-emerald-400"></i>
-      <span class="flex items-center gap-0.5">Portal <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-400"></i></span>
-    </a>
-    <button onclick="switchView('questionbank')" id="nav-questionbank" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-book-bookmark text-base"></i>
+    <button onclick="switchView('questionbank')" id="nav-questionbank" class="nav-btn flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 text-[10px] font-medium transition active:scale-95">
+      <i class="fa-solid fa-book-bookmark text-lg"></i>
       <span>PYQ & MCQ</span>
     </button>
-    <button onclick="switchView('placements')" id="nav-placements" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-briefcase text-base"></i>
-      <span>Placement</span>
+    <button onclick="switchView('faculty')" id="nav-faculty" class="nav-btn flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 text-[10px] font-medium transition active:scale-95">
+      <i class="fa-solid fa-chalkboard-user text-lg"></i>
+      <span>Faculty</span>
     </button>
-    <button onclick="switchView('gpa')" id="nav-gpa" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-calculator text-base"></i>
-      <span>CGPA</span>
-    </button>
-    <button onclick="switchView('emergency')" id="nav-emergency" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-rose-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-shield-heart text-base"></i>
-      <span>SOS</span>
+    <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" id="nav-portal" class="flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 hover:text-emerald-300 text-[10px] font-medium transition active:scale-95" title="Open Official BIET Student Portal">
+      <i class="fa-solid fa-graduation-cap text-lg text-emerald-400"></i>
+      <span class="flex items-center gap-0.5">Portal <i class="fa-solid fa-arrow-up-right-from-square text-[8px] text-slate-400"></i></span>
+    </a>
+    <button onclick="toggleCampusHubMenu()" id="nav-hub" class="nav-btn flex flex-col items-center gap-1 py-1 px-3 rounded-xl text-slate-400 text-[10px] font-medium transition active:scale-95">
+      <i class="fa-solid fa-cubes-stacked text-lg text-[#cba23e]"></i>
+      <span>Campus Hub</span>
     </button>
   </nav>
+
+  <!-- Floating Mobile Emergency SOS Action Pill -->
+  <div class="fixed bottom-20 left-4 z-40 sm:bottom-6 sm:left-6">
+    <button onclick="switchView('emergency')" class="px-3.5 py-2 rounded-full bg-gradient-to-r from-rose-600 to-red-600 text-white font-black text-xs shadow-xl shadow-rose-600/40 border border-rose-400/60 flex items-center gap-1.5 active:scale-95 transition">
+      <span class="w-2 h-2 rounded-full bg-white animate-ping"></span>
+      <span>SOS 24x7</span>
+    </button>
+  </div>
+
+  <!-- Campus Hub Bottom Sheet / Quick Launcher -->
+  <div id="campus-hub-sheet" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all">
+    <div class="glass-panel w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 border-t sm:border border-white/20 bg-[#071329]/95 space-y-4 shadow-2xl animate-card-appear">
+      <div class="flex items-center justify-between pb-3 border-b border-white/10">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-[#cba23e]/20 text-[#e6c66d] flex items-center justify-center text-base">
+            <i class="fa-solid fa-cubes-stacked"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-sm text-white">BIET Campus Hub</h3>
+            <p class="text-[10px] text-slate-400">Quick Access Tools & Services</p>
+          </div>
+        </div>
+        <button onclick="toggleCampusHubMenu()" class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 flex items-center justify-center text-slate-400 hover:text-white">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2.5 text-xs">
+        <button onclick="switchView('map'); toggleCampusHubMenu();" class="p-3 rounded-2xl glass-panel-interactive border border-cyan-500/30 bg-cyan-950/20 flex flex-col items-start gap-1 text-left">
+          <i class="fa-solid fa-map-location-dot text-cyan-400 text-lg"></i>
+          <span class="font-bold text-white mt-1">Satellite Map</span>
+          <span class="text-[10px] text-slate-400">3D Building Routes</span>
+        </button>
+
+        <button onclick="switchView('placements'); toggleCampusHubMenu();" class="p-3 rounded-2xl glass-panel-interactive border border-amber-500/30 bg-amber-950/20 flex flex-col items-start gap-1 text-left">
+          <i class="fa-solid fa-briefcase text-amber-400 text-lg"></i>
+          <span class="font-bold text-white mt-1">Placements</span>
+          <span class="text-[10px] text-slate-400">Drives & Salary Stats</span>
+        </button>
+
+        <button onclick="switchView('gpa'); toggleCampusHubMenu();" class="p-3 rounded-2xl glass-panel-interactive border border-emerald-500/30 bg-emerald-950/20 flex flex-col items-start gap-1 text-left">
+          <i class="fa-solid fa-calculator text-emerald-400 text-lg"></i>
+          <span class="font-bold text-white mt-1">CGPA Calc</span>
+          <span class="text-[10px] text-slate-400">VTU Grading Matrix</span>
+        </button>
+
+        <button onclick="switchView('cheatsheets'); toggleCampusHubMenu();" class="p-3 rounded-2xl glass-panel-interactive border border-pink-500/30 bg-pink-950/20 flex flex-col items-start gap-1 text-left">
+          <i class="fa-solid fa-file-code text-pink-400 text-lg"></i>
+          <span class="font-bold text-white mt-1">Cheat Sheets</span>
+          <span class="text-[10px] text-slate-400">GATE & Exam Formulas</span>
+        </button>
+
+        <button onclick="switchView('lostfound'); toggleCampusHubMenu();" class="p-3 rounded-2xl glass-panel-interactive border border-purple-500/30 bg-purple-950/20 flex flex-col items-start gap-1 text-left">
+          <i class="fa-solid fa-box-open text-purple-400 text-lg"></i>
+          <span class="font-bold text-white mt-1">Lost & Found</span>
+          <span class="text-[10px] text-slate-400">Student Gear Depository</span>
+        </button>
+
+        <button onclick="switchView('emergency'); toggleCampusHubMenu();" class="p-3 rounded-2xl glass-panel-interactive border border-rose-500/30 bg-rose-950/20 flex flex-col items-start gap-1 text-left">
+          <i class="fa-solid fa-shield-heart text-rose-400 text-lg"></i>
+          <span class="font-bold text-white mt-1">Targeted SOS</span>
+          <span class="text-[10px] text-slate-400">Immediate Speed Dial</span>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================== -->
   <!-- FLOATING AI COPILOT WIDGET -->

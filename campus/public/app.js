@@ -36,19 +36,11 @@ let buildingMeshes = {};
 let activeRouteLine = null;
 let is3DAutoRotating = false;
 
-// High-Res Professional Fallback Avatars
-const FALLBACK_AVATARS = [
-  'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=400',
-  'https://images.unsplash.com/photo-1580894732444-8ecded7900cd?w=400',
-  'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
-  'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400',
-  'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400',
-  'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
-  'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400',
-  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
-  'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=400',
-  'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400'
-];
+// High-Res Professional Fallback Avatars Generator (Official Institutional Styling)
+function getFacultyFallbackAvatar(name) {
+  const cleanName = (name || 'Faculty').replace(/^(Dr\.|Prof\.|Mr\.|Mrs\.|Ms\.)\s*/i, '').trim();
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(cleanName)}&background=0a1733&color=cba23e&size=200&bold=true&font-size=0.4`;
+}
 
 // ==========================================
 // 1. INITIALIZATION ON DOM LOAD
@@ -74,6 +66,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Start real-time notifications poller
   startNotificationPolling();
+
+  // Dismiss Branded Splash Screen smoothly after initial assets initialize
+  setTimeout(() => {
+    const splash = document.getElementById('app-splash-screen');
+    if (splash) {
+      splash.classList.add('opacity-0', 'pointer-events-none');
+      setTimeout(() => splash.remove(), 750);
+    }
+  }, 700);
 
   // Initialize Real-World Satellite Map
   setTimeout(() => {
@@ -427,7 +428,9 @@ function setDestinationAndRoute(code) {
   window.scrollTo({ top: 120, behavior: 'smooth' });
 }
 
-// Initialize Real-World Satellite Aerial Map (Esri World Imagery)
+// Initialize Real-World Satellite Aerial Map (Esri World Imagery + Reference Places Overlay)
+let referenceLabelsLayer = null;
+
 function initRealSatelliteMap() {
   const mapContainer = document.getElementById('real-satellite-map');
   if (!mapContainer || realSatMap) return;
@@ -442,8 +445,15 @@ function initRealSatelliteMap() {
 
   // Default Layer: Esri High-Resolution World Satellite Imagery
   currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    attribution: 'Tiles &copy; Esri, Maxar, Earthstar Geographics | BIET Davangere',
+    attribution: 'Satellite &copy; Esri, Maxar | BIET Davangere',
     maxZoom: 19
+  }).addTo(realSatMap);
+
+  // Esri World Boundaries & Roads Reference Layer (Superimposes crisp campus roads, labels & landmarks)
+  referenceLabelsLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+    attribution: 'Labels &copy; Esri',
+    maxZoom: 19,
+    pane: 'overlayPane'
   }).addTo(realSatMap);
 
   // Add Campus Perimeter Polygon Overlay
@@ -454,10 +464,10 @@ function initRealSatelliteMap() {
     [14.4515, 75.9162]
   ];
   L.polygon(bietBounds, {
-    color: '#8B5CF6',
+    color: '#cba23e',
     weight: 2,
     dashArray: '6, 6',
-    fillColor: '#8B5CF6',
+    fillColor: '#cba23e',
     fillOpacity: 0.08
   }).addTo(realSatMap).bindTooltip("🏛️ BIET Davangere 63-Acre Campus Perimeter", { sticky: true });
 }
@@ -465,27 +475,40 @@ function initRealSatelliteMap() {
 function populateBuildingPinsOnSatellite(locs) {
   if (!realSatMap) return;
 
+  const deptColors = {
+    'Administration': '#cba23e',
+    'Academic': '#a78bfa',
+    'Library': '#38bdf8',
+    'Hostel': '#34d399',
+    'Sports': '#10b981',
+    'Cafeteria': '#f59e0b',
+    'Medical': '#f43f5e'
+  };
+
   locs.forEach(l => {
-    // Custom Glassmorphic Marker Icon
+    const color = deptColors[l.category] || '#38bdf8';
+    // Custom Glassmorphic Marker Icon with Department Accent Color
     const customIcon = L.divIcon({
       className: 'custom-sat-pin',
       html: `
-        <div style="background: rgba(18, 22, 37, 0.9); border: 2px solid #06B6D4; color: #fff; padding: 3px 8px; border-radius: 9999px; font-size: 10px; font-weight: bold; white-space: nowrap; box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; items-center; gap: 4px;">
-          <span style="color: #06B6D4;">📍</span> ${l.name.split(' ')[0]}
+        <div style="background: rgba(5, 13, 31, 0.95); border: 2px solid ${color}; color: #fff; padding: 4px 10px; border-radius: 9999px; font-size: 11px; font-weight: 800; white-space: nowrap; box-shadow: 0 4px 16px rgba(0,0,0,0.7); display: flex; align-items: center; gap: 5px; cursor: pointer;">
+          <span style="color: ${color}; font-size: 12px;">📍</span> <span>${l.name.split(' ')[0]}</span>
         </div>
       `,
-      iconSize: [80, 24],
-      iconAnchor: [40, 12]
+      iconSize: [96, 28],
+      iconAnchor: [48, 14]
     });
 
     const marker = L.marker([l.lat, l.lng], { icon: customIcon }).addTo(realSatMap);
+    const imgHtml = l.image_url ? `<img src="${l.image_url}" class="w-full h-24 object-cover rounded-xl mb-2 border border-white/10" onerror="this.remove()">` : '';
     marker.bindPopup(`
-      <div style="font-family: inherit; font-size: 12px; line-height: 1.4; max-width: 240px;">
-        <strong style="color: #06B6D4; font-size: 13px;">${l.name}</strong><br>
-        <span style="color: #A78BFA; font-weight: 600;">${l.code} • ${l.floor_info}</span><br>
-        <p style="margin-top: 4px; color: #E2E8F0; font-size: 11px;">${l.facilities}</p>
-        <button onclick="setDestinationAndRoute('${l.code}')" style="margin-top: 8px; width: 100%; padding: 4px; background: #06B6D4; color: #fff; border: none; border-radius: 6px; font-weight: bold; cursor: pointer;">
-          Walk Here
+      <div style="font-family: inherit; font-size: 12px; line-height: 1.4; max-width: 260px; padding: 2px;">
+        ${imgHtml}
+        <strong style="color: ${color}; font-size: 13px; display: block; margin-bottom: 2px;">${l.name}</strong>
+        <span style="color: #cba23e; font-weight: 700; font-size: 11px;">${l.code} • ${l.floor_info}</span>
+        <p style="margin-top: 5px; color: #cbd5e1; font-size: 11px; line-height: 1.35;">${l.facilities}</p>
+        <button onclick="setDestinationAndRoute('${l.code}')" style="margin-top: 8px; width: 100%; padding: 6px; background: linear-gradient(135deg, #1f4178, #345798); color: #fff; border: 1px solid rgba(203, 162, 62, 0.4); border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+          <span>🚶 Walk Here</span>
         </button>
       </div>
     `);
@@ -738,14 +761,14 @@ function renderFaculty(faculty) {
                      isLecture ? 'bg-amber-500/20 text-amber-400 border-amber-500/40' :
                      'bg-purple-500/20 text-purple-300 border-purple-500/40';
 
-    const fallbackImg = FALLBACK_AVATARS[idx % FALLBACK_AVATARS.length];
+    const fallbackImg = getFacultyFallbackAvatar(f.name);
 
     return `
       <div class="glass-panel p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between">
         <div class="space-y-3">
           <div class="flex items-start gap-3">
             <div class="relative w-14 h-14 rounded-2xl overflow-hidden shrink-0 border border-white/10 shadow-md bg-black/40">
-              <img src="${f.avatar}" onerror="this.src='${fallbackImg}'" alt="${f.name}" class="w-full h-full object-cover">
+              <img src="${f.avatar || fallbackImg}" onerror="this.onerror=null;this.src='${fallbackImg}'" alt="${f.name}" class="w-full h-full object-cover">
               <span class="absolute bottom-1 right-1 w-3 h-3 rounded-full ${isAvail ? 'bg-emerald-500 pulse-green' : 'bg-amber-500'} border-2 border-[#0a0c14]"></span>
             </div>
             <div class="flex-1 min-w-0">
@@ -1242,34 +1265,101 @@ async function loadLostFound() {
   }
 }
 
+let currentLfFilter = 'all';
+
+function filterLostFound(filter) {
+  currentLfFilter = filter.toLowerCase();
+  document.querySelectorAll('.lf-pill').forEach(btn => {
+    btn.classList.remove('bg-purple-600', 'text-white');
+    btn.classList.add('bg-white/5', 'text-slate-300');
+  });
+  const activeBtn = document.getElementById(`lf-pill-${filter.toLowerCase()}`);
+  if (activeBtn) {
+    activeBtn.classList.add('bg-purple-600', 'text-white');
+    activeBtn.classList.remove('bg-white/5', 'text-slate-300');
+  }
+  applyLostFoundFilters();
+}
+
+function searchLostFound() {
+  applyLostFoundFilters();
+}
+
+function applyLostFoundFilters() {
+  const query = (document.getElementById('lf-search-input')?.value || '').toLowerCase().trim();
+  let list = allLostFound;
+
+  if (currentLfFilter === 'lost') {
+    list = list.filter(i => i.type === 'lost');
+  } else if (currentLfFilter === 'found') {
+    list = list.filter(i => i.type === 'found');
+  } else if (currentLfFilter !== 'all') {
+    list = list.filter(i => (i.category || '').toLowerCase().includes(currentLfFilter));
+  }
+
+  if (query) {
+    list = list.filter(i => 
+      (i.title && i.title.toLowerCase().includes(query)) ||
+      (i.description && i.description.toLowerCase().includes(query)) ||
+      (i.location_name && i.location_name.toLowerCase().includes(query)) ||
+      (i.category && i.category.toLowerCase().includes(query))
+    );
+  }
+
+  renderLostFound(list);
+}
+
 function renderLostFound(items) {
   const container = document.getElementById('lostfound-grid');
   if (!container) return;
 
+  if (items.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-400 space-y-2">
+        <i class="fa-solid fa-box-open text-3xl text-purple-400/50"></i>
+        <p class="text-xs">No lost or found belongings matching this filter.</p>
+      </div>
+    `;
+    return;
+  }
+
   container.innerHTML = items.map(item => {
     const isFound = item.type === 'found';
     const waNumber = item.whatsapp_number || item.contact_phone.replace(/[^0-9]/g, '');
-    const waText = encodeURIComponent(`Hi ${item.contact_name}, regarding your ${item.type.toUpperCase()} post for "${item.title}" on BIET App.`);
+    const waText = encodeURIComponent(`Hi ${item.contact_name}, regarding your ${item.type.toUpperCase()} post for "${item.title}" on BIET Smart Campus App.`);
+    const isVerifiedDept = item.contact_name && (item.contact_name.includes('BIET') || item.contact_name.includes('Library') || item.contact_name.includes('Department') || item.contact_name.includes('Section'));
 
     return `
-      <div class="glass-panel p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between">
+      <div class="glass-panel p-4 rounded-2xl border border-white/10 space-y-3 flex flex-col justify-between card-appear hover:border-[#cba23e]/40 transition">
         <div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-bold ${isFound ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}">
-            ${isFound ? '🟢 FOUND' : '🔴 LOST'}
-          </span>
-          <div class="h-32 rounded-xl overflow-hidden my-2 bg-black/40">
-            <img src="${item.image_url}" alt="${item.title}" class="w-full h-full object-cover">
+          <div class="flex items-center justify-between gap-1 flex-wrap">
+            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${isFound ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40' : 'bg-rose-500/20 text-rose-400 border border-rose-500/40'}">
+              ${isFound ? '🟢 FOUND' : '🔴 LOST'}
+            </span>
+            <span class="text-[10px] text-purple-300 font-mono px-2 py-0.5 rounded-md bg-purple-950/40 border border-purple-500/20">
+              ${item.category || 'Belonging'}
+            </span>
           </div>
-          <h4 class="text-xs font-bold text-white">${item.title}</h4>
-          <p class="text-[11px] text-cyan-400"><i class="fa-solid fa-location-dot"></i> ${item.location_name}</p>
-          <p class="text-xs text-slate-300 mt-1 line-clamp-2">${item.description}</p>
+
+          <div class="h-32 rounded-xl overflow-hidden my-2.5 bg-black/50 border border-white/10 relative">
+            <img src="${item.image_url}" alt="${item.title}" class="w-full h-full object-cover" onerror="this.src='/biet-logo.png'; this.classList.add('p-6', 'object-contain');">
+            ${isVerifiedDept ? '<span class="absolute bottom-1 right-1 px-2 py-0.5 rounded-md bg-[#0a1733]/90 text-[#e6c66d] border border-[#cba23e]/50 text-[9px] font-bold flex items-center gap-1 shadow"><i class="fa-solid fa-circle-check text-emerald-400"></i> Official Custody</span>' : ''}
+          </div>
+
+          <h4 class="text-xs font-black text-white leading-snug">${item.title}</h4>
+          <p class="text-[11px] text-cyan-400 mt-1 flex items-center gap-1"><i class="fa-solid fa-location-dot"></i> ${item.location_name}</p>
+          <p class="text-xs text-slate-300 mt-1.5 line-clamp-2 leading-relaxed">${item.description}</p>
+          <p class="text-[10px] text-slate-400 mt-1 font-mono">Posted by: <strong class="text-slate-200">${item.contact_name}</strong> • ${item.date_time || 'Recent'}</p>
         </div>
-        <div class="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
-          <a href="tel:${item.contact_phone}" class="py-1.5 px-2 rounded-xl bg-white/5 text-white text-xs font-semibold text-center border border-white/10">
-            <i class="fa-solid fa-phone text-xs"></i> Call
+
+        <div class="grid grid-cols-2 gap-2 pt-2.5 border-t border-white/10">
+          <a href="tel:${item.contact_phone}" class="py-2 px-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-white text-xs font-semibold text-center border border-white/10 flex items-center justify-center gap-1.5 active:scale-95 transition">
+            <i class="fa-solid fa-phone text-xs text-cyan-400"></i>
+            <span>Call</span>
           </a>
-          <a href="https://wa.me/${waNumber}?text=${waText}" target="_blank" class="py-1.5 px-2 rounded-xl bg-emerald-600 text-white text-xs font-semibold text-center">
-            <i class="fa-brands fa-whatsapp text-xs"></i> WhatsApp
+          <a href="https://wa.me/${waNumber}?text=${waText}" target="_blank" rel="noopener noreferrer" class="py-2 px-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold text-center flex items-center justify-center gap-1.5 active:scale-95 transition shadow-sm">
+            <i class="fa-brands fa-whatsapp text-sm"></i>
+            <span>WhatsApp</span>
           </a>
         </div>
       </div>
@@ -1801,15 +1891,118 @@ function switchErpTab(tab) {
   if (inappView) inappView.classList.remove('hidden');
 }
 
-async function syncBietUpdates() {
+// Campus Hub Bottom Sheet Toggle
+function toggleCampusHubMenu() {
+  const sheet = document.getElementById('campus-hub-sheet');
+  if (!sheet) return;
+  sheet.classList.toggle('hidden');
+}
+
+// Live Alerts Sync Engine (24/7 Updates)
+async function syncLatestAlerts() {
+  const btn = document.getElementById('btn-sync-alerts');
+  const icon = document.getElementById('sync-alerts-icon');
+  const ts = document.getElementById('alerts-sync-timestamp');
+  if (icon) icon.classList.add('animate-spin');
+
   try {
-    const res = await fetch('/api/alerts/sync-biet', { method: 'POST' });
+    const res = await fetch('/api/alerts/sync', { method: 'POST' });
     const data = await res.json();
-    playChimeSound();
-    alert(`🔄 ${data.message}`);
-    loadAlerts();
+    if (data.success) {
+      if (ts) ts.textContent = `Synced: ${new Date().toLocaleTimeString('en-US', { hour12: true })}`;
+      playChimeSound();
+      await loadAlerts();
+      showPopUpNotification({
+        title: '📢 Official Announcements Synced',
+        message: data.message || `Connected with BIET administration (${data.new_count || 0} updates checked).`,
+        type: 'general'
+      });
+    }
   } catch (err) {
-    console.error(err);
+    console.error('Alerts sync error:', err);
+    await loadAlerts();
+  } finally {
+    if (icon) icon.classList.remove('animate-spin');
+  }
+}
+
+async function syncBietUpdates() {
+  await syncLatestAlerts();
+}
+
+// Emergency Panic Siren Synthesizer (Web Audio API)
+let panicAudioCtx = null;
+let panicOsc = null;
+let panicInterval = null;
+let isPanicSirenActive = false;
+
+function togglePanicSiren() {
+  isPanicSirenActive = !isPanicSirenActive;
+  const btn = document.getElementById('btn-panic-siren');
+  const label = document.getElementById('panic-siren-label');
+  const overlay = document.getElementById('siren-overlay');
+
+  if (isPanicSirenActive) {
+    if (btn) {
+      btn.classList.add('distress-strobe');
+      btn.classList.remove('bg-gradient-to-r', 'from-rose-600', 'to-red-700');
+    }
+    if (label) label.textContent = 'Mute Panic Siren 🔊';
+    if (overlay) overlay.classList.remove('hidden');
+
+    try {
+      panicAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      panicOsc = panicAudioCtx.createOscillator();
+      const gain = panicAudioCtx.createGain();
+      gain.gain.setValueAtTime(0.4, panicAudioCtx.currentTime);
+      panicOsc.type = 'sawtooth';
+      panicOsc.frequency.setValueAtTime(850, panicAudioCtx.currentTime);
+      
+      let toggle = false;
+      panicInterval = setInterval(() => {
+        if (!panicAudioCtx || !panicOsc) return;
+        panicOsc.frequency.setValueAtTime(toggle ? 850 : 1300, panicAudioCtx.currentTime);
+        toggle = !toggle;
+      }, 350);
+
+      panicOsc.connect(gain);
+      gain.connect(panicAudioCtx.destination);
+      panicOsc.start();
+    } catch (e) {
+      console.warn("Panic siren Web Audio API init error:", e);
+    }
+
+    // Auto-locate GPS in emergency
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const coords = `${pos.coords.latitude.toFixed(6)},${pos.coords.longitude.toFixed(6)}`;
+        showPopUpNotification({
+          title: '🚨 Emergency GPS Coordinates Locked',
+          message: `Live Location Pin: ${coords}. Security dispatched.`,
+          type: 'emergency'
+        });
+      }, () => {}, { enableHighAccuracy: true, timeout: 5000 });
+    }
+  } else {
+    if (btn) {
+      btn.classList.remove('distress-strobe');
+      btn.classList.add('bg-gradient-to-r', 'from-rose-600', 'to-red-700');
+    }
+    if (label) label.textContent = 'Sound Panic Siren';
+    if (overlay) overlay.classList.add('hidden');
+
+    if (panicInterval) {
+      clearInterval(panicInterval);
+      panicInterval = null;
+    }
+    if (panicOsc) {
+      try { panicOsc.stop(); } catch(e){}
+      panicOsc = null;
+    }
+    if (panicAudioCtx) {
+      try { panicAudioCtx.close(); } catch(e){}
+      panicAudioCtx = null;
+    }
   }
 }
 

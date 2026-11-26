@@ -786,11 +786,11 @@ def seed_all_faculty():
         # === 16. ADMINISTRATION & GOVERNANCE ===
         # =========================================================================
         (
-            "Dr. K. S. Jayantha", "Principal & Chief Academic Officer", "Administration & Governance",
-            "Principal", "Ph.D (IISc Bangalore / VTU), M.Tech, B.E", "Administrative Block - Room PR-01",
+            "Dr. H. B. Aravind", "Principal & Professor", "Administration & Governance",
+            "Principal", "Ph.D, M.Tech, B.E", "Administrative Block - Room PR-01",
             "principal@bietdvg.edu", "+91 8192-223461 Ext: 100", "Mon-Fri: 03:00 PM - 04:30 PM", "Available",
-            "In Principal Chamber PR-01 • Office hours open for students", "Environmental Engineering, Water Resource Systems, Campus Governance",
-            "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/jayantha-k-s.jpg", "35+ Years", "prof123"
+            "In Principal Chamber PR-01 • Office hours open for students", "Structural Engineering, Concrete Technology, Campus Governance",
+            "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/h-b-aravind.jpg", "32+ Years", "prof123"
         ),
         (
             "Dr. B. M. Gangadharappa", "Vice Principal & Dean (Academic Affairs)", "Administration & Governance",

@@ -64,16 +64,16 @@ def scrape_and_seed_all():
     seen_emails = set()
     faculty_rows = []
     
-    # Always ensure Principal Dr. K. S. Jayantha is first
+    # Always ensure Principal Dr. H. B. Aravind is first
     seen_emails.add("principal@bietdvg.edu")
     principal_tuple = (
-        "Dr. K. S. Jayantha", "Principal & Chief Academic Officer", "Administration & Governance",
-        "Principal", "Ph.D (IISc Bangalore / VTU), M.Tech, B.E", "Administrative Block - Room PR-01",
+        "Dr. H. B. Aravind", "Principal & Professor", "Administration & Governance",
+        "Principal", "Ph.D, M.Tech, B.E", "Administrative Block - Room PR-01",
         "principal@bietdvg.edu", "+91 8192-223461 Ext: 100", "Mon-Fri: 03:00 PM - 04:30 PM", "Available",
         "In Principal Chamber PR-01 • Office hours open for students & parents",
-        "Environmental Engineering, Water Resource Systems, Campus Governance",
-        "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/jayantha-k-s.jpg",
-        "35+ Years", "prof123"
+        "Structural Engineering, Concrete Technology, Campus Governance",
+        "https://d7biqdpghttdi.cloudfront.net/fit-in/600x0/sites/biet/site-content/faculty/h-b-aravind.jpg",
+        "32+ Years", "prof123"
     )
     faculty_rows.append(principal_tuple)
 
