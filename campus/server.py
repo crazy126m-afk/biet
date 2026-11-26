@@ -880,8 +880,8 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
         # 0. API: Unified Role-Based Authentication (Student vs Faculty vs Admin)
         if path == "/api/auth/login":
             role = body.get("role", "student").lower() # 'student', 'faculty', 'admin'
-            identifier = (body.get("identifier") or "").strip()
-            password = (body.get("password") or "").strip()
+            identifier = (body.get("identifier") or body.get("id") or body.get("faculty_id") or "").strip()
+            password = (body.get("password") or body.get("pin") or body.get("admin_pin") or "").strip()
 
             conn = get_db_connection()
             cursor = conn.cursor()
@@ -927,16 +927,28 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             # --- CASE B: FACULTY / PROFESSOR LOGIN ---
             elif role == "faculty":
-                # Look up by email or by professor ID
-                if identifier.isdigit():
+                if not identifier:
+                    conn.close()
+                    self.send_json({"success": False, "error": "Please select a professor from the list before entering your password."}, 400)
+                    return
+
+                # Look up by professor ID, or email, or exact name, or partial name
+                prof = None
+                if str(identifier).isdigit():
                     cursor.execute("SELECT * FROM professors WHERE id = ?", (int(identifier),))
-                else:
-                    cursor.execute("SELECT * FROM professors WHERE email = ? OR name LIKE ?", (identifier, f"%{identifier}%"))
-                prof = cursor.fetchone()
+                    prof = cursor.fetchone()
+
+                if not prof:
+                    cursor.execute("SELECT * FROM professors WHERE LOWER(email) = LOWER(?) OR LOWER(name) = LOWER(?)", (identifier, identifier))
+                    prof = cursor.fetchone()
+
+                if not prof:
+                    cursor.execute("SELECT * FROM professors WHERE LOWER(name) LIKE LOWER(?)", (f"%{identifier}%",))
+                    prof = cursor.fetchone()
 
                 if not prof:
                     conn.close()
-                    self.send_json({"success": False, "error": f"No faculty profile found for '{identifier}'."}, 404)
+                    self.send_json({"success": False, "error": f"No faculty profile found for '{identifier}'. Please search and select your name from the directory."}, 404)
                     return
 
                 prof_dict = dict(prof)

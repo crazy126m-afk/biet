@@ -1713,7 +1713,8 @@ async function handleDirectERPLogin(overrideUsn, overridePass) {
 
     if (data.success && data.user) {
       currentUser = data.user;
-      currentUser.pin = pin;
+      currentUser.pin = password;
+      currentUser.password = password;
       localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
       updateAuthUI();
       updateErpAuthStatus();
@@ -2318,12 +2319,13 @@ async function verifyAdminPIN() {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role: 'admin', pin: pin })
+      body: JSON.stringify({ role: 'admin', password: pin, pin: pin })
     });
     const data = await res.json();
     if (data.success && data.user && data.user.role === 'admin') {
       currentUser = data.user;
       currentUser.pin = pin;
+      currentUser.password = pin;
       localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
       updateAuthUI();
       document.getElementById('admin-auth-box')?.classList.add('hidden');
@@ -2691,13 +2693,14 @@ async function handleUnifiedAuthLogin(e) {
     const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ role, identifier, password })
+      body: JSON.stringify({ role, identifier, password, pin: password })
     });
     const data = await res.json();
 
     if (data.success) {
       currentUser = data.user;
-      currentUser.pin = pin;
+      currentUser.pin = password;
+      currentUser.password = password;
       localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
       updateAuthUI();
       closeModal('modal-auth-login');
@@ -2952,10 +2955,14 @@ function openModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('hidden');
   if (id === 'modal-auth-login') {
+    switchAuthTab('faculty');
     if (document.getElementById('auth-faculty-pass')) document.getElementById('auth-faculty-pass').value = '';
     if (document.getElementById('auth-admin-pass')) document.getElementById('auth-admin-pass').value = '';
     const errBox = document.getElementById('auth-login-error');
     if (errBox) errBox.classList.add('hidden');
+    if (!document.getElementById('auth-faculty-id')?.value && typeof allFaculty !== 'undefined' && allFaculty.length > 0) {
+      selectAuthFaculty(allFaculty[0].id);
+    }
   }
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
