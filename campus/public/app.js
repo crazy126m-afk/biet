@@ -504,15 +504,29 @@ function populateBuildingPinsOnSatellite(locs) {
 
     const marker = L.marker([l.lat, l.lng], { icon: customIcon }).addTo(realSatMap);
     const imgHtml = l.image_url ? `<img src="${l.image_url}" class="w-full h-24 object-cover rounded-xl mb-2 border border-white/10" onerror="this.remove()">` : '';
+    const gmapsNavUrl = `https://www.google.com/maps/dir/?api=1&destination=${l.lat},${l.lng}&travelmode=walking`;
+    const streetViewUrl = `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${l.lat},${l.lng}`;
     marker.bindPopup(`
-      <div style="font-family: inherit; font-size: 12px; line-height: 1.4; max-width: 260px; padding: 2px;">
+      <div style="font-family: inherit; font-size: 12px; line-height: 1.4; max-width: 270px; padding: 2px;">
         ${imgHtml}
         <strong style="color: ${color}; font-size: 13px; display: block; margin-bottom: 2px;">${l.name}</strong>
         <span style="color: #cba23e; font-weight: 700; font-size: 11px;">${l.code} • ${l.floor_info}</span>
         <p style="margin-top: 5px; color: #cbd5e1; font-size: 11px; line-height: 1.35;">${l.facilities}</p>
-        <button onclick="setDestinationAndRoute('${l.code}')" style="margin-top: 8px; width: 100%; padding: 6px; background: linear-gradient(135deg, #1f4178, #345798); color: #fff; border: 1px solid rgba(203, 162, 62, 0.4); border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <span>🚶 Walk Here</span>
-        </button>
+        <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 5px;">
+          <button onclick="setDestinationAndRoute('${l.code}')" style="width: 100%; padding: 6px; background: linear-gradient(135deg, #1f4178, #345798); color: #fff; border: 1px solid rgba(203, 162, 62, 0.4); border-radius: 8px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 11px;">
+            <span>🚶 Campus Walk Route</span>
+          </button>
+          <div style="display: flex; gap: 5px;">
+            <a href="${gmapsNavUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-decoration: none; padding: 5px 6px; background: #0f172a; color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px;">
+              <i class="fa-solid fa-diamond-turn-right" style="color: #38bdf8;"></i>
+              <span>Google Maps</span>
+            </a>
+            <a href="${streetViewUrl}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-decoration: none; padding: 5px 6px; background: #0f172a; color: #cba23e; border: 1px solid rgba(203, 162, 62, 0.3); border-radius: 8px; font-weight: 600; text-align: center; display: flex; align-items: center; justify-content: center; gap: 4px; font-size: 10px;">
+              <i class="fa-solid fa-street-view" style="color: #cba23e;"></i>
+              <span>Street View 360°</span>
+            </a>
+          </div>
+        </div>
       </div>
     `);
   });
@@ -680,7 +694,17 @@ function calculateSatelliteRoute() {
     distText.innerHTML = `<i class="fa-solid fa-arrows-left-right"></i> Distance: ${meters} Meters`;
     timeText.innerHTML = `<i class="fa-regular fa-clock"></i> ~${minutes} Mins Walk`;
     bearingText.innerHTML = `<i class="fa-solid fa-location-arrow"></i> Direction: Head ${compassDirection} (${bearing}°) towards ${endLoc.name}`;
-    stepText.textContent = `Walk along the highlighted satellite pathway past the central quadrangle to arrive at ${endLoc.name}.`;
+    stepText.innerHTML = `
+      <span>Walk along the highlighted satellite pathway past the central quadrangle to arrive at <strong>${endLoc.name}</strong>.</span>
+      <div class="mt-2.5 flex items-center gap-2 flex-wrap">
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${endLoc.lat},${endLoc.lng}&travelmode=walking" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-md shadow-cyan-600/30">
+          <i class="fa-solid fa-diamond-turn-right"></i> Start Google Maps Navigation ↗
+        </a>
+        <a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${endLoc.lat},${endLoc.lng}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-[#cba23e] border border-[#cba23e]/40 font-bold text-xs inline-flex items-center gap-1.5">
+          <i class="fa-solid fa-street-view"></i> Street View 360° ↗
+        </a>
+      </div>
+    `;
   }
 }
 
@@ -1284,6 +1308,19 @@ function filterAlerts(category) {
       const cat = (a.category || '').toLowerCase();
       const prio = (a.priority || '').toLowerCase();
       const title = (a.title || '').toLowerCase();
+      const msg = (a.message || '').toLowerCase();
+      if (currentAlertFilter === 'urgent') {
+        return cat.includes('urgent') || cat.includes('emergency') || prio.includes('critical') || prio.includes('high') || title.includes('urgent') || title.includes('notice') || title.includes('exam');
+      }
+      if (currentAlertFilter === 'placement') {
+        return cat.includes('placement') || title.includes('placement') || title.includes('recruitment') || title.includes('tcs') || title.includes('internship') || msg.includes('placement');
+      }
+      if (currentAlertFilter === 'academic') {
+        return cat.includes('academic') || title.includes('exam') || title.includes('vtu') || title.includes('admit') || title.includes('library') || msg.includes('academic') || msg.includes('semester');
+      }
+      if (currentAlertFilter === 'event') {
+        return cat.includes('event') || title.includes('event') || title.includes('symposium') || title.includes('invento') || title.includes('hackathon') || msg.includes('event');
+      }
       return cat.includes(currentAlertFilter) || prio.includes(currentAlertFilter) || title.includes(currentAlertFilter);
     });
     renderAlerts(filtered);
@@ -2189,75 +2226,296 @@ function onThreeWindowResize() {
   threeRenderer.setSize(container.clientWidth, container.clientHeight);
 }
 
-// AI Copilot
-let copilotMode = 'genz';
-function toggleCopilot() { document.getElementById('copilot-drawer').classList.toggle('hidden'); }
-function setCopilotMode(m) {
-  copilotMode = m;
-  document.getElementById('btn-copilot-genz').className = m === 'genz' ? 'px-2 py-0.5 rounded-lg bg-purple-600 text-white font-bold' : 'px-2 py-0.5 rounded-lg text-slate-400';
-  document.getElementById('btn-copilot-pro').className = m === 'pro' ? 'px-2 py-0.5 rounded-lg bg-purple-600 text-white font-bold' : 'px-2 py-0.5 rounded-lg text-slate-400';
+// Admin Command Hub & Privileged Controls
+let adminFacultyList = [];
+
+function openAdminModal() {
+  if (currentUser && currentUser.role === 'admin') {
+    document.getElementById('admin-auth-box')?.classList.add('hidden');
+    document.getElementById('admin-panel-body')?.classList.remove('hidden');
+    loadAdminDashboardData();
+  } else {
+    document.getElementById('admin-auth-box')?.classList.remove('hidden');
+    document.getElementById('admin-panel-body')?.classList.add('hidden');
+    if (document.getElementById('admin-pin-input')) {
+      document.getElementById('admin-pin-input').value = '';
+    }
+  }
+  openModal('modal-admin');
 }
 
-function askCopilot(q) {
-  document.getElementById('copilot-input').value = q;
-  handleCopilotSubmit(new Event('submit'));
-}
-
-async function handleCopilotSubmit(e) {
-  e.preventDefault();
-  const input = document.getElementById('copilot-input');
-  const box = document.getElementById('copilot-messages');
-  const msg = input.value.trim();
-  if (!msg) return;
-
-  box.innerHTML += `<div class="text-right"><span class="p-2 rounded-2xl bg-purple-600 text-white text-xs inline-block">${msg}</span></div>`;
-  input.value = '';
-  box.scrollTop = box.scrollHeight;
-
+async function verifyAdminPIN() {
+  const pin = (document.getElementById('admin-pin-input')?.value || '').trim();
+  if (!pin) {
+    alert('Please enter the Admin Master Password.');
+    return;
+  }
   try {
-    const res = await fetch('/api/chatbot', {
+    const res = await fetch('/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: msg, mode: copilotMode })
+      body: JSON.stringify({ role: 'admin', pin: pin })
     });
-    const d = await res.json();
-    box.innerHTML += `<div class="text-left"><span class="p-2 rounded-2xl bg-white/5 text-slate-200 text-xs inline-block">${d.reply}</span></div>`;
-    box.scrollTop = box.scrollHeight;
-    playChimeSound();
+    const data = await res.json();
+    if (data.success && data.user && data.user.role === 'admin') {
+      currentUser = data.user;
+      localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
+      updateAuthUI();
+      document.getElementById('admin-auth-box')?.classList.add('hidden');
+      document.getElementById('admin-panel-body')?.classList.remove('hidden');
+      loadAdminDashboardData();
+      playChimeSound();
+    } else {
+      alert('Invalid Admin Master Password. Access restricted to authorized BIET personnel.');
+    }
   } catch (err) {
     console.error(err);
+    alert('Network error validating Admin credentials.');
   }
 }
 
-// Admin
-function openAdminModal() { openModal('modal-admin'); }
-function verifyAdminPIN() {
-  const pin = (document.getElementById('admin-pin-input') ? document.getElementById('admin-pin-input').value : '').trim();
-  if (pin === '79754577@Aa') {
-    document.getElementById('admin-auth-box').classList.add('hidden');
-    document.getElementById('admin-panel-body').classList.remove('hidden');
+function switchAdminHubTab(tabName) {
+  const tabs = ['broadcast', 'faculty', 'sos', 'lf'];
+  tabs.forEach(t => {
+    const btn = document.getElementById(`adm-tab-${t}`);
+    const sec = document.getElementById(`adm-section-${t}`);
+    if (btn) {
+      if (t === tabName) {
+        btn.className = 'py-1.5 px-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1.5';
+      } else {
+        btn.className = 'py-1.5 px-2 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5';
+      }
+    }
+    if (sec) {
+      if (t === tabName) {
+        sec.classList.remove('hidden');
+      } else {
+        sec.classList.add('hidden');
+      }
+    }
+  });
+
+  if (tabName === 'faculty' && (!adminFacultyList || adminFacultyList.length === 0)) {
+    loadFaculty().then(() => {
+      adminFacultyList = allFaculty || [];
+      renderAdminFacultyList(adminFacultyList);
+    });
+  }
+}
+
+async function loadAdminDashboardData() {
+  try {
+    const res = await fetch('/api/admin/overview');
+    const data = await res.json();
+    if (data.success) {
+      renderAdminSOSList(data.sos_dispatches || []);
+      renderAdminLFList(data.lost_found || []);
+    }
+  } catch (e) {
+    console.error('Error loading admin overview:', e);
+  }
+
+  if (allFaculty && allFaculty.length > 0) {
+    adminFacultyList = allFaculty;
+    renderAdminFacultyList(adminFacultyList);
   } else {
-    alert('Invalid Admin Password. Access restricted to authorized BIET personnel.');
+    try {
+      const fres = await fetch('/api/faculty');
+      const fdata = await fres.json();
+      adminFacultyList = fdata.professors || [];
+      renderAdminFacultyList(adminFacultyList);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+}
+
+function refreshAdminDashboard() {
+  loadAdminDashboardData();
+}
+
+function renderAdminFacultyList(list) {
+  const container = document.getElementById('admin-faculty-list');
+  if (!container) return;
+  if (!list || list.length === 0) {
+    container.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">No professors match your search.</div>';
+    return;
+  }
+  container.innerHTML = list.slice(0, 60).map(p => `
+    <div class="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="font-bold text-white text-xs truncate">${p.name}</div>
+        <div class="text-[10px] text-slate-400 truncate">${p.department} • Cabin: ${p.cabin || 'Dept'}</div>
+      </div>
+      <button onclick="adminResetFacultyPin(${p.id}, '${escapeHtml(p.name)}')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-[10px] font-bold transition flex items-center gap-1">
+        <i class="fa-solid fa-key"></i> Reset PIN
+      </button>
+    </div>
+  `).join('');
+}
+
+function filterAdminFaculty(q) {
+  const query = (q || '').toLowerCase().trim();
+  if (!query) {
+    renderAdminFacultyList(adminFacultyList);
+    return;
+  }
+  const filtered = adminFacultyList.filter(p =>
+    (p.name || '').toLowerCase().includes(query) ||
+    (p.department || '').toLowerCase().includes(query)
+  );
+  renderAdminFacultyList(filtered);
+}
+
+async function adminResetFacultyPin(profId, profName) {
+  if (!confirm(`Reset login password for ${profName} back to default (biet@1234)?`)) return;
+  const adminPin = (currentUser && currentUser.pin) || (document.getElementById('admin-pin-input')?.value.trim()) || '79754577@Aa';
+  try {
+    const res = await fetch('/api/admin/reset-faculty-pin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ admin_pin: adminPin, professor_id: profId })
+    });
+    const d = await res.json();
+    if (d.success) {
+      alert(d.message || `Password for ${profName} reset to biet@1234`);
+    } else {
+      alert(d.error || 'Failed to reset faculty password');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Network error resetting PIN');
+  }
+}
+
+function renderAdminSOSList(dispatches) {
+  const container = document.getElementById('admin-sos-list');
+  if (!container) return;
+  if (!dispatches || dispatches.length === 0) {
+    container.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">No emergency dispatches recorded.</div>';
+    return;
+  }
+  container.innerHTML = dispatches.map(s => {
+    const isResolved = s.status === 'Resolved';
+    return `
+      <div class="p-2.5 rounded-xl bg-white/5 border ${isResolved ? 'border-emerald-500/20' : 'border-rose-500/30'} flex items-center justify-between gap-2">
+        <div class="min-w-0">
+          <div class="flex items-center gap-1.5">
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${isResolved ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'}">${s.status || 'Active'}</span>
+            <span class="font-bold text-white text-xs truncate">${s.distress_type || 'Emergency SOS'}</span>
+          </div>
+          <div class="text-[10px] text-slate-400 mt-0.5">${s.location || 'Campus'} • ${s.contact || 'User'} • ${s.timestamp || ''}</div>
+        </div>
+        ${!isResolved ? `
+          <button onclick="adminResolveSOS(${s.id})" class="shrink-0 px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600 text-emerald-200 hover:text-white border border-emerald-500/40 text-[10px] font-bold transition flex items-center gap-1">
+            <i class="fa-solid fa-check"></i> Mark Resolved
+          </button>
+        ` : '<span class="text-emerald-400 text-[10px] font-mono shrink-0">✓ Resolved</span>'}
+      </div>
+    `;
+  }).join('');
+}
+
+async function adminResolveSOS(sosId) {
+  const adminPin = (currentUser && currentUser.pin) || (document.getElementById('admin-pin-input')?.value.trim()) || '79754577@Aa';
+  try {
+    const res = await fetch('/api/admin/sos-resolve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ admin_pin: adminPin, sos_id: sosId })
+    });
+    const d = await res.json();
+    if (d.success) {
+      loadAdminDashboardData();
+    } else {
+      alert(d.error || 'Failed to update SOS status');
+    }
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+function renderAdminLFList(posts) {
+  const container = document.getElementById('admin-lf-list');
+  if (!container) return;
+  if (!posts || posts.length === 0) {
+    container.innerHTML = '<div class="text-center py-4 text-slate-400 text-xs">No lost & found posts recorded.</div>';
+    return;
+  }
+  container.innerHTML = posts.map(item => `
+    <div class="p-2.5 rounded-xl bg-white/5 border border-white/5 flex items-center justify-between gap-2">
+      <div class="min-w-0">
+        <div class="flex items-center gap-1.5">
+          <span class="px-1.5 py-0.5 rounded text-[9px] font-bold ${item.type === 'lost' ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'}">${(item.type || 'item').toUpperCase()}</span>
+          <span class="font-bold text-white text-xs truncate">${item.title}</span>
+        </div>
+        <div class="text-[10px] text-slate-400 mt-0.5">${item.location || 'Campus'} • By: ${item.reported_by || 'Anonymous'}</div>
+      </div>
+      <button onclick="adminDeleteLF(${item.id})" class="shrink-0 px-2.5 py-1 rounded-lg bg-rose-600/20 hover:bg-rose-600 text-rose-300 hover:text-white border border-rose-500/30 text-[10px] font-bold transition flex items-center gap-1">
+        <i class="fa-solid fa-trash"></i> Delete
+      </button>
+    </div>
+  `).join('');
+}
+
+async function adminDeleteLF(id) {
+  if (!confirm("Remove this Lost & Found post from campus feeds?")) return;
+  try {
+    const res = await fetch(`/api/lost-found/${id}`, { method: 'DELETE' });
+    const d = await res.json();
+    if (d.success) {
+      loadAdminDashboardData();
+      if (typeof loadLostAndFound === 'function') loadLostAndFound();
+    }
+  } catch (e) {
+    console.error(e);
   }
 }
 
 async function submitAdminBroadcast() {
-  const title = document.getElementById('admin-broadcast-title').value;
-  const message = document.getElementById('admin-broadcast-msg').value;
-  const adminPin = (document.getElementById('admin-pin-input') ? document.getElementById('admin-pin-input').value.trim() : '') || '79754577@Aa';
-  await fetch('/api/admin/broadcast', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ admin_pin: adminPin, title, message, type: 'announcement' })
-  });
-  alert('Broadcast sent!');
-  closeModal('modal-admin');
+  const title = (document.getElementById('admin-broadcast-title')?.value || '').trim();
+  const message = (document.getElementById('admin-broadcast-msg')?.value || '').trim();
+  const category = document.getElementById('admin-broadcast-category')?.value || 'Urgent';
+  const type = document.getElementById('admin-broadcast-type')?.value || 'announcement';
+
+  if (!title || !message) {
+    alert('Please enter both circular title and message.');
+    return;
+  }
+
+  const adminPin = (currentUser && currentUser.pin) || (document.getElementById('admin-pin-input')?.value.trim()) || '79754577@Aa';
+  try {
+    const res = await fetch('/api/admin/broadcast', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        admin_pin: adminPin,
+        title,
+        message,
+        category,
+        type
+      })
+    });
+    const d = await res.json();
+    if (d.success) {
+      alert(d.message || 'Broadcast circular posted and pushed to all devices!');
+      document.getElementById('admin-broadcast-title').value = '';
+      document.getElementById('admin-broadcast-msg').value = '';
+      closeModal('modal-admin');
+      loadAlerts();
+    } else {
+      alert(d.error || 'Failed to post broadcast.');
+    }
+  } catch (e) {
+    console.error(e);
+    alert('Network error pushing broadcast.');
+  }
 }
 
 // PWA
 function initServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js?v=3.1').then(reg => {
+    navigator.serviceWorker.register('/sw.js?v=5.5').then(reg => {
       reg.update().catch(() => {});
     }).catch(() => {});
   }
@@ -2409,6 +2667,15 @@ function updateAuthUI() {
   const pill = document.getElementById('user-auth-pill');
   const roleBanner = document.getElementById('role-control-banner');
   const bannerTitle = document.getElementById('role-banner-title');
+  const adminBroadcastBtn = document.getElementById('btn-admin-broadcast-hub');
+
+  if (adminBroadcastBtn) {
+    if (currentUser && currentUser.role === 'admin') {
+      adminBroadcastBtn.classList.remove('hidden');
+    } else {
+      adminBroadcastBtn.classList.add('hidden');
+    }
+  }
 
   if (!currentUser) {
     if (pill) {
@@ -2812,20 +3079,20 @@ function renderQuestionBanks(items) {
           </div>
         </div>
 
-        <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-2">
+        <div class="pt-2 border-t border-white/10 flex items-center justify-between gap-2 flex-wrap">
           <button onclick="openModuleQuestionsModal(${item.id})" class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-semibold transition flex items-center gap-1.5">
             <i class="fa-solid fa-layer-group text-purple-400 text-xs"></i>
             <span>Modules</span>
           </button>
 
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-1.5 flex-wrap">
             <button onclick="openMCQPracticeModal('${item.subject_code}')" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600 border border-purple-500/40 text-purple-200 hover:text-white text-xs font-bold transition flex items-center gap-1">
               <i class="fa-solid fa-brain text-[11px]"></i>
               <span>MCQs</span>
             </button>
             <a href="${(item.file_url && item.file_url.startsWith('/papers/')) ? item.file_url : '/papers/' + (item.file_url ? item.file_url.split('/').pop() : item.subject_code + '.pdf')}" target="_blank" class="px-3 py-1.5 rounded-xl bg-[#1f4178] hover:bg-[#345798] border border-[#cba23e]/50 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm" title="View & Download Official Examination PDF">
               <i class="fa-solid fa-file-pdf text-rose-400 text-[11px]"></i>
-              <span>PDF</span>
+              <span>PDF ↗</span>
             </a>
           </div>
         </div>

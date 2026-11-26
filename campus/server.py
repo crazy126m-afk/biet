@@ -721,6 +721,27 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"appointments": apps, "count": len(apps)})
             return
 
+        if path == "/api/admin/overview":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM professors")
+            prof_count = cursor.fetchone()[0]
+            cursor.execute("SELECT * FROM targeted_sos_dispatches ORDER BY id DESC LIMIT 15")
+            sos_list = [dict(r) for r in cursor.fetchall()]
+            cursor.execute("SELECT * FROM lost_found ORDER BY id DESC LIMIT 15")
+            lf_list = [dict(r) for r in cursor.fetchall()]
+            cursor.execute("SELECT COUNT(*) FROM alerts")
+            alerts_count = cursor.fetchone()[0]
+            conn.close()
+            self.send_json({
+                "success": True,
+                "prof_count": prof_count,
+                "alerts_count": alerts_count,
+                "sos_dispatches": sos_list,
+                "lost_found": lf_list
+            })
+            return
+
         # 13. Health Check for Render & 24/7 Monitoring
         if path == "/healthz" or path == "/ping":
             self.send_json({"status": "ok", "app": "BIET", "uptime": "active", "timestamp": datetime.now().isoformat()})
@@ -859,10 +880,10 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
                 prof_dict = dict(prof)
-                # Verify password/PIN (Default: biet@1234 or private saved PIN or master key)
-                if password != "biet@1234" and password != prof_dict.get("password") and password != "79754577@Aa":
+                # Verify password/PIN (Default: biet@1234 or private saved PIN - Master Key is restricted to Admin only)
+                if password != "biet@1234" and password != prof_dict.get("password"):
                     conn.close()
-                    self.send_json({"success": False, "error": "Invalid Faculty PIN/Password. Default is: biet@1234"}, 401)
+                    self.send_json({"success": False, "error": "Invalid Faculty PIN/Password."}, 401)
                     return
 
                 conn.close()
@@ -1101,21 +1122,36 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             })
             return
 
-        # 6. API: Admin Instant Notification Broadcast
+        # 6. API: Admin Instant Notification & Circular Broadcast
         if path == "/api/admin/broadcast":
             pin = body.get("admin_pin", "")
-            if pin != "79754577@Aa":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
+            row = cursor.fetchone()
+            admin_expected = row["value"] if row else "79754577@Aa"
+            if pin != admin_expected and pin != "79754577@Aa":
+                conn.close()
                 self.send_json({"success": False, "error": "Unauthorized: Invalid Admin Master Password"}, 401)
                 return
 
             title = body.get("title", "Campus Bulletin")
             message = body.get("message", "")
-            notify_type = body.get("type", "announcement") # 'siren', 'alert', 'announcement'
+            category = body.get("category", "Urgent") # 'Urgent', 'Placement', 'Academic', 'Event'
+            notify_type = body.get("type", "announcement")
             timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+            cursor.execute("""
+            INSERT INTO alerts (title, category, priority, message, department, author, pinned, timestamp, source_url)
+            VALUES (?, ?, 'critical', ?, 'Administrative Control Desk', 'Campus Administrator', 1, ?, 'https://www.bietdvg.edu')
+            """, (title, category, message, now_str))
+            conn.commit()
+            conn.close()
 
             LIVE_NOTIFICATIONS.append({
                 "id": f"admin-broadcast-{len(LIVE_NOTIFICATIONS)+1}",
-                "title": title,
+                "title": f"📢 {title}",
                 "message": message,
                 "type": notify_type,
                 "timestamp": timestamp,
@@ -1124,7 +1160,56 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             self.send_json({
                 "success": True,
-                "message": "Broadcast pushed instantly to all student and faculty devices!"
+                "message": "Broadcast pushed instantly to live bulletins and all user devices!"
+            })
+            return
+
+        # 7. API: Admin Reset Faculty PIN to Default
+        if path == "/api/admin/reset-faculty-pin":
+            pin = body.get("admin_pin", "")
+            prof_id = body.get("professor_id")
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
+            row = cursor.fetchone()
+            admin_expected = row["value"] if row else "79754577@Aa"
+            if pin != admin_expected and pin != "79754577@Aa":
+                conn.close()
+                self.send_json({"success": False, "error": "Unauthorized: Invalid Admin Master Password"}, 401)
+                return
+
+            cursor.execute("UPDATE professors SET password = 'biet@1234' WHERE id = ?", (prof_id,))
+            cursor.execute("SELECT name FROM professors WHERE id = ?", (prof_id,))
+            prof = cursor.fetchone()
+            conn.commit()
+            conn.close()
+            prof_name = prof["name"] if prof else f"Professor #{prof_id}"
+            self.send_json({
+                "success": True,
+                "message": f"Security PIN for {prof_name} has been reset to default (biet@1234)."
+            })
+            return
+
+        # 8. API: Admin Resolve SOS Incident
+        if path == "/api/admin/sos-resolve":
+            pin = body.get("admin_pin", "")
+            sos_id = body.get("sos_id")
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
+            row = cursor.fetchone()
+            admin_expected = row["value"] if row else "79754577@Aa"
+            if pin != admin_expected and pin != "79754577@Aa":
+                conn.close()
+                self.send_json({"success": False, "error": "Unauthorized: Invalid Admin Master Password"}, 401)
+                return
+
+            cursor.execute("UPDATE targeted_sos_dispatches SET status = 'Resolved' WHERE id = ?", (sos_id,))
+            conn.commit()
+            conn.close()
+            self.send_json({
+                "success": True,
+                "message": f"Distress dispatch #{sos_id} resolved and archived."
             })
             return
 
@@ -1290,9 +1375,9 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 prof_dict = dict(prof)
                 saved_pass = prof_dict.get("password") or "biet@1234"
-                if current_pass != saved_pass and current_pass != "biet@1234" and current_pass != "79754577@Aa":
+                if current_pass != saved_pass and current_pass != "biet@1234":
                     conn.close()
-                    self.send_json({"success": False, "error": "Current Faculty Password is incorrect (Default is biet@1234)."}, 401)
+                    self.send_json({"success": False, "error": "Current Faculty Password is incorrect."}, 401)
                     return
                 cursor.execute("UPDATE professors SET password = ? WHERE id = ?", (new_pass, prof_id))
                 conn.commit()
@@ -1353,10 +1438,10 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             prof_dict = dict(prof)
             saved_pin = prof_dict.get("password") or "biet@1234"
-            # Strict authorization check: Must match professor's current PIN OR biet@1234 OR Master Key (79754577@Aa)
-            if current_auth != saved_pin and current_auth != "biet@1234" and current_auth != "79754577@Aa":
+            # Strict authorization check: Must match professor's current PIN OR biet@1234 (Master Key restricted to Admin only)
+            if current_auth != saved_pin and current_auth != "biet@1234":
                 conn.close()
-                self.send_json({"success": False, "error": "Security Authorization Failed: Current Faculty Password (default: biet@1234) or Master Key is required to authorize password change."}, 401)
+                self.send_json({"success": False, "error": "Security Authorization Failed: Current Faculty Password is required to authorize password change."}, 401)
                 return
 
             cursor.execute("UPDATE professors SET password = ? WHERE id = ?", (new_pin, prof_id))
