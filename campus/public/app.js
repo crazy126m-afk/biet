@@ -1799,21 +1799,7 @@ async function handleSaveStudentProfile(e) {
 
 function switchErpTab(tab) {
   const inappView = document.getElementById('erp-tab-inapp-view');
-  const frameView = document.getElementById('erp-tab-frame-view');
-  const btnInapp = document.getElementById('btn-erp-inapp');
-  const btnFrame = document.getElementById('btn-erp-frame');
-
-  if (tab === 'inapp') {
-    if (inappView) inappView.classList.remove('hidden');
-    if (frameView) frameView.classList.add('hidden');
-    if (btnInapp) btnInapp.className = 'px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold transition shadow-sm';
-    if (btnFrame) btnFrame.className = 'px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-bold transition';
-  } else {
-    if (inappView) inappView.classList.add('hidden');
-    if (frameView) frameView.classList.remove('hidden');
-    if (btnFrame) btnFrame.className = 'px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold transition shadow-sm';
-    if (btnInapp) btnInapp.className = 'px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-bold transition';
-  }
+  if (inappView) inappView.classList.remove('hidden');
 }
 
 async function syncBietUpdates() {

@@ -652,12 +652,10 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="switchErpTab('inapp')" id="btn-erp-inapp" class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold transition shadow-sm">
-            <i class="fa-solid fa-chart-pie mr-1"></i> My In-App Dashboard
-          </button>
-          <button onclick="switchErpTab('frame')" id="btn-erp-frame" class="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 text-xs font-bold transition">
-            <i class="fa-solid fa-window-maximize mr-1"></i> RoveLabs Web Portal
-          </button>
+          <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-200 border border-white/15 text-xs font-bold transition flex items-center gap-2 shadow-sm" title="Open RoveLabs directly in a new browser tab where cookies work">
+            <i class="fa-solid fa-arrow-up-right-from-square text-emerald-400"></i>
+            <span>Open Official RoveLabs (New Tab)</span>
+          </a>
         </div>
       </div>
 
@@ -856,66 +854,7 @@
         </div>
       </div>
 
-      <!-- ERP SUB-VIEW 2: ROVELABS LIVE PORTAL LAUNCHER -->
-      <div id="erp-tab-frame-view" class="hidden glass-panel rounded-3xl p-6 border border-emerald-500/30 space-y-5 bg-gradient-to-b from-[#0a1733] to-[#071329]">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl font-bold">
-              <i class="fa-solid fa-graduation-cap"></i>
-            </div>
-            <div>
-              <div class="flex items-center gap-2">
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Official External ERP</span>
-                <span class="text-xs text-slate-400 font-mono">shareu.rovelabs.com</span>
-              </div>
-              <h3 class="text-lg font-extrabold text-white mt-0.5">RoveLabs Student Academic Cloud Portal</h3>
-              <p class="text-xs text-slate-300">Official BIET Autonomous ERP system for academic marks, internal assessment, and faculty feedback.</p>
-            </div>
-          </div>
-          <button type="button" onclick="switchErpTab('inapp')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 hover:opacity-90 transition">
-            <i class="fa-solid fa-bolt"></i>
-            <span>Use Fast In-App Dashboard</span>
-          </button>
-        </div>
-
-        <!-- Why iframe login fails explanation banner -->
-        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2.5">
-          <div class="flex items-center gap-2 text-amber-300 font-bold text-xs">
-            <i class="fa-solid fa-circle-exclamation text-base text-amber-400"></i>
-            <span>Why RoveLabs Bounces / Resets to Login in 1 Second:</span>
-          </div>
-          <p class="text-xs text-slate-200 leading-relaxed">
-            Google Chrome, Microsoft Edge, aur iOS Safari <strong>third-party cookie & storage partitioning security</strong> ki wajah se kisi bhi website ke andar doosri site (<code class="text-amber-300 bg-black/40 px-1.5 py-0.5 rounded font-mono">shareu.rovelabs.com</code>) ke login cookies block kar dete hain. RoveLabs par login hote hi browser uska session cookie drop kar deta hai, isliye RoveLabs 1 second mein wapas <code class="text-amber-300 bg-black/40 px-1 py-0.5 rounded font-mono">/login</code> par bounce ho jata hai.
-          </p>
-          <div class="pt-2 flex flex-wrap gap-2.5">
-            <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-md transition">
-              <i class="fa-solid fa-arrow-up-right-from-square"></i>
-              <span>Open RoveLabs in External New Tab (Login Works 100%)</span>
-            </a>
-            <button type="button" onclick="switchErpTab('inapp')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs border border-white/20 transition flex items-center gap-1.5">
-              <i class="fa-solid fa-chart-pie text-emerald-400"></i>
-              <span>Switch to In-App Dashboard (Instant Sync, No Cookie Block)</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Embedded Frame Preview with Sandbox Attributes -->
-        <div class="rounded-2xl overflow-hidden border border-white/10 space-y-2">
-          <div class="p-2.5 bg-black/40 border-b border-white/10 flex items-center justify-between text-xs">
-            <div class="flex items-center gap-2 text-slate-300 font-mono text-[11px]">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span>
-              <span>Preview Window (Read-Only / Preview)</span>
-            </div>
-            <a href="https://shareu.rovelabs.com/login" target="_blank" class="text-emerald-400 hover:underline text-[11px] font-semibold flex items-center gap-1">
-              <span>Open Fullscreen Tab</span> <i class="fa-solid fa-expand text-[9px]"></i>
-            </a>
-          </div>
-          <div class="w-full" style="height: 600px;">
-            <iframe src="https://shareu.rovelabs.com/login" class="w-full h-full border-0" title="RoveLabs Official Academic Login" allow="clipboard-write; fullscreen"></iframe>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
 
     <!-- ========================================== -->
     <!-- VIEW: VTU & BIET ACADEMIC QUESTION BANK & MCQS -->
