@@ -1421,6 +1421,7 @@ async function loadEmergencyContacts() {
 
 
 async function handleDirectERPLogin(overrideUsn, overridePass) {
+  if (window.event && window.event.preventDefault) window.event.preventDefault();
   const usnInput = document.getElementById('erp-direct-login-usn');
   const passInput = document.getElementById('erp-direct-login-pass');
   const btn = document.getElementById('btn-erp-direct-login');

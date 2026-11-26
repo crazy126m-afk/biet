@@ -686,21 +686,21 @@
               <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Your VTU USN</label>
               <div class="relative">
                 <i class="fa-solid fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400 text-xs"></i>
-                <input type="text" id="erp-direct-login-usn" placeholder="e.g. 4BD23CS001" class="glass-input w-full pl-9 pr-3 py-2 text-xs rounded-xl uppercase font-mono font-bold text-white tracking-wider" value="4BD23CS001">
+                <input type="text" id="erp-direct-login-usn" onkeydown="if(event.key==='Enter') handleDirectERPLogin()" placeholder="e.g. 4BD23CS001" class="glass-input w-full pl-9 pr-3 py-2 text-xs rounded-xl uppercase font-mono font-bold text-white tracking-wider" value="4BD23CS001">
               </div>
             </div>
             <div class="sm:col-span-4">
               <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Password</label>
               <div class="relative">
                 <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400 text-xs"></i>
-                <input type="password" id="erp-direct-login-pass" value="79754577@Aa" placeholder="Default: 79754577@Aa" class="glass-input w-full pl-9 pr-8 py-2 text-xs rounded-xl font-mono text-white">
+                <input type="password" id="erp-direct-login-pass" onkeydown="if(event.key==='Enter') handleDirectERPLogin()" value="79754577@Aa" placeholder="Default: 79754577@Aa" class="glass-input w-full pl-9 pr-8 py-2 text-xs rounded-xl font-mono text-white">
                 <button type="button" onclick="toggleErpPasswordVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
                   <i class="fa-solid fa-eye" id="erp-pass-eye"></i>
                 </button>
               </div>
             </div>
             <div class="sm:col-span-3">
-              <button onclick="handleDirectERPLogin()" id="btn-erp-direct-login" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 transition">
+              <button type="button" onclick="handleDirectERPLogin()" id="btn-erp-direct-login" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 transition">
                 <i class="fa-solid fa-right-to-bracket"></i>
                 <span>Login & Sync All</span>
               </button>
@@ -856,28 +856,63 @@
         </div>
       </div>
 
-      <!-- ERP SUB-VIEW 2: EMBEDDED ROVELABS LIVE PORTAL -->
-      <div id="erp-tab-frame-view" class="hidden glass-panel rounded-2xl overflow-hidden border border-emerald-500/30">
-        <div class="p-3 bg-amber-500/15 border-b border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-          <div class="flex items-center gap-2 text-amber-200">
-            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
-            <span><strong>Cross-Origin Browser Isolation:</strong> Logins inside this external portal iframe cannot synchronize back to the app. Use the <strong>"My In-App Dashboard"</strong> tab for 1-click login and complete sync!</span>
+      <!-- ERP SUB-VIEW 2: ROVELABS LIVE PORTAL LAUNCHER -->
+      <div id="erp-tab-frame-view" class="hidden glass-panel rounded-3xl p-6 border border-emerald-500/30 space-y-5 bg-gradient-to-b from-[#0a1733] to-[#071329]">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
+          <div class="flex items-center gap-3">
+            <div class="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl font-bold">
+              <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Official External ERP</span>
+                <span class="text-xs text-slate-400 font-mono">shareu.rovelabs.com</span>
+              </div>
+              <h3 class="text-lg font-extrabold text-white mt-0.5">RoveLabs Student Academic Cloud Portal</h3>
+              <p class="text-xs text-slate-300">Official BIET Autonomous ERP system for academic marks, internal assessment, and faculty feedback.</p>
+            </div>
           </div>
-          <button onclick="switchErpTab('inapp')" class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shrink-0 transition flex items-center gap-1 shadow-sm">
-            <span>Switch to In-App Sync</span> <i class="fa-solid fa-arrow-left text-[10px]"></i>
+          <button type="button" onclick="switchErpTab('inapp')" class="px-4 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-purple-500/20 hover:opacity-90 transition">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Use Fast In-App Dashboard</span>
           </button>
         </div>
-        <div class="p-3 bg-emerald-950/40 border-b border-emerald-500/30 flex items-center justify-between text-xs">
-          <div class="flex items-center gap-2 text-emerald-300 font-bold font-mono">
-            <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span>
-            <span>https://shareu.rovelabs.com/login</span>
+
+        <!-- Why iframe login fails explanation banner -->
+        <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2.5">
+          <div class="flex items-center gap-2 text-amber-300 font-bold text-xs">
+            <i class="fa-solid fa-circle-exclamation text-base text-amber-400"></i>
+            <span>Why RoveLabs Bounces / Resets to Login in 1 Second:</span>
           </div>
-          <a href="https://shareu.rovelabs.com/login" target="_blank" class="px-2.5 py-1 rounded bg-emerald-600 text-white font-bold text-[10px] flex items-center gap-1">
-            <span>Open in External Tab</span> <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
-          </a>
+          <p class="text-xs text-slate-200 leading-relaxed">
+            Google Chrome, Microsoft Edge, aur iOS Safari <strong>third-party cookie & storage partitioning security</strong> ki wajah se kisi bhi website ke andar doosri site (<code class="text-amber-300 bg-black/40 px-1.5 py-0.5 rounded font-mono">shareu.rovelabs.com</code>) ke login cookies block kar dete hain. RoveLabs par login hote hi browser uska session cookie drop kar deta hai, isliye RoveLabs 1 second mein wapas <code class="text-amber-300 bg-black/40 px-1 py-0.5 rounded font-mono">/login</code> par bounce ho jata hai.
+          </p>
+          <div class="pt-2 flex flex-wrap gap-2.5">
+            <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs flex items-center gap-2 shadow-md transition">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+              <span>Open RoveLabs in External New Tab (Login Works 100%)</span>
+            </a>
+            <button type="button" onclick="switchErpTab('inapp')" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 text-white font-bold text-xs border border-white/20 transition flex items-center gap-1.5">
+              <i class="fa-solid fa-chart-pie text-emerald-400"></i>
+              <span>Switch to In-App Dashboard (Instant Sync, No Cookie Block)</span>
+            </button>
+          </div>
         </div>
-        <div class="w-full" style="height: 700px;">
-          <iframe src="https://shareu.rovelabs.com/login" class="w-full h-full border-0" title="RoveLabs Official Academic Login"></iframe>
+
+        <!-- Embedded Frame Preview with Sandbox Attributes -->
+        <div class="rounded-2xl overflow-hidden border border-white/10 space-y-2">
+          <div class="p-2.5 bg-black/40 border-b border-white/10 flex items-center justify-between text-xs">
+            <div class="flex items-center gap-2 text-slate-300 font-mono text-[11px]">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span>
+              <span>Preview Window (Read-Only / Preview)</span>
+            </div>
+            <a href="https://shareu.rovelabs.com/login" target="_blank" class="text-emerald-400 hover:underline text-[11px] font-semibold flex items-center gap-1">
+              <span>Open Fullscreen Tab</span> <i class="fa-solid fa-expand text-[9px]"></i>
+            </a>
+          </div>
+          <div class="w-full" style="height: 600px;">
+            <iframe src="https://shareu.rovelabs.com/login" class="w-full h-full border-0" title="RoveLabs Official Academic Login" allow="clipboard-write; fullscreen"></iframe>
+          </div>
         </div>
       </div>
     </section>
