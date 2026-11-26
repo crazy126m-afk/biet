@@ -1,3 +1,7 @@
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+}
 /**
  * BIET Davangere - Smart Campus 360 Full Client Application (v2.1)
  * Real-World Satellite Geospatial Map, Live Direction Guidance,
@@ -2347,7 +2351,7 @@ function renderAdminFacultyList(list) {
         <div class="font-bold text-white text-xs truncate">${p.name}</div>
         <div class="text-[10px] text-slate-400 truncate">${p.department} • Cabin: ${p.cabin || 'Dept'}</div>
       </div>
-      <button onclick="adminResetFacultyPin(${p.id}, '${escapeHtml(p.name)}')" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-[10px] font-bold transition flex items-center gap-1">
+      <button onclick="adminResetFacultyPin(${p.id})" class="shrink-0 px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-black border border-amber-500/40 text-[10px] font-bold transition flex items-center gap-1">
         <i class="fa-solid fa-key"></i> Reset PIN
       </button>
     </div>
@@ -2368,7 +2372,9 @@ function filterAdminFaculty(q) {
 }
 
 async function adminResetFacultyPin(profId, profName) {
-  if (!confirm(`Reset login password for ${profName} back to default (biet@1234)?`)) return;
+  const prof = (adminFacultyList && adminFacultyList.find(p => p.id === profId)) || (allFaculty && allFaculty.find(p => p.id === profId));
+  const name = profName || (prof ? prof.name : `Professor #${profId}`);
+  if (!confirm(`Reset login password for ${name} back to default (biet@1234)?`)) return;
   const adminPin = (currentUser && currentUser.pin) || (document.getElementById('admin-pin-input')?.value.trim()) || '79754577@Aa';
   try {
     const res = await fetch('/api/admin/reset-faculty-pin', {
