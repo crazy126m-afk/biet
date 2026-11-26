@@ -62,7 +62,7 @@
       <div class="relative w-28 h-28 flex items-center justify-center">
         <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-[#cba23e]/40 via-purple-600/30 to-cyan-500/30 blur-2xl animate-pulse"></div>
         <div class="relative w-24 h-24 rounded-3xl p-2 bg-[#0a1733] border-2 border-[#cba23e] shadow-2xl shadow-[#cba23e]/30 flex items-center justify-center">
-          <img src="/biet-logo.png" alt="BIET Davangere Official Emblem" class="w-full h-full object-contain filter drop-shadow">
+          <img src="/biet-emblem-raw.png" alt="BIET Davangere Official Emblem" class="w-full h-full object-contain filter drop-shadow">
         </div>
       </div>
       
@@ -115,16 +115,16 @@
   <header class="sticky top-0 z-40 bg-[#050d1f]/95 backdrop-blur-md border-b border-[#cba23e]/20 px-2.5 sm:px-4 py-2">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
       <!-- Brand & Institute Info with Official Logo -->
-      <div class="flex items-center gap-2.5 cursor-pointer min-w-0 shrink group" onclick="switchView('alerts')" title="BIET Davangere - Autonomous">
-        <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl p-0.5 bg-gradient-to-br from-[#1f4178]/60 via-[#0a1733] to-[#050d1f] border border-[#cba23e]/60 shadow-lg shadow-[#cba23e]/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
-          <img src="/biet-logo.png" alt="BIET Davangere Official Emblem" class="w-full h-full object-contain filter drop-shadow">
+      <div class="flex items-center gap-2 cursor-pointer min-w-0 shrink" onclick="switchView('alerts')">
+        <div class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden p-0.5 bg-[#0a1733] border border-[#cba23e]/50 shadow-md flex items-center justify-center shrink-0">
+          <img src="/biet-emblem-raw.png" alt="BIET Davangere Official Emblem" class="w-full h-full object-contain">
         </div>
         <div class="min-w-0">
-          <div class="flex items-center gap-1.5">
+          <div class="flex items-center gap-1 sm:gap-1.5">
             <span class="font-black text-sm sm:text-base tracking-tight text-white leading-none">BIET</span>
-            <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-[#cba23e]/20 text-[#e6c66d] border border-[#cba23e]/40 font-mono font-extrabold leading-none tracking-wider">1979</span>
+            <span class="text-[9px] px-1 py-0.2 rounded bg-[#cba23e]/20 text-[#e6c66d] border border-[#cba23e]/40 font-mono font-bold leading-none hidden xs:inline">1979</span>
           </div>
-          <p class="text-[9px] sm:text-[10px] text-slate-300 font-medium truncate max-w-[110px] sm:max-w-none leading-tight mt-0.5">Davangere • Autonomous</p>
+          <p class="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate max-w-[95px] sm:max-w-none leading-tight mt-0.5">Davangere</p>
         </div>
       </div>
 
@@ -657,7 +657,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-white/10">
           <div class="flex items-center gap-3">
             <div class="w-12 h-12 rounded-2xl overflow-hidden p-1 bg-white/5 border border-[#cba23e]/50 flex items-center justify-center shrink-0 shadow-lg">
-              <img src="/biet-logo.png" alt="BIET Logo" class="w-full h-full object-contain">
+              <img src="/biet-emblem-raw.png" alt="BIET Logo" class="w-full h-full object-contain">
             </div>
             <div>
               <div class="flex items-center gap-2 flex-wrap">
@@ -1393,7 +1393,7 @@
     <div class="glass-panel p-6 rounded-3xl max-w-md w-full border border-[#cba23e]/40 bg-[#0a1733]/95 space-y-4 shadow-2xl">
       <div class="flex items-center gap-3 pb-3 border-b border-white/10">
         <div class="w-12 h-12 rounded-2xl overflow-hidden p-0.5 bg-[#050d1f] border border-[#cba23e]/60 flex items-center justify-center shrink-0 shadow-lg">
-          <img src="/biet-logo.png" alt="BIET Official Crest" class="w-full h-full object-contain">
+          <img src="/biet-emblem-raw.png" alt="BIET Official Crest" class="w-full h-full object-contain">
         </div>
         <div class="flex-1 min-w-0">
           <h3 class="font-extrabold text-base text-white flex items-center gap-1.5">
@@ -2135,7 +2135,7 @@
 
 
   <!-- Main JavaScript Logic -->
-  <script src="/app.js?v=6.4.0"></script>
+  <script src="/app.js?v=6.5.0"></script>
   <!-- MODAL: CAMPUS PLACEMENT DRIVE REGISTRATION -->
   <div id="modal-placement-register" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="glass-panel p-6 rounded-3xl max-w-lg w-full border border-amber-500/40 bg-[#0a1733]/95 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
