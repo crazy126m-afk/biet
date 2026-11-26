@@ -115,17 +115,16 @@
   <header class="sticky top-0 z-40 bg-[#050d1f]/95 backdrop-blur-md border-b border-[#cba23e]/20 px-2.5 sm:px-4 py-2">
     <div class="max-w-7xl mx-auto flex items-center justify-between gap-1.5 sm:gap-2">
       <!-- Brand & Institute Info with Official Logo -->
-      <div class="flex items-center gap-2 cursor-pointer min-w-0 shrink" onclick="switchView('alerts')">
-        <div class="relative w-9 h-9 sm:w-10 sm:h-10 rounded-xl overflow-hidden p-0.5 bg-[#0a1733] border border-[#cba23e]/50 shadow-md flex items-center justify-center shrink-0">
-          <img src="/biet-logo.png" alt="BIET Davangere Official Emblem" class="w-full h-full object-contain">
-          <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 rounded-full border border-[#050d1f]"></span>
+      <div class="flex items-center gap-2.5 cursor-pointer min-w-0 shrink group" onclick="switchView('alerts')" title="BIET Davangere - Autonomous">
+        <div class="relative w-10 h-10 sm:w-11 sm:h-11 rounded-2xl p-0.5 bg-gradient-to-br from-[#1f4178]/60 via-[#0a1733] to-[#050d1f] border border-[#cba23e]/60 shadow-lg shadow-[#cba23e]/20 flex items-center justify-center shrink-0 group-hover:scale-105 transition">
+          <img src="/biet-logo.png" alt="BIET Davangere Official Emblem" class="w-full h-full object-contain filter drop-shadow">
         </div>
         <div class="min-w-0">
-          <div class="flex items-center gap-1 sm:gap-1.5">
+          <div class="flex items-center gap-1.5">
             <span class="font-black text-sm sm:text-base tracking-tight text-white leading-none">BIET</span>
-            <span class="text-[9px] px-1 py-0.2 rounded bg-[#cba23e]/20 text-[#e6c66d] border border-[#cba23e]/40 font-mono font-bold leading-none hidden xs:inline">1979</span>
+            <span class="text-[9px] px-1.5 py-0.5 rounded-full bg-[#cba23e]/20 text-[#e6c66d] border border-[#cba23e]/40 font-mono font-extrabold leading-none tracking-wider">1979</span>
           </div>
-          <p class="text-[9px] sm:text-[10px] text-slate-400 font-medium truncate max-w-[95px] sm:max-w-none leading-tight mt-0.5">Davangere</p>
+          <p class="text-[9px] sm:text-[10px] text-slate-300 font-medium truncate max-w-[110px] sm:max-w-none leading-tight mt-0.5">Davangere • Autonomous</p>
         </div>
       </div>
 
@@ -2136,7 +2135,7 @@
 
 
   <!-- Main JavaScript Logic -->
-  <script src="/app.js?v=6.3.0"></script>
+  <script src="/app.js?v=6.4.0"></script>
   <!-- MODAL: CAMPUS PLACEMENT DRIVE REGISTRATION -->
   <div id="modal-placement-register" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="glass-panel p-6 rounded-3xl max-w-lg w-full border border-amber-500/40 bg-[#0a1733]/95 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
