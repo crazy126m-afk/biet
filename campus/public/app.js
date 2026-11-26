@@ -2992,18 +2992,64 @@ async function deleteAppointment(appId) {
   }
 }
 
+function togglePasswordVisibility(inputId, iconId) {
+  const input = document.getElementById(inputId);
+  const icon = document.getElementById(iconId);
+  if (!input) return;
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) {
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    }
+  } else {
+    input.type = 'password';
+    if (icon) {
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+}
+
 function openModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('hidden');
   if (id === 'modal-auth-login') {
     switchAuthTab('faculty');
-    if (document.getElementById('auth-faculty-pass')) document.getElementById('auth-faculty-pass').value = '';
-    if (document.getElementById('auth-admin-pass')) document.getElementById('auth-admin-pass').value = '';
+    if (document.getElementById('auth-faculty-pass')) {
+      document.getElementById('auth-faculty-pass').value = '';
+      document.getElementById('auth-faculty-pass').type = 'password';
+    }
+    if (document.getElementById('auth-admin-pass')) {
+      document.getElementById('auth-admin-pass').value = '';
+      document.getElementById('auth-admin-pass').type = 'password';
+    }
+    if (document.getElementById('eye-auth-faculty')) document.getElementById('eye-auth-faculty').className = 'fa-regular fa-eye text-xs';
+    if (document.getElementById('eye-auth-admin')) document.getElementById('eye-auth-admin').className = 'fa-regular fa-eye text-xs';
     const errBox = document.getElementById('auth-login-error');
     if (errBox) errBox.classList.add('hidden');
     if (!document.getElementById('auth-faculty-id')?.value && typeof allFaculty !== 'undefined' && allFaculty.length > 0) {
       selectAuthFaculty(allFaculty[0].id);
     }
+  } else if (id === 'modal-faculty-set-pin') {
+    // Strictly clear all password fields so old and new passwords are NEVER pre-filled!
+    ['set-pin-current', 'set-pin-new', 'set-pin-confirm'].forEach(fId => {
+      const field = document.getElementById(fId);
+      if (field) {
+        field.value = '';
+        field.type = 'password';
+      }
+    });
+    ['eye-set-pin-current', 'eye-set-pin-new', 'eye-set-pin-confirm'].forEach(eyeId => {
+      const eye = document.getElementById(eyeId);
+      if (eye) eye.className = 'fa-regular fa-eye text-xs';
+    });
+  } else if (id === 'modal-admin') {
+    if (document.getElementById('admin-pin-input')) {
+      document.getElementById('admin-pin-input').value = '';
+      document.getElementById('admin-pin-input').type = 'password';
+    }
+    if (document.getElementById('eye-admin-pin')) document.getElementById('eye-admin-pin').className = 'fa-regular fa-eye text-xs';
   }
 }
 function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
@@ -3022,6 +3068,18 @@ function openChangePasswordModal(role = 'faculty') {
       }
     }
   }
+  // Strictly clear all password fields so old and new passwords are NEVER pre-filled!
+  ['set-pin-current', 'set-pin-new', 'set-pin-confirm'].forEach(fId => {
+    const field = document.getElementById(fId);
+    if (field) {
+      field.value = '';
+      field.type = 'password';
+    }
+  });
+  ['eye-set-pin-current', 'eye-set-pin-new', 'eye-set-pin-confirm'].forEach(eyeId => {
+    const eye = document.getElementById(eyeId);
+    if (eye) eye.className = 'fa-regular fa-eye text-xs';
+  });
   openModal('modal-faculty-set-pin');
 }
 
@@ -3038,6 +3096,19 @@ function switchChangePassTab(role) {
   const facultyPicker = document.getElementById('chpass-faculty-picker-section');
   const currentLabel = document.getElementById('chpass-current-label');
   const securityHint = document.getElementById('chpass-security-hint');
+
+  // Clear fields when switching role tab
+  ['set-pin-current', 'set-pin-new', 'set-pin-confirm'].forEach(fId => {
+    const field = document.getElementById(fId);
+    if (field) {
+      field.value = '';
+      field.type = 'password';
+    }
+  });
+  ['eye-set-pin-current', 'eye-set-pin-new', 'eye-set-pin-confirm'].forEach(eyeId => {
+    const eye = document.getElementById(eyeId);
+    if (eye) eye.className = 'fa-regular fa-eye text-xs';
+  });
 
   if (role === 'faculty') {
     if (tabFaculty) tabFaculty.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1.5';

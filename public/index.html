@@ -1466,7 +1466,12 @@
                 <i class="fa-solid fa-key text-[9px]"></i> Change / Set PIN?
               </button>
             </div>
-            <input type="password" id="auth-faculty-pass" value="" placeholder="Enter Password / PIN" autocomplete="current-password" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+            <div class="relative flex items-center">
+              <input type="password" id="auth-faculty-pass" value="" placeholder="Enter Password / PIN" autocomplete="off" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-white font-mono">
+              <button type="button" onclick="togglePasswordVisibility('auth-faculty-pass', 'eye-auth-faculty')" class="absolute right-3 text-slate-400 hover:text-white transition p-1" title="Show/Hide Password">
+                <i id="eye-auth-faculty" class="fa-regular fa-eye text-xs"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1479,7 +1484,12 @@
                 <i class="fa-solid fa-key text-[9px]"></i> Change Admin PIN?
               </button>
             </div>
-            <input type="password" id="auth-admin-pass" value="" placeholder="Enter Administrator Password" autocomplete="current-password" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+            <div class="relative flex items-center">
+              <input type="password" id="auth-admin-pass" value="" placeholder="Enter Administrator Password" autocomplete="off" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-white font-mono">
+              <button type="button" onclick="togglePasswordVisibility('auth-admin-pass', 'eye-auth-admin')" class="absolute right-3 text-slate-400 hover:text-white transition p-1" title="Show/Hide Password">
+                <i id="eye-auth-admin" class="fa-regular fa-eye text-xs"></i>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1556,15 +1566,30 @@
 
         <div>
           <label id="chpass-current-label" class="block text-slate-400 mb-1">Current Password / PIN *</label>
-          <input type="password" id="set-pin-current" required placeholder="Enter Current Password" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+          <div class="relative flex items-center">
+            <input type="password" id="set-pin-current" required autocomplete="new-password" placeholder="Enter Current Password" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-white font-mono">
+            <button type="button" onclick="togglePasswordVisibility('set-pin-current', 'eye-set-pin-current')" class="absolute right-3 text-slate-400 hover:text-white transition p-1" title="Show/Hide Password">
+              <i id="eye-set-pin-current" class="fa-regular fa-eye text-xs"></i>
+            </button>
+          </div>
         </div>
         <div>
           <label class="block text-slate-400 mb-1">Enter New Password / PIN (Min 6 chars) *</label>
-          <input type="password" id="set-pin-new" required minlength="6" placeholder="Enter New Password (min 6 chars)" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+          <div class="relative flex items-center">
+            <input type="password" id="set-pin-new" required minlength="6" autocomplete="new-password" placeholder="Enter New Password (min 6 chars)" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-white font-mono">
+            <button type="button" onclick="togglePasswordVisibility('set-pin-new', 'eye-set-pin-new')" class="absolute right-3 text-slate-400 hover:text-white transition p-1" title="Show/Hide Password">
+              <i id="eye-set-pin-new" class="fa-regular fa-eye text-xs"></i>
+            </button>
+          </div>
         </div>
         <div>
           <label class="block text-slate-400 mb-1">Confirm New Password / PIN *</label>
-          <input type="password" id="set-pin-confirm" required minlength="6" placeholder="Re-enter New Password" class="w-full glass-input rounded-xl px-3 py-2 text-white font-mono">
+          <div class="relative flex items-center">
+            <input type="password" id="set-pin-confirm" required minlength="6" autocomplete="new-password" placeholder="Re-enter New Password" class="w-full glass-input rounded-xl pl-3 pr-10 py-2 text-white font-mono">
+            <button type="button" onclick="togglePasswordVisibility('set-pin-confirm', 'eye-set-pin-confirm')" class="absolute right-3 text-slate-400 hover:text-white transition p-1" title="Show/Hide Password">
+              <i id="eye-set-pin-confirm" class="fa-regular fa-eye text-xs"></i>
+            </button>
+          </div>
         </div>
 
         <div class="pt-2 flex items-center justify-end gap-2">
@@ -1908,7 +1933,12 @@
       <div id="admin-auth-box" class="space-y-3 text-xs">
         <p class="text-slate-300">Enter Admin Master Password to access privileged campus controls:</p>
         <div class="flex items-center gap-2">
-          <input type="password" id="admin-pin-input" placeholder="Admin Password" class="glass-input rounded-xl px-3 py-2 text-white flex-1 font-mono">
+          <div class="relative flex-1 flex items-center">
+            <input type="password" id="admin-pin-input" autocomplete="off" placeholder="Admin Password" class="glass-input rounded-xl pl-3 pr-10 py-2 text-white w-full font-mono">
+            <button type="button" onclick="togglePasswordVisibility('admin-pin-input', 'eye-admin-pin')" class="absolute right-3 text-slate-400 hover:text-white transition p-1" title="Show/Hide Password">
+              <i id="eye-admin-pin" class="fa-regular fa-eye text-xs"></i>
+            </button>
+          </div>
           <button onclick="verifyAdminPIN()" class="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold transition">Unlock Hub</button>
         </div>
         <p class="text-[10px] text-slate-500">Security Gate: Restricted to authorized BIET administrative personnel.</p>
@@ -2106,7 +2136,7 @@
 
 
   <!-- Main JavaScript Logic -->
-  <script src="/app.js?v=6.2.0"></script>
+  <script src="/app.js?v=6.3.0"></script>
   <!-- MODAL: CAMPUS PLACEMENT DRIVE REGISTRATION -->
   <div id="modal-placement-register" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
     <div class="glass-panel p-6 rounded-3xl max-w-lg w-full border border-amber-500/40 bg-[#0a1733]/95 space-y-4 shadow-2xl max-h-[90vh] overflow-y-auto">
