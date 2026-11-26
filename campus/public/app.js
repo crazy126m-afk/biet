@@ -2220,11 +2220,12 @@ function initUserSession() {
   if (saved) {
     try {
       currentUser = JSON.parse(saved);
+      if (currentUser && currentUser.role === 'student') {
+        currentUser = null;
+        localStorage.removeItem('biet_user_session');
+      }
       updateAuthUI();
       updateErpAuthStatus();
-      if (currentUser && currentUser.role === 'student') {
-        syncAcademicPreferences(currentUser);
-      }
     } catch (e) {
       currentUser = null;
     }
@@ -2238,25 +2239,20 @@ function initUserSession() {
 function switchAuthTab(role) {
   document.getElementById('auth-role').value = role;
 
-  const tabStudent = document.getElementById('auth-tab-student');
   const tabFaculty = document.getElementById('auth-tab-faculty');
   const tabAdmin = document.getElementById('auth-tab-admin');
 
-  const fieldsStudent = document.getElementById('auth-student-fields');
   const fieldsFaculty = document.getElementById('auth-faculty-fields');
   const fieldsAdmin = document.getElementById('auth-admin-fields');
 
-  [tabStudent, tabFaculty, tabAdmin].forEach(t => {
+  [tabFaculty, tabAdmin].forEach(t => {
     if (t) t.className = 'py-2 rounded-xl text-slate-300 hover:text-white transition flex items-center justify-center gap-1';
   });
-  [fieldsStudent, fieldsFaculty, fieldsAdmin].forEach(f => {
+  [fieldsFaculty, fieldsAdmin].forEach(f => {
     if (f) f.classList.add('hidden');
   });
 
-  if (role === 'student') {
-    if (tabStudent) tabStudent.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1';
-    if (fieldsStudent) fieldsStudent.classList.remove('hidden');
-  } else if (role === 'faculty') {
+  if (role === 'faculty') {
     if (tabFaculty) tabFaculty.className = 'py-2 rounded-xl bg-purple-600 text-white font-bold transition flex items-center justify-center gap-1';
     if (fieldsFaculty) fieldsFaculty.classList.remove('hidden');
     if (!document.getElementById('auth-faculty-id').value && allFaculty.length > 0) {
@@ -2274,10 +2270,7 @@ async function handleUnifiedAuthLogin(e) {
   let identifier = '';
   let password = '';
 
-  if (role === 'student') {
-    identifier = document.getElementById('auth-student-usn').value.trim();
-    password = document.getElementById('auth-student-pass').value.trim();
-  } else if (role === 'faculty') {
+  if (role === 'faculty') {
     identifier = document.getElementById('auth-faculty-id').value;
     if (!identifier) {
       alert("Please search and select a professor first.");
@@ -2305,15 +2298,7 @@ async function handleUnifiedAuthLogin(e) {
       closeModal('modal-auth-login');
       playChimeSound();
 
-      if (role === 'student') {
-        showPopUpNotification({
-          title: `🎓 Welcome, ${currentUser.name}!`,
-          message: `Logged in as Student (${currentUser.usn}).`,
-          type: 'general'
-        });
-        updateErpAuthStatus();
-        syncAcademicPreferences(currentUser);
-      } else if (role === 'faculty') {
+      if (role === 'faculty') {
         showPopUpNotification({
           title: `👨‍🏫 Welcome, ${currentUser.name}!`,
           message: `Faculty Control Bar active. Cabin: ${currentUser.cabin}`,
@@ -2367,8 +2352,8 @@ function updateAuthUI() {
     if (pill) {
       pill.innerHTML = `
         <button onclick="openModal('modal-auth-login')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white text-xs font-bold shadow-md shadow-purple-500/20 flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-right-to-bracket text-xs"></i>
-          <span>Sign In / Role</span>
+          <i class="fa-solid fa-chalkboard-user text-xs"></i>
+          <span>Faculty Login</span>
         </button>
       `;
     }
@@ -2376,30 +2361,7 @@ function updateAuthUI() {
     return;
   }
 
-  if (currentUser.role === 'student') {
-    if (pill) {
-      pill.innerHTML = `
-        <div class="flex items-center gap-1.5 bg-white/5 border border-purple-500/30 rounded-xl px-2.5 py-1">
-          <i class="fa-solid fa-user-graduate text-purple-400 text-xs"></i>
-          <span class="text-xs font-bold text-white truncate max-w-[120px]">${currentUser.name.split(' ')[0]}</span>
-          <span class="text-[10px] text-slate-400 font-mono">(${currentUser.usn})</span>
-          <button onclick="logoutUser()" title="Logout" class="text-slate-400 hover:text-rose-400 ml-1">
-            <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
-          </button>
-        </div>
-      `;
-    }
-    if (roleBanner) roleBanner.classList.add('hidden');
-
-    const bookName = document.getElementById('book-student-name');
-    const bookUsn = document.getElementById('book-student-usn');
-    if (bookName) bookName.value = currentUser.name;
-    if (bookUsn) bookUsn.value = currentUser.usn;
-
-    const lfName = document.getElementById('form-lf-name');
-    if (lfName) lfName.value = currentUser.name;
-
-  } else if (currentUser.role === 'faculty') {
+  if (currentUser.role === 'faculty') {
     if (pill) {
       pill.innerHTML = `
         <div class="flex items-center gap-1.5 bg-purple-950/40 border border-purple-500/40 rounded-xl px-2.5 py-1">
@@ -3423,81 +3385,5 @@ function copyCheatSheetSummary(id) {
 }
 
 
-/* =========================================================
-   FEATURE 5: DIGITAL SMART STUDENT ID CARD BADGE
-========================================================= */
-async function openStudentIdCardModal(usn) {
-  const targetUSN = usn || (currentUser && currentUser.role === 'student' ? currentUser.usn : '') || (currentLoadedStudent ? currentLoadedStudent.usn : '') || '4BD23CS001';
 
-  try {
-    const res = await fetch(`/api/students/id-card?usn=${encodeURIComponent(targetUSN)}`);
-    const data = await res.json();
-    if (data.success && data.student) {
-      const st = data.student;
-      document.getElementById('idc-student-name').textContent = st.student_name;
-      document.getElementById('idc-usn').textContent = st.usn;
-      document.getElementById('idc-branch').textContent = st.branch;
-      document.getElementById('idc-sem').textContent = `${st.semester} (Sec ${st.section || 'A'})`;
-      document.getElementById('idc-blood').textContent = st.blood_group || 'B+ Rh+';
-      document.getElementById('idc-validity').textContent = st.academic_years || '2023 - 2027';
-
-      const qrContainer = document.getElementById('idc-qr-container');
-      if (qrContainer) {
-        qrContainer.innerHTML = `
-          <svg class="w-14 h-14" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="100" height="100" fill="white"/>
-            <rect x="10" y="10" width="25" height="25" stroke="black" stroke-width="5"/>
-            <rect x="17" y="17" width="11" height="11" fill="black"/>
-            <rect x="65" y="10" width="25" height="25" stroke="black" stroke-width="5"/>
-            <rect x="72" y="17" width="11" height="11" fill="black"/>
-            <rect x="10" y="65" width="25" height="25" stroke="black" stroke-width="5"/>
-            <rect x="17" y="72" width="11" height="11" fill="black"/>
-            <rect x="42" y="15" width="6" height="6" fill="black"/>
-            <rect x="52" y="22" width="6" height="6" fill="black"/>
-            <rect x="42" y="42" width="16" height="16" fill="#0a1733"/>
-            <rect x="15" y="45" width="6" height="6" fill="black"/>
-            <rect x="25" y="52" width="6" height="6" fill="black"/>
-            <rect x="68" y="45" width="6" height="6" fill="black"/>
-            <rect x="78" y="55" width="6" height="6" fill="black"/>
-            <rect x="45" y="70" width="6" height="6" fill="black"/>
-            <rect x="55" y="78" width="6" height="6" fill="black"/>
-            <rect x="70" y="72" width="6" height="6" fill="black"/>
-          </svg>
-        `;
-      }
-      openModal('modal-student-id-card');
-    }
-  } catch (err) {
-    console.error('Error opening Student ID Card:', err);
-  }
-}
-
-function printStudentIdCard() {
-  const cardEl = document.getElementById('id-card-printable');
-  if (!cardEl) return;
-
-  const printWindow = window.open('', '_blank', 'width=600,height=700');
-  printWindow.document.write(`
-    <html>
-      <head>
-        <title>BIET Smart Student ID Badge</title>
-        <script src="https://cdn.tailwindcss.com"><\/script>
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <style>
-          body { background: #f1f5f9; padding: 20px; display: flex; justify-content: center; }
-          @media print { body { padding: 0; background: white; } }
-        </style>
-      </head>
-      <body>
-        <div style="width: 380px;">
-          ${cardEl.outerHTML}
-        </div>
-        <script>
-          setTimeout(() => { window.print(); }, 400);
-        <\/script>
-      </body>
-    </html>
-  `);
-  printWindow.document.close();
-}
 
