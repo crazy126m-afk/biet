@@ -97,49 +97,49 @@ def seed_advanced_features(db_path=None):
          "CSE, ISE, ECE, EEE", 7.00, 0, "2026-12-05", "2026-12-02 18:00",
          "Round 1: Online Technical & Logical Reasoning Test | Round 2: Core Domain & System Design Interview | Round 3: Leadership & HR Evaluation",
          "BIET Central Placement Auditorium, Main Block (Ground Floor)", "Bengaluru / Coimbatore", "Upcoming",
-         "https://career.bosch.com/biet-drive-2026"),
+         "https://www.bosch.in/careers/"),
 
         ("Cisco Systems India", "https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=120", 
          "Network Software Engineer (Core Networking & Security)", "14.50 LPA", 
          "CSE, ISE, ECE", 7.50, 0, "2026-12-10", "2026-12-06 23:59",
          "Round 1: HackerRank Online Coding & NetAcad Aptitude | Round 2: Technical Architecture Deep Dive | Round 3: Executive HR Discussion",
          "Department of CS Seminar Hall, MV-Block", "Bengaluru", "Upcoming",
-         "https://jobs.cisco.com/university/biet"),
+         "https://www.cisco.com/c/en/us/about/careers.html"),
 
         ("Tata Consultancy Services (TCS Digital & Prime)", "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=120", 
          "Digital / Prime Systems Engineer (Cloud, AI & Full Stack)", "7.00 - 9.00 LPA", 
          "All Engineering Branches (BE / B.Tech)", 6.50, 1, "2026-12-12", "2026-12-08 17:00",
          "Round 1: National Qualifier Test (NQT) - Cognitive & Advanced Coding | Round 2: Technical Interview | Round 3: HR & Document Verification",
          "BIET Central Computing Complex (CCC - Lab 1 to 4)", "Pan India (Bangalore / Pune / Hyderabad)", "Upcoming",
-         "https://www.tcs.com/careers/nqt-campus"),
+         "https://nextstep.tcs.com/campus/#/"),
 
         ("Infosys Limited", "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=120", 
          "Specialist Programmer (Power Programmer) & Digital Specialist", "9.50 LPA", 
          "CSE, ISE, ECE, EEE", 7.00, 0, "2026-12-16", "2026-12-11 20:00",
          "Round 1: InfyTQ / HackWithInfy Advanced Coding Round | Round 2: Technical Interview on Data Structures & System Architecture | Round 3: HR Interview",
          "Online Assessment followed by Virtual Interview at BIET Placement Cell", "Bengaluru / Mysuru", "Upcoming",
-         "https://career.infosys.com/sp-drive"),
+         "https://www.infosys.com/careers.html"),
 
         ("LTIMindtree", "https://images.unsplash.com/photo-1497215728101-856f4ea42174?w=120", 
          "Graduate Engineer Trainee - Cloud Enterprise & DevOps", "5.50 - 6.50 LPA", 
          "CSE, ISE, ECE, EEE, MECH, CIVIL", 6.00, 1, "2026-12-18", "2026-12-14 18:00",
          "Round 1: Online Aptitude, English Verbal & Coding Test | Round 2: Technical Face-to-Face Interview | Round 3: HR Discussion",
          "BIET Auditorium, Golden Jubilee Block", "Bengaluru / Chennai", "Upcoming",
-         "https://www.ltimindtree.com/careers/campus"),
+         "https://www.ltimindtree.com/careers/early-careers/"),
 
         ("Continental Automotive Systems", "https://images.unsplash.com/photo-1503376780353-7e6692767b70?w=120", 
          "R&D Graduate Engineer - ADAS, Automotive IoT & Electronics", "8.25 LPA", 
          "ECE, EEE, CSE, MECH", 6.80, 0, "2026-12-21", "2026-12-17 18:00",
          "Round 1: C/C++ Programming & Core Automotive Electronics Aptitude | Round 2: Embedded Systems & Hardware Technical Round | Round 3: HR Round",
          "ECE Department Conference Room, MV-Block", "Bengaluru", "Upcoming",
-         "https://www.continental.com/careers/campus-india"),
+         "https://www.continental.com/en-in/career/"),
 
         ("SLK Software", "https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=120", 
          "Associate Software Engineer - Banking & Fintech Solutions", "5.00 - 6.00 LPA", 
          "CSE, ISE, ECE", 6.25, 1, "2026-12-23", "2026-12-19 17:00",
          "Round 1: Online Cognitive & Java/Python Coding Test | Round 2: Technical Interview | Round 3: HR Fitment",
          "BIET Central Placement Hall", "Bengaluru", "Upcoming",
-         "https://www.slksoftware.com/campus-hiring")
+         "https://www.slksoftware.com/careers/")
     ]
     for p in placement_data:
         c.execute("""

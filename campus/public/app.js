@@ -2586,7 +2586,7 @@ async function submitAdminBroadcast() {
 // PWA
 function initServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js?v=5.9').then(reg => {
+    navigator.serviceWorker.register('/sw.js?v=6.0').then(reg => {
       reg.update().catch(() => {});
     }).catch(() => {});
   }
@@ -3525,15 +3525,21 @@ function renderPlacementDrives(drives) {
           </div>
         </div>
 
-        <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+        <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-2 flex-wrap">
           <div class="text-[10px] text-slate-400">
             <span class="block">Drive Date: <strong class="text-white">${d.drive_date}</strong></span>
             <span class="text-amber-300">Deadline: ${d.registration_deadline}</span>
           </div>
-          <a href="${d.apply_link || '#'}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold text-xs shadow-md shadow-amber-500/20 transition flex items-center gap-1">
-            <span>Register</span>
-            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
-          </a>
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <button type="button" onclick="openPlacementRegisterModal(${d.id})" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 text-black font-extrabold text-xs shadow-md shadow-amber-500/20 transition flex items-center gap-1 cursor-pointer">
+              <i class="fa-solid fa-file-signature text-[11px]"></i>
+              <span>Register</span>
+            </button>
+            <a href="${d.apply_link || 'https://www.bietdvg.edu'}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white text-xs font-semibold transition flex items-center gap-1" title="Open Official Corporate Portal">
+              <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-amber-400"></i>
+              <span class="hidden sm:inline">Portal</span>
+            </a>
+          </div>
         </div>
       </div>
     `;
@@ -3935,3 +3941,88 @@ function copyCheatSheetSummary(id) {
 
 
 
+
+// Placement Drive Registration Modal Handlers
+function openPlacementRegisterModal(driveId) {
+  const drive = allPlacementDrives.find(d => d.id === driveId);
+  if (!drive) return;
+
+  document.getElementById('pl-reg-drive-id').value = drive.id;
+  document.getElementById('pl-reg-company-name').value = drive.company_name;
+  document.getElementById('pl-reg-corp-link').value = drive.apply_link || 'https://www.bietdvg.edu';
+
+  document.getElementById('pl-reg-modal-title').textContent = drive.role_title;
+  document.getElementById('pl-reg-modal-company').textContent = drive.company_name;
+  document.getElementById('pl-reg-summary-ctc').textContent = drive.ctc_package;
+  document.getElementById('pl-reg-summary-cgpa').textContent = `${drive.min_cgpa} & Above`;
+  document.getElementById('pl-reg-summary-date').textContent = drive.drive_date;
+
+  const corpBtn = document.getElementById('pl-reg-official-corp-btn');
+  if (corpBtn) corpBtn.href = drive.apply_link || 'https://www.bietdvg.edu';
+
+  // Auto-fill student info if logged in or available in local state
+  if (currentUser && currentUser.role === 'student') {
+    if (document.getElementById('pl-reg-student-name')) document.getElementById('pl-reg-student-name').value = currentUser.name || '';
+    if (document.getElementById('pl-reg-usn')) document.getElementById('pl-reg-usn').value = currentUser.usn || '';
+  }
+
+  // Reset success box vs form visibility
+  document.getElementById('form-placement-register').classList.remove('hidden');
+  document.getElementById('pl-reg-success-box').classList.add('hidden');
+
+  openModal('modal-placement-register');
+}
+
+async function handlePlacementRegisterSubmit(e) {
+  e.preventDefault();
+  const driveId = document.getElementById('pl-reg-drive-id').value;
+  const companyName = document.getElementById('pl-reg-company-name').value;
+  const corpLink = document.getElementById('pl-reg-corp-link').value;
+  const studentName = document.getElementById('pl-reg-student-name').value.trim();
+  const usn = document.getElementById('pl-reg-usn').value.trim().toUpperCase();
+  const branch = document.getElementById('pl-reg-branch').value;
+  const cgpa = document.getElementById('pl-reg-cgpa').value.trim();
+  const backlogs = document.getElementById('pl-reg-backlogs').value.trim();
+  const phone = document.getElementById('pl-reg-phone').value.trim();
+  const email = document.getElementById('pl-reg-email').value.trim();
+
+  try {
+    const res = await fetch('/api/placements/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        drive_id: driveId,
+        company_name: companyName,
+        student_name: studentName,
+        usn: usn,
+        branch: branch,
+        cgpa: cgpa,
+        backlogs: backlogs,
+        phone: phone,
+        email: email
+      })
+    });
+    const data = await res.json();
+    if (data.success) {
+      playChimeSound();
+      document.getElementById('form-placement-register').classList.add('hidden');
+      const sBox = document.getElementById('pl-reg-success-box');
+      sBox.classList.remove('hidden');
+      document.getElementById('pl-reg-success-msg').textContent = `Registration successfully confirmed for ${companyName}. Your credentials have been forwarded to the Training & Placement Cell.`;
+      document.getElementById('pl-reg-success-token').textContent = `REGISTRATION TOKEN: ${data.reg_code}`;
+      const sCorpBtn = document.getElementById('pl-reg-success-corp-btn');
+      if (sCorpBtn) sCorpBtn.href = corpLink || 'https://www.bietdvg.edu';
+
+      showPopUpNotification({
+        title: '🎉 Placement Registered!',
+        message: `${studentName} registered for ${companyName}. Token: ${data.reg_code}`,
+        type: 'placement'
+      });
+    } else {
+      alert(data.error || 'Failed to submit registration.');
+    }
+  } catch (err) {
+    console.error(err);
+    alert('Network error submitting placement registration.');
+  }
+}

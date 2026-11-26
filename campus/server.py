@@ -817,6 +817,66 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
         path = parsed_url.path
         body = self.parse_body()
 
+        # 0. API: Register Student for Campus Placement Drive
+        if path == "/api/placements/register":
+            drive_id = body.get("drive_id")
+            company_name = body.get("company_name", "Campus Placement Partner")
+            student_name = (body.get("student_name") or "").strip()
+            usn = (body.get("usn") or "").strip().upper()
+            branch = body.get("branch", "Computer Science & Engineering")
+            cgpa = float(body.get("cgpa", 0.0) or 0.0)
+            backlogs = int(body.get("backlogs", 0) or 0)
+            phone = (body.get("phone") or "").strip()
+            email = (body.get("email") or "").strip()
+
+            if not student_name or not usn:
+                self.send_json({"success": False, "error": "Student Name and VTU USN are required."}, 400)
+                return
+
+            now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+            reg_code = f"BIET-PL-{int(datetime.now().timestamp()) % 1000000:06d}"
+
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("""
+                CREATE TABLE IF NOT EXISTS placement_registrations (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    drive_id INTEGER,
+                    company_name TEXT,
+                    student_name TEXT,
+                    usn TEXT,
+                    branch TEXT,
+                    cgpa REAL,
+                    backlogs INTEGER,
+                    phone TEXT,
+                    email TEXT,
+                    reg_code TEXT,
+                    applied_at TEXT,
+                    status TEXT DEFAULT 'Verified'
+                )
+            """)
+            cursor.execute("""
+                INSERT INTO placement_registrations (drive_id, company_name, student_name, usn, branch, cgpa, backlogs, phone, email, reg_code, applied_at, status)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Verified')
+            """, (drive_id, company_name, student_name, usn, branch, cgpa, backlogs, phone, email, reg_code, now_str))
+            conn.commit()
+            conn.close()
+
+            LIVE_NOTIFICATIONS.append({
+                "id": f"pl-reg-{int(datetime.now().timestamp())}",
+                "title": f"💼 Placement Drive Registered",
+                "message": f"{student_name} ({usn}) registered for {company_name}. Token: {reg_code}",
+                "type": "info",
+                "timestamp": now_str
+            })
+
+            self.send_json({
+                "success": True,
+                "reg_code": reg_code,
+                "message": f"Successfully registered for {company_name} Recruitment Drive! Your official registration token is {reg_code}."
+            })
+            return
+
         # 0. API: Unified Role-Based Authentication (Student vs Faculty vs Admin)
         if path == "/api/auth/login":
             role = body.get("role", "student").lower() # 'student', 'faculty', 'admin'
@@ -1886,6 +1946,14 @@ def ensure_authentic_data():
             except Exception as e:
                 print("Advanced features seed error:", e)
 
+                # Update placement drive URLs to verified working links
+        c.execute("UPDATE placement_drives SET apply_link = 'https://www.bosch.in/careers/' WHERE id = 1")
+        c.execute("UPDATE placement_drives SET apply_link = 'https://www.cisco.com/c/en/us/about/careers.html' WHERE id = 2")
+        c.execute("UPDATE placement_drives SET apply_link = 'https://nextstep.tcs.com/campus/#/' WHERE id = 3")
+        c.execute("UPDATE placement_drives SET apply_link = 'https://www.infosys.com/careers.html' WHERE id = 4")
+        c.execute("UPDATE placement_drives SET apply_link = 'https://www.ltimindtree.com/careers/early-careers/' WHERE id = 5")
+        c.execute("UPDATE placement_drives SET apply_link = 'https://www.continental.com/en-in/career/' WHERE id = 6")
+        c.execute("UPDATE placement_drives SET apply_link = 'https://www.slksoftware.com/careers/' WHERE id = 7")
         conn.commit()
         conn.close()
         print("✅ Authentic database integrity check completed.")
