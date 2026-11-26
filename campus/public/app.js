@@ -311,7 +311,7 @@ function clearNotifications() {
 // ==========================================
 function switchView(viewName) {
   currentView = viewName;
-  const views = ['alerts', 'map', 'lostfound', 'faculty', 'erp', 'emergency', 'questionbank', 'placements', 'timetable', 'gpa', 'cheatsheets'];
+  const views = ['alerts', 'map', 'lostfound', 'faculty', 'portal', 'emergency', 'questionbank', 'placements', 'gpa', 'cheatsheets'];
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
@@ -343,15 +343,10 @@ function switchView(viewName) {
     }, 150);
   }
 
-  if (viewName === 'erp') {
-    updateErpAuthStatus();
-    const targetUSN = (currentUser && currentUser.role === 'student' && currentUser.usn) || document.getElementById('erp-usn-input')?.value || '4BD23CS001';
-    lookupStudentERP(targetUSN);
-  }
+  
 
   if (viewName === 'placements') loadPlacementDrives();
-  if (viewName === 'timetable') loadTimetableSchedule();
-  if (viewName === 'gpa') autoLoadGPACourses();
+    if (viewName === 'gpa') autoLoadGPACourses();
   if (viewName === 'cheatsheets') loadCheatSheets();
   if (viewName === 'questionbank' && (!allQuestionBanks || allQuestionBanks.length === 0)) loadQuestionBanks();
 
@@ -2109,7 +2104,7 @@ async function handleUnifiedAuthLogin(e) {
           type: 'general'
         });
         updateErpAuthStatus();
-        switchView('erp');
+        switchView('portal');
         await lookupStudentERP(currentUser.usn);
         syncAcademicPreferences(currentUser);
       } else if (role === 'faculty') {

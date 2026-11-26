@@ -111,9 +111,6 @@
         <button onclick="switchView('placements')" id="desktop-nav-placements" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-briefcase mr-1 text-amber-400"></i> Placements
         </button>
-        <button onclick="switchView('timetable')" id="desktop-nav-timetable" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
-          <i class="fa-solid fa-calendar-days mr-1 text-cyan-400"></i> Timetable
-        </button>
         <button onclick="switchView('gpa')" id="desktop-nav-gpa" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-calculator mr-1 text-emerald-400"></i> CGPA Calc
         </button>
@@ -126,8 +123,8 @@
         <button onclick="switchView('lostfound')" id="desktop-nav-lostfound" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-box-open mr-1 text-pink-400"></i> Lost & Found
         </button>
-        <button onclick="switchView('erp')" id="desktop-nav-erp" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
-          <i class="fa-solid fa-graduation-cap mr-1 text-emerald-400"></i> ERP
+        <button onclick="switchView('portal')" id="desktop-nav-portal" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-graduation-cap mr-1 text-emerald-400"></i> Student Portal
         </button>
         <button onclick="switchView('map')" id="desktop-nav-map" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-map-location-dot mr-1 text-cyan-400"></i> Map
@@ -637,224 +634,70 @@
     <!-- ========================================== -->
     <!-- VIEW 5: ACADEMIC ERP (ROVELABS IN-APP INTEGRATION) -->
     <!-- ========================================== -->
-    <section id="view-erp" class="space-y-5 hidden">
-      <!-- BIET Student Academic Portal Header -->
-      <div class="glass-panel p-5 rounded-2xl border border-emerald-500/20 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider">Official Autonomous ERP</span>
-            <span class="text-xs text-slate-400 font-mono">• bietdvg.edu</span>
+        <!-- ========================================== -->
+    <!-- VIEW: BIET STUDENT ACADEMIC CLOUD PORTAL (SHAREU) -->
+    <!-- ========================================== -->
+    <section id="view-portal" class="space-y-5 hidden">
+      <!-- Portal Top Header -->
+      <div class="glass-panel p-5 rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-[#071329] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+        <div class="flex items-center gap-3.5">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-white text-xl font-black shadow-lg shadow-emerald-500/20">
+            <i class="fa-solid fa-graduation-cap"></i>
           </div>
-          <h2 class="text-xl font-extrabold text-white mt-1">BIET Student Academic & Examination Dossier</h2>
-          <p class="text-xs text-slate-300 mt-1 max-w-xl">
-            Direct in-app academic dossier: subject-wise attendance with VTU 75% detention alerts, CIE internal assessment marks, fee receipts, and official VTU hall ticket.
-          </p>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/30">Official Student Portal</span>
+              <span class="text-xs text-slate-400 font-mono flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span> shareu.rovelabs.com</span>
+            </div>
+            <h2 class="text-xl font-black text-white mt-0.5">BIET Student Academic Cloud Portal</h2>
+            <p class="text-xs text-slate-300">Official college portal for live student attendance, internal assessment (IA) marks, and academic evaluations.</p>
+          </div>
         </div>
 
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="openEditStudentProfileModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition">
-            <i class="fa-solid fa-user-pen"></i>
-            <span>Customize My Real Marks</span>
+        <!-- 1-Click Direct Launch Button -->
+        <div class="flex items-center gap-2.5 flex-wrap">
+          <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="px-4 py-2.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-black text-xs flex items-center gap-2 shadow-lg shadow-emerald-500/30 transition">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            <span>Open in Fullscreen Tab</span>
+          </a>
+          <button type="button" onclick="document.getElementById('portal-live-frame').src='https://shareu.rovelabs.com/login'" class="px-3 py-2.5 rounded-2xl bg-white/10 hover:bg-white/15 text-slate-300 text-xs font-semibold border border-white/15 transition flex items-center gap-1.5" title="Reload Portal">
+            <i class="fa-solid fa-rotate-right"></i>
           </button>
         </div>
       </div>
 
-      <!-- ERP SUB-VIEW 1: IN-APP COMPLETE DASHBOARD -->
-      <div id="erp-tab-inapp-view" class="space-y-4">
-        <!-- Student Academic Sign-In & Single Sign-On Gateway (When Not Logged In) -->
-        <div id="erp-auth-gateway-card" class="glass-panel p-5 rounded-3xl border border-purple-500/40 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-[#071329] shadow-xl space-y-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 border border-purple-400/40 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-purple-500/20">
-                <i class="fa-solid fa-graduation-cap"></i>
-              </div>
-              <div>
-                <div class="flex items-center gap-2">
-                  <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-wider border border-purple-500/30">Official Student Single Sign-On</span>
-                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span> Live BIET Academic Portal Sync</span>
-                </div>
-                <h3 class="text-base font-extrabold text-white mt-0.5">BIET Academic Dossier & Student Login</h3>
-                <p class="text-xs text-slate-300">Enter your VTU USN & Password below. Your real attendance %, CIE internal marks, timetable, CGPA tracker, and RFID ID badge will immediately sync.</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-white/10 items-end">
-            <div class="sm:col-span-5">
-              <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Your VTU USN</label>
-              <div class="relative">
-                <i class="fa-solid fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400 text-xs"></i>
-                <input type="text" id="erp-direct-login-usn" onkeydown="if(event.key==='Enter') handleDirectERPLogin()" placeholder="e.g. 4BD23CS001" class="glass-input w-full pl-9 pr-3 py-2 text-xs rounded-xl uppercase font-mono font-bold text-white tracking-wider" value="4BD23CS001">
-              </div>
-            </div>
-            <div class="sm:col-span-4">
-              <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Password</label>
-              <div class="relative">
-                <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400 text-xs"></i>
-                <input type="password" id="erp-direct-login-pass" onkeydown="if(event.key==='Enter') handleDirectERPLogin()" value="79754577@Aa" placeholder="Default: 79754577@Aa" class="glass-input w-full pl-9 pr-8 py-2 text-xs rounded-xl font-mono text-white">
-                <button type="button" onclick="toggleErpPasswordVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
-                  <i class="fa-solid fa-eye" id="erp-pass-eye"></i>
-                </button>
-              </div>
-            </div>
-            <div class="sm:col-span-3">
-              <button type="button" onclick="handleDirectERPLogin()" id="btn-erp-direct-login" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 transition">
-                <i class="fa-solid fa-right-to-bracket"></i>
-                <span>Login & Sync All</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2 flex-wrap text-[11px] text-slate-400 pt-1">
-            <span class="text-slate-300 font-semibold">Test Sample Profiles:</span>
-            <button onclick="setSampleUsn('4BD23CS001')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-300 border border-white/10 font-mono text-[10px]">4BD23CS001 (CS)</button>
-            <button onclick="setSampleUsn('4BD23CS042')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-300 border border-white/10 font-mono text-[10px]">4BD23CS042 (Kavya)</button>
-            <button onclick="setSampleUsn('4BD23EC018')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-amber-300 border border-white/10 font-mono text-[10px]">4BD23EC018 (EC)</button>
-            <button onclick="setSampleUsn('4BD22ME009')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-300 border border-white/10 font-mono text-[10px]">4BD22ME009 (ME)</button>
-          </div>
+      <!-- Quick Helpful Guide Card -->
+      <div class="glass-panel p-4 rounded-2xl border border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02]">
+        <div class="flex items-center gap-2.5 text-xs text-slate-300">
+          <i class="fa-solid fa-mobile-screen-button text-cyan-400 text-base"></i>
+          <span><strong>Mobile & Desktop Optimized:</strong> RoveLabs SHAREU is designed for mobile viewports. The phone simulator below renders the real mobile login interface directly inside the app, or you can open it fullscreen!</span>
         </div>
+        <a href="https://shareu.rovelabs.com/login" target="_blank" rel="noopener noreferrer" class="text-xs font-bold text-emerald-400 hover:underline shrink-0 flex items-center gap-1">
+          <span>Direct Web Link</span> <i class="fa-solid fa-chevron-right text-[10px]"></i>
+        </a>
+      </div>
 
-        <!-- Student Active Connected Session Bar (When Logged In) -->
-        <div id="erp-active-session-bar" class="hidden glass-panel p-4 rounded-3xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-[#071329] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
-          <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl">
-              <i class="fa-solid fa-circle-check"></i>
-            </div>
-            <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-xs font-black text-white" id="erp-session-user-name">Student Name</span>
-                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/30" id="erp-session-user-usn">4BD23CS001</span>
-                <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px]">Dossier Live</span>
-              </div>
-              <p class="text-[11px] text-slate-300 mt-0.5">
-                Active & Synchronized with Student ID Badge, Live Timetable, and VTU CGPA Tracker.
-              </p>
-            </div>
-          </div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <button onclick="syncStudentERPNow()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 border border-purple-500/40 text-xs font-semibold flex items-center gap-1.5 transition">
-              <i class="fa-solid fa-rotate"></i>
-              <span>Refresh</span>
-            </button>
-            <button onclick="openStudentIdCardModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold flex items-center gap-1.5 transition">
-              <i class="fa-solid fa-id-card"></i>
-              <span>RFID Badge</span>
-            </button>
-            <button onclick="openEditStudentProfileModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
-              <i class="fa-solid fa-user-pen"></i>
-              <span>Edit Details</span>
-            </button>
-            <button onclick="logoutUser()" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-semibold transition" title="Log Out">
-              <i class="fa-solid fa-arrow-right-from-bracket"></i>
-            </button>
-          </div>
-        </div>
-        <!-- Quick Access to Question Bank & PYQs -->
-        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/50 via-indigo-950/40 to-[#071329] border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-purple-600/30 border border-purple-500/40 flex items-center justify-center text-purple-300 text-lg shrink-0">
-              <i class="fa-solid fa-book-bookmark"></i>
-            </div>
-            <div>
-              <h4 class="text-xs font-bold text-white flex items-center gap-1.5">
-                <span>VTU Question Banks, Old Exam Papers (PYQs) & MCQs</span>
-                <span class="px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[9px] font-mono">2021/2022 Scheme</span>
-              </h4>
-              <p class="text-[11px] text-slate-300">Previous semester final exam question papers, module-wise question banks, and interactive MCQ tests.</p>
-            </div>
-          </div>
-          <button onclick="switchView('questionbank')" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs shrink-0 transition flex items-center gap-1.5 shadow-sm">
-            <span>Browse Question Banks</span>
-            <i class="fa-solid fa-arrow-right text-[10px]"></i>
-          </button>
-        </div>
-        <!-- Quick USN Tracker Search & Edit Profile -->
-        <div class="glass-panel p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 pulse-green"></span>
-            <span class="text-xs font-bold text-white">Student Academic Records</span>
-          </div>
-          <div class="flex items-center gap-2 flex-wrap">
-            <input type="text" id="erp-usn-input" value="" placeholder="Enter VTU USN (e.g. 4BD23CS001)" class="glass-input uppercase rounded-xl px-3 py-1.5 text-xs text-slate-200 w-52 font-mono font-semibold">
-            <button onclick="lookupStudentERP()" class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold transition">Search</button>
-            <button onclick="openEditStudentProfileModal()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-semibold transition flex items-center gap-1.5 shadow-sm">
-              <i class="fa-solid fa-user-pen text-xs"></i>
-              <span>Set My Real Details</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Student Profile Identity Banner -->
-        <div id="erp-student-identity-banner" class="glass-panel p-4 rounded-2xl border border-emerald-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <!-- Populated by JS -->
-        </div>
-
-        <!-- Student Summary Cards -->
-        <div id="erp-student-card" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
-          <!-- Dynamically populated -->
-        </div>
-
-        <!-- Subject-Wise Attendance & CIE Marks Table -->
-        <div class="glass-panel p-5 rounded-2xl space-y-3">
-          <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold text-white flex items-center gap-2">
-              <i class="fa-solid fa-list-check text-emerald-400"></i> Subject-Wise Attendance & CIE Internal Assessment
-            </h3>
-            <span class="text-[10px] text-slate-400 font-mono">VTU Detention Threshold: 75%</span>
+      <!-- Smartphone Frame Container (Forces Mobile Viewport so RoveLabs Renders Perfectly!) -->
+      <div class="py-2 flex justify-center">
+        <div class="w-full max-w-[420px] rounded-[42px] border-4 border-slate-700/80 bg-slate-950 p-3 shadow-2xl shadow-emerald-950/40 relative">
+          <!-- Top Speaker / Camera Notch Pill -->
+          <div class="flex items-center justify-center gap-2 pb-2">
+            <span class="w-12 h-3.5 bg-slate-800 rounded-full"></span>
+            <span class="w-3 h-3 bg-slate-800 rounded-full"></span>
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-xs text-left" id="erp-subjects-table">
-              <thead class="text-slate-400 border-b border-white/10 uppercase text-[10px]">
-                <tr>
-                  <th class="py-2.5 px-3">Subject Code & Name</th>
-                  <th class="py-2.5 px-3">Faculty Mentor</th>
-                  <th class="py-2.5 px-3 text-center">Attended / Total</th>
-                  <th class="py-2.5 px-3 text-center">Attendance %</th>
-                  <th class="py-2.5 px-3 text-center">CIE Test 1 (20)</th>
-                  <th class="py-2.5 px-3 text-center">CIE Test 2 (20)</th>
-                  <th class="py-2.5 px-3 text-center">Total CIE (50)</th>
-                  <th class="py-2.5 px-3 text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody id="erp-subjects-body" class="divide-y divide-white/5 text-slate-300">
-                <!-- Dynamically populated -->
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Fees & Hall Ticket Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- Fee Payment Verification -->
-          <div class="glass-panel p-4 rounded-2xl space-y-2 border border-white/10">
-            <div class="flex items-center justify-between text-xs font-bold text-white">
-              <span><i class="fa-solid fa-receipt text-cyan-400 mr-1.5"></i> Academic Fee & Accounts Receipt</span>
-              <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[10px]">Paid & Verified</span>
-            </div>
-            <p class="text-xs text-slate-300">Tuition, VTU Examination Fee, and Library dues cleared for Odd Semester 2026-27.</p>
-            <div class="flex items-center justify-between text-[11px] text-slate-400 font-mono pt-1 border-t border-white/5">
-              <span>Receipt: <strong class="text-white" id="erp-receipt-no">BEA-BIET-2026-8891</strong></span>
-              <span class="text-emerald-400">Dues: ₹0.00</span>
-            </div>
+          <!-- The Live Portal IFrame -->
+          <div class="rounded-[28px] overflow-hidden bg-white shadow-inner relative" style="height: 680px;">
+            <iframe id="portal-live-frame" src="https://shareu.rovelabs.com/login" class="w-full h-full border-0" title="BIET Official Student Portal (SHAREU)" allow="camera; microphone; geolocation; clipboard-write; fullscreen"></iframe>
           </div>
 
-          <!-- Hall Ticket Generator -->
-          <div class="glass-panel p-4 rounded-2xl space-y-2 border border-white/10">
-            <div class="flex items-center justify-between text-xs font-bold text-white">
-              <span><i class="fa-solid fa-id-card text-purple-400 mr-1.5"></i> VTU Official Examination Hall Ticket</span>
-              <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 text-[10px]">Ready to Print</span>
-            </div>
-            <p class="text-xs text-slate-300">Candidate is eligible to appear for VTU Theory & Practical Examinations at Center 4BD.</p>
-            <button onclick="downloadHallTicket()" class="w-full py-2 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center gap-2 transition hover:opacity-90">
-              <i class="fa-solid fa-download"></i>
-              <span>Download Official VTU Hall Ticket (PDF)</span>
-            </button>
+          <!-- Bottom Home Indicator Bar -->
+          <div class="pt-2 flex justify-center">
+            <span class="w-28 h-1 bg-slate-700 rounded-full"></span>
           </div>
         </div>
       </div>
-
-      </section>
+    </section>
 
     <!-- ========================================== -->
     <!-- VIEW: VTU & BIET ACADEMIC QUESTION BANK & MCQS -->
@@ -1228,70 +1071,6 @@
     <!-- ========================================== -->
     <!-- VIEW 9: WEEKLY CLASSROOM & LAB TIMETABLE -->
     <!-- ========================================== -->
-    <section id="view-timetable" class="space-y-6 hidden">
-      <!-- Live Status Hero -->
-      <div class="glass-panel p-6 rounded-3xl border border-cyan-500/30 bg-gradient-to-r from-[#0a1733]/90 via-[#0e3b5e]/80 to-[#0a1733]/90 shadow-2xl space-y-4">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-500/30">
-                <i class="fa-solid fa-clock mr-1"></i> Live Schedule System
-              </span>
-              <span id="timetable-live-clock" class="text-xs font-mono text-slate-300">IST: Loading...</span>
-            </div>
-            <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-1">
-              <i class="fa-solid fa-calendar-days text-cyan-400"></i> Classroom & Laboratory Timetable
-            </h2>
-          </div>
-
-          <!-- Controls: Dept & Semester -->
-          <div class="flex flex-wrap items-center gap-2">
-            <select id="tt-dept-select" onchange="loadTimetableSchedule()" class="px-3 py-2 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-cyan-400">
-              <option value="Computer Science & Engineering" selected>CSE Department</option>
-              <option value="Electronics & Communication Engg">ECE Department</option>
-            </select>
-            <select id="tt-sem-select" onchange="loadTimetableSchedule()" class="px-3 py-2 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-cyan-400">
-              <option value="5th Sem" selected>5th Semester (Section A)</option>
-              <option value="3rd Sem">3rd Semester (Section A)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Live Current Class & Next Class Ticker -->
-        <div id="tt-live-indicator-card" class="p-4 rounded-2xl bg-black/40 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-lg border border-emerald-500/30 pulse-green">
-              <i class="fa-solid fa-chalkboard-user"></i>
-            </div>
-            <div>
-              <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Currently in Session</span>
-              <h4 id="tt-active-title" class="text-sm font-extrabold text-white">Detecting active lecture...</h4>
-            </div>
-          </div>
-          <div class="text-left sm:text-right">
-            <span class="text-[10px] text-slate-400 block">Next Upcoming Session</span>
-            <span id="tt-next-title" class="text-xs font-semibold text-cyan-300">Checking upcoming slots...</span>
-          </div>
-        </div>
-
-        <!-- Day Pills -->
-        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1" id="tt-day-pills">
-          <button onclick="setTimetableDay('All')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500 text-black transition">Full Week</button>
-          <button onclick="setTimetableDay('Monday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Mon</button>
-          <button onclick="setTimetableDay('Tuesday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Tue</button>
-          <button onclick="setTimetableDay('Wednesday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Wed</button>
-          <button onclick="setTimetableDay('Thursday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Thu</button>
-          <button onclick="setTimetableDay('Friday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Fri</button>
-          <button onclick="setTimetableDay('Saturday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Sat</button>
-        </div>
-      </div>
-
-      <!-- Timetable Grid -->
-      <div id="timetable-cards-grid" class="space-y-3">
-        <!-- Dynamically populated schedule slots -->
-      </div>
-    </section>
-
     <!-- ========================================== -->
     <!-- VIEW 10: VTU AUTONOMOUS CGPA & SGPA CALCULATOR -->
     <!-- ========================================== -->
@@ -1487,9 +1266,9 @@
       <i class="fa-solid fa-chalkboard-user text-base"></i>
       <span>Faculty</span>
     </button>
-    <button onclick="switchView('erp')" id="nav-erp" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
+    <button onclick="switchView('portal')" id="nav-portal" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-graduation-cap text-base"></i>
-      <span>ERP</span>
+      <span>Portal</span>
     </button>
     <button onclick="switchView('questionbank')" id="nav-questionbank" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-book-bookmark text-base"></i>
@@ -1498,10 +1277,6 @@
     <button onclick="switchView('placements')" id="nav-placements" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-briefcase text-base"></i>
       <span>Placement</span>
-    </button>
-    <button onclick="switchView('timetable')" id="nav-timetable" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
-      <i class="fa-solid fa-calendar-days text-base"></i>
-      <span>Schedule</span>
     </button>
     <button onclick="switchView('gpa')" id="nav-gpa" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-calculator text-base"></i>
