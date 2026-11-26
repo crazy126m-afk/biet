@@ -880,8 +880,9 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     return
 
                 prof_dict = dict(prof)
-                # Verify password/PIN (Default: biet@1234 or private saved PIN - Master Key is restricted to Admin only)
-                if password != "biet@1234" and password != prof_dict.get("password"):
+                # Verify password/PIN: Must strictly match the professor's current active password
+                active_fac_pass = prof_dict.get("password") or "biet@1234"
+                if password != active_fac_pass:
                     conn.close()
                     self.send_json({"success": False, "error": "Wrong password! Please check your faculty password and try again."}, 401)
                     return
@@ -911,8 +912,8 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                 cursor.execute("CREATE TABLE IF NOT EXISTS app_settings (key TEXT PRIMARY KEY, value TEXT)")
                 cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
                 row = cursor.fetchone()
-                expected_admin_pass = row["value"] if row else "79754577@Aa"
-                if password != expected_admin_pass and password != "79754577@Aa":
+                expected_admin_pass = row["value"] if (row and row["value"]) else "79754577@Aa"
+                if password != expected_admin_pass:
                     conn.close()
                     self.send_json({"success": False, "error": "Wrong password! Invalid administrator credentials."}, 401)
                     return
@@ -925,7 +926,8 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                         "role": "admin",
                         "name": "Campus Security & Admin Control Desk",
                         "email": "admin@bietdvg.edu",
-                        "permissions": ["broadcast", "moderate", "targeted_sos", "faculty_override"]
+                        "permissions": ["broadcast", "moderate", "targeted_sos", "faculty_override"],
+                        "pin": expected_admin_pass
                     }
                 })
                 return
@@ -1130,7 +1132,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
             row = cursor.fetchone()
             admin_expected = row["value"] if row else "79754577@Aa"
-            if pin != admin_expected and pin != "79754577@Aa":
+            if pin != admin_expected:
                 conn.close()
                 self.send_json({"success": False, "error": "Unauthorized: Invalid Admin Master Password"}, 401)
                 return
@@ -1173,7 +1175,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
             row = cursor.fetchone()
             admin_expected = row["value"] if row else "79754577@Aa"
-            if pin != admin_expected and pin != "79754577@Aa":
+            if pin != admin_expected:
                 conn.close()
                 self.send_json({"success": False, "error": "Unauthorized: Invalid Admin Master Password"}, 401)
                 return
@@ -1199,7 +1201,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
             row = cursor.fetchone()
             admin_expected = row["value"] if row else "79754577@Aa"
-            if pin != admin_expected and pin != "79754577@Aa":
+            if pin != admin_expected:
                 conn.close()
                 self.send_json({"success": False, "error": "Unauthorized: Invalid Admin Master Password"}, 401)
                 return
@@ -1375,7 +1377,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                     return
                 prof_dict = dict(prof)
                 saved_pass = prof_dict.get("password") or "biet@1234"
-                if current_pass != saved_pass and current_pass != "biet@1234":
+                if current_pass != saved_pass:
                     conn.close()
                     self.send_json({"success": False, "error": "Current Faculty Password is incorrect."}, 401)
                     return
@@ -1395,8 +1397,8 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             elif role == "admin":
                 cursor.execute("SELECT value FROM app_settings WHERE key = 'admin_password'")
                 row = cursor.fetchone()
-                admin_expected = row["value"] if row else "79754577@Aa"
-                if current_pass != admin_expected and current_pass != "79754577@Aa":
+                admin_expected = row["value"] if (row and row["value"]) else "79754577@Aa"
+                if current_pass != admin_expected:
                     conn.close()
                     self.send_json({"success": False, "error": "Current Admin PIN is incorrect."}, 401)
                     return
@@ -1438,8 +1440,7 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             prof_dict = dict(prof)
             saved_pin = prof_dict.get("password") or "biet@1234"
-            # Strict authorization check: Must match professor's current PIN OR biet@1234 (Master Key restricted to Admin only)
-            if current_auth != saved_pin and current_auth != "biet@1234":
+            if current_auth != saved_pin:
                 conn.close()
                 self.send_json({"success": False, "error": "Security Authorization Failed: Current Faculty Password is required to authorize password change."}, 401)
                 return

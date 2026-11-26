@@ -1654,6 +1654,7 @@ async function handleDirectERPLogin(overrideUsn, overridePass) {
 
     if (data.success && data.user) {
       currentUser = data.user;
+      currentUser.pin = pin;
       localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
       updateAuthUI();
       updateErpAuthStatus();
@@ -2263,6 +2264,7 @@ async function verifyAdminPIN() {
     const data = await res.json();
     if (data.success && data.user && data.user.role === 'admin') {
       currentUser = data.user;
+      currentUser.pin = pin;
       localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
       updateAuthUI();
       document.getElementById('admin-auth-box')?.classList.add('hidden');
@@ -2525,7 +2527,7 @@ async function submitAdminBroadcast() {
 // PWA
 function initServiceWorker() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js?v=5.7').then(reg => {
+    navigator.serviceWorker.register('/sw.js?v=5.8').then(reg => {
       reg.update().catch(() => {});
     }).catch(() => {});
   }
@@ -2636,6 +2638,7 @@ async function handleUnifiedAuthLogin(e) {
 
     if (data.success) {
       currentUser = data.user;
+      currentUser.pin = pin;
       localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
       updateAuthUI();
       closeModal('modal-auth-login');
@@ -2707,9 +2710,10 @@ function updateAuthUI() {
   if (!currentUser) {
     if (pill) {
       pill.innerHTML = `
-        <button onclick="openModal('modal-auth-login')" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 text-white text-xs font-bold shadow-md shadow-purple-500/20 flex items-center gap-1.5 transition">
-          <i class="fa-solid fa-chalkboard-user text-xs"></i>
-          <span>Faculty Login</span>
+        <button onclick="openModal('modal-auth-login')" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-[#1f4178] to-[#0f2148] hover:from-[#345798] text-white text-xs font-bold border border-[#cba23e]/40 shadow-sm flex items-center gap-1 transition">
+          <i class="fa-solid fa-chalkboard-user text-xs text-[#cba23e]"></i>
+          <span class="hidden sm:inline">Faculty Login</span>
+          <span class="sm:hidden text-[11px]">Faculty</span>
         </button>
       `;
     }
@@ -2720,10 +2724,10 @@ function updateAuthUI() {
   if (currentUser.role === 'faculty') {
     if (pill) {
       pill.innerHTML = `
-        <div class="flex items-center gap-1.5 bg-purple-950/40 border border-purple-500/40 rounded-xl px-2.5 py-1">
+        <div class="flex items-center gap-1 bg-purple-950/40 border border-purple-500/40 rounded-xl px-2 py-1 max-w-[120px] sm:max-w-none">
           <i class="fa-solid fa-chalkboard-user text-purple-400 text-xs"></i>
-          <span class="text-xs font-bold text-white truncate max-w-[140px]">${currentUser.name}</span>
-          <button onclick="logoutUser()" title="Logout" class="text-slate-400 hover:text-rose-400 ml-1">
+          <span class="text-xs font-bold text-white truncate max-w-[75px] sm:max-w-[140px]">${currentUser.name}</span>
+          <button onclick="logoutUser()" title="Logout" class="text-slate-400 hover:text-rose-400 ml-0.5">
             <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
           </button>
         </div>
@@ -2741,13 +2745,13 @@ function updateAuthUI() {
   } else if (currentUser.role === 'admin') {
     if (pill) {
       pill.innerHTML = `
-        <div class="flex items-center gap-1.5 bg-rose-950/40 border border-rose-500/40 rounded-xl px-2.5 py-1">
+        <div class="flex items-center gap-1 bg-rose-950/40 border border-rose-500/40 rounded-xl px-2 py-1">
           <i class="fa-solid fa-shield-halved text-rose-400 text-xs"></i>
-          <span class="text-xs font-bold text-white">Admin Control</span>
-          <button onclick="openChangePasswordModal('admin')" title="Change Admin PIN" class="text-[10px] bg-rose-600/30 hover:bg-rose-600 text-rose-200 px-2 py-0.5 rounded-lg border border-rose-500/40 ml-1 transition">
-            <i class="fa-solid fa-key text-[9px]"></i> PIN
+          <span class="text-xs font-bold text-white">Admin</span>
+          <button onclick="openChangePasswordModal('admin')" title="Change Admin PIN" class="text-[9px] bg-rose-600/30 hover:bg-rose-600 text-rose-200 px-1.5 py-0.5 rounded border border-rose-500/40 ml-1 transition">
+            PIN
           </button>
-          <button onclick="logoutUser()" title="Logout" class="text-slate-400 hover:text-rose-400 ml-1">
+          <button onclick="logoutUser()" title="Logout" class="text-slate-400 hover:text-rose-400 ml-0.5">
             <i class="fa-solid fa-arrow-right-from-bracket text-xs"></i>
           </button>
         </div>
@@ -3011,11 +3015,16 @@ async function handleChangePasswordSubmit(e) {
 
       if (role === 'faculty') {
         const passInput = document.getElementById('auth-faculty-pass');
-        if (passInput) passInput.value = newPin;
+        if (passInput) passInput.value = '';
       } else if (role === 'admin') {
         const adminPassInput = document.getElementById('auth-admin-pass');
-        if (adminPassInput) adminPassInput.value = newPin;
+        if (adminPassInput) adminPassInput.value = '';
+        if (currentUser && currentUser.role === 'admin') {
+          currentUser.pin = newPin;
+          localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
+        }
       }
+      alert(data.message || 'Password updated successfully! Please login with your new password.');
     } else {
       showPopUpNotification({
         title: 'Verification Failed',

@@ -1,5 +1,5 @@
 // BIET Service Worker
-const CACHE_NAME = 'biet-v5.7';
+const CACHE_NAME = 'biet-v5.8';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
