@@ -212,6 +212,7 @@ async function fetchNotifications() {
         if (!latest.target_only) {
           showPopUpNotification(latest);
         }
+        loadAlerts();
       }
       lastSeenNotificationId = latest.id;
       unreadNotifications = list.slice().reverse();
@@ -1373,16 +1374,16 @@ function filterAlerts(category) {
       const title = (a.title || '').toLowerCase();
       const msg = (a.message || '').toLowerCase();
       if (currentAlertFilter === 'urgent') {
-        return cat.includes('urgent') || cat.includes('emergency') || prio.includes('critical') || prio.includes('high') || title.includes('urgent') || title.includes('notice') || title.includes('exam');
+        return cat.includes('urgent') || cat.includes('emergency') || prio.includes('critical') || prio.includes('high') || title.includes('urgent') || title.includes('emergency') || title.includes('notice') || title.includes('🚨') || a.pinned == 1;
       }
       if (currentAlertFilter === 'placement') {
-        return cat.includes('placement') || title.includes('placement') || title.includes('recruitment') || title.includes('tcs') || title.includes('internship') || msg.includes('placement');
+        return cat.includes('placement') || cat.includes('mou') || cat.includes('career') || cat.includes('job') || title.includes('placement') || title.includes('recruitment') || title.includes('bosch') || title.includes('tcs') || title.includes('infosys') || title.includes('internship') || title.includes('💼') || msg.includes('placement') || msg.includes('recruitment');
       }
       if (currentAlertFilter === 'academic') {
-        return cat.includes('academic') || title.includes('exam') || title.includes('vtu') || title.includes('admit') || title.includes('library') || msg.includes('academic') || msg.includes('semester');
+        return cat.includes('academic') || cat.includes('exam') || cat.includes('achieve') || title.includes('exam') || title.includes('vtu') || title.includes('hall ticket') || title.includes('admit') || title.includes('library') || title.includes('rank') || title.includes('📚') || msg.includes('academic') || msg.includes('semester');
       }
       if (currentAlertFilter === 'event') {
-        return cat.includes('event') || title.includes('event') || title.includes('symposium') || title.includes('invento') || title.includes('hackathon') || msg.includes('event');
+        return cat.includes('event') || cat.includes('sport') || cat.includes('hackathon') || title.includes('event') || title.includes('symposium') || title.includes('invento') || title.includes('hackathon') || title.includes('league') || title.includes('⚡') || msg.includes('event') || msg.includes('tournament');
       }
       return cat.includes(currentAlertFilter) || prio.includes(currentAlertFilter) || title.includes(currentAlertFilter);
     });
@@ -1396,24 +1397,64 @@ function renderAlerts(alerts) {
 
   if (!alerts || alerts.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full py-8 text-center text-slate-400 text-xs">
-        <i class="fa-solid fa-bullhorn text-lg mb-1 block text-slate-500"></i>
-        No announcements in this category right now.
+      <div class="col-span-full py-12 text-center text-slate-400 text-xs glass-panel rounded-2xl border border-white/5">
+        <i class="fa-solid fa-bullhorn text-2xl mb-2 block text-slate-500"></i>
+        <p class="font-bold text-white text-sm">No bulletins in this category</p>
+        <p class="text-slate-400 text-xs mt-1">Check back later or click 'All' to view all announcements.</p>
       </div>
     `;
     return;
   }
 
-  container.innerHTML = alerts.map(a => `
-    <div class="glass-panel p-4 rounded-2xl border border-white/10 space-y-2">
-      <div class="flex items-center justify-between text-xs">
-        <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 font-bold">${a.category}</span>
-        <span class="text-slate-400 font-mono">${a.timestamp}</span>
+  container.innerHTML = alerts.map(a => {
+    const cat = (a.category || 'Notice').toLowerCase();
+    let badgeColor = 'bg-blue-500/20 text-blue-300 border border-blue-500/30';
+    let icon = 'fa-solid fa-bullhorn';
+
+    if (cat.includes('urgent') || cat.includes('emergency')) {
+      badgeColor = 'bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse';
+      icon = 'fa-solid fa-triangle-exclamation';
+    } else if (cat.includes('placement') || cat.includes('recruit')) {
+      badgeColor = 'bg-amber-500/20 text-amber-300 border border-amber-500/40';
+      icon = 'fa-solid fa-briefcase';
+    } else if (cat.includes('academic') || cat.includes('exam')) {
+      badgeColor = 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40';
+      icon = 'fa-solid fa-graduation-cap';
+    } else if (cat.includes('event') || cat.includes('sport')) {
+      badgeColor = 'bg-purple-500/20 text-purple-300 border border-purple-500/40';
+      icon = 'fa-solid fa-bolt';
+    }
+
+    const isPinned = a.pinned == 1 || (a.priority || '').toLowerCase() === 'critical';
+
+    return `
+      <div class="glass-panel p-4 sm:p-5 rounded-2xl border ${isPinned ? 'border-[#cba23e]/50 bg-gradient-to-r from-[#1f4178]/40 to-[#0a1733]/80' : 'border-white/10'} space-y-2.5 transition hover:border-purple-500/40 shadow-lg">
+        <div class="flex items-center justify-between text-xs flex-wrap gap-2">
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="px-2.5 py-0.5 rounded-full ${badgeColor} text-[11px] font-bold flex items-center gap-1">
+              <i class="${icon} text-[10px]"></i> ${a.category || 'Notice'}
+            </span>
+            ${isPinned ? '<span class="px-2 py-0.5 rounded-full bg-[#cba23e]/20 text-[#cba23e] border border-[#cba23e]/40 text-[10px] font-bold flex items-center gap-1"><i class="fa-solid fa-thumbtack text-[9px]"></i> PINNED</span>' : ''}
+          </div>
+          <span class="text-slate-400 font-mono text-[11px] flex items-center gap-1">
+            <i class="fa-regular fa-clock text-[10px]"></i> ${a.timestamp}
+          </span>
+        </div>
+        <h3 class="text-sm sm:text-base font-extrabold text-white leading-snug">${a.title}</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">${a.message}</p>
+        <div class="pt-2 border-t border-white/5 flex items-center justify-between text-[11px] text-slate-400 flex-wrap gap-2">
+          <span class="flex items-center gap-1">
+            <i class="fa-solid fa-building-columns text-[10px] text-purple-400"></i> ${a.department || 'BIET Official'} ${a.author ? `• ${a.author}` : ''}
+          </span>
+          ${a.source_url ? `
+            <a href="${a.source_url}" target="_blank" class="text-[#cba23e] hover:underline font-semibold flex items-center gap-1">
+              <span>View Notice</span> <i class="fa-solid fa-arrow-up-right-from-square text-[9px]"></i>
+            </a>
+          ` : ''}
+        </div>
       </div>
-      <h3 class="text-sm font-bold text-white">${a.title}</h3>
-      <p class="text-xs text-slate-300">${a.message}</p>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 async function loadLostFound() {

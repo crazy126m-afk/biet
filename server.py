@@ -39,6 +39,40 @@ def get_db_connection():
     conn.row_factory = sqlite3.Row
     return conn
 
+def push_notification_and_alert(title, message, n_type="info", category="Campus Notice", priority="normal", department="Administration", author="BIET Official", target_only=False, play_siren=False):
+    ts = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    notif_id = f"notif-{int(datetime.now().timestamp() * 1000)}"
+    item = {
+        "id": notif_id,
+        "title": title,
+        "message": message,
+        "type": n_type,
+        "category": category,
+        "priority": priority,
+        "timestamp": ts,
+        "target_only": target_only,
+        "play_siren": play_siren
+    }
+    LIVE_NOTIFICATIONS.append(item)
+
+    # Automatically persist all public notifications into the alerts database so they appear in Alerts view
+    if not target_only:
+        try:
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT id FROM alerts WHERE title = ?", (title,))
+            if not cursor.fetchone():
+                cursor.execute("""
+                    INSERT INTO alerts (title, category, priority, message, department, author, pinned, timestamp, source_url)
+                    VALUES (?, ?, ?, ?, ?, ?, 0, ?, 'https://www.bietdvg.edu')
+                """, (title, category, priority, message, department, author, now_str))
+                conn.commit()
+            conn.close()
+        except Exception as e:
+            print("Auto-sync alert to DB error:", e)
+    return item
+
 def sync_live_alerts_from_biet():
     """
     Synchronizes real circulars & notifications from BIET official administration.
@@ -47,10 +81,12 @@ def sync_live_alerts_from_biet():
     try:
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M")
         official_alerts = [
+            ("🚨 Mandatory Examination Biometric & Entry Protocol Notice", "Urgent", "critical", "All students appearing for VTU Odd Semester Examinations at Centre 4BD must report 30 minutes before commencement. Strictly carry official printed Hall Ticket and BIET Identity Card.", "Exam Control Centre", "Chief Superintendent (BIET Centre)", 1, now_str, "https://www.bietdvg.edu"),
             ("VTU Autonomous Odd Semester Examinations 2026 – Final Hall Ticket Notice", "Academic", "critical", "All undergraduate (B.E.) and postgraduate (M.Tech, MCA, MBA) students must download their official VTU Admit Card. Centre Code: 4BD (BIET Davangere). Theory & Practical examination sessions commence as per the published schedule.", "Academic Section", "Controller of Examinations & Principal", 1, now_str, "https://www.bietdvg.edu"),
-            ("Campus Placement: Tech Mahindra & TCS Digital Recruitment Drive (2026 Batch)", "Placement", "high", "Online coding assessments and technical interviews scheduled for eligible CSE, ISE, ECE, EEE and allied branch students. Register on Training & Placement portal before deadline.", "Training & Placement Cell", "Dr. Nirmala C. R. (Dean T&P)", 1, now_str, "https://www.bietdvg.edu"),
-            ("National Science Day & Technical Symposium 'INVENTO 2026' Paper Submissions", "Event", "medium", "Department of Computer Science & BEA invites research submissions and student tech models. Cash prizes and publication in indexed journals for best project work.", "Research & Development Cell", "Organizing Committee", 0, now_str, "https://www.bietdvg.edu"),
-            ("Central Library Extended 24/7 Digital IEEE Access for Semester Exams", "Academic", "medium", "24/7 digital IEEE Xplore access is enabled across campus LAN and Wi-Fi. Extended library reference hours till 10:00 PM for upcoming VTU examinations.", "Central Library", "Chief Librarian", 0, now_str, "https://www.bietdvg.edu")
+            ("💼 Bosch India & Tech Mahindra Recruitment Drive (2026 Batch)", "Placement", "critical", "Online coding assessments and technical interviews scheduled for eligible CSE, ISE, ECE, EEE and allied branch students. Register on Training & Placement portal before deadline.", "Training & Placement Cell", "Dr. Nirmala C. R. (Dean T&P)", 1, now_str, "https://www.bietdvg.edu"),
+            ("⚡ National Science Day & Technical Symposium 'INVENTO 2026' Paper Submissions", "Event", "high", "Department of Computer Science & BEA invites research submissions and student tech models. Cash prizes and publication in indexed journals for best project work.", "Research & Development Cell", "Organizing Committee", 0, now_str, "https://www.bietdvg.edu"),
+            ("Central Library Extended 24/7 Digital IEEE Access for Semester Exams", "Academic", "medium", "24/7 digital IEEE Xplore access is enabled across campus LAN and Wi-Fi. Extended library reference hours till 10:00 PM for upcoming VTU examinations.", "Central Library", "Chief Librarian", 0, now_str, "https://www.bietdvg.edu"),
+            ("⚡ 'TECHNO-BIET 2026' National Level 36-Hour Hackathon Registrations", "Event", "medium", "Inter-college innovation sprint organized by BEA and ACM Student Chapter with ₹1,50,000 cash prizes. Register your team of 2-4 members.", "Innovation Cell", "Staff Coordinator", 0, now_str, "https://www.bietdvg.edu")
         ]
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -65,9 +101,11 @@ def sync_live_alerts_from_biet():
                 new_count += 1
                 LIVE_NOTIFICATIONS.append({
                     "id": f"alert-{int(datetime.now().timestamp())}-{new_count}",
-                    "title": f"📢 {title}",
+                    "title": title,
                     "message": msg[:120] + "...",
                     "type": "alert",
+                    "category": cat,
+                    "priority": prio,
                     "timestamp": ts
                 })
         conn.commit()
@@ -344,7 +382,30 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             cursor.execute(sql, params)
             rows = [dict(row) for row in cursor.fetchall()]
             conn.close()
-            self.send_json({"alerts": rows, "count": len(rows)})
+
+            # Synchronize: Include any active public notifications into the alerts feed
+            existing_titles = set(r.get("title", "").lower().strip() for r in rows)
+            merged_alerts = list(rows)
+            for notif in reversed(LIVE_NOTIFICATIONS):
+                if notif.get("target_only"):
+                    continue
+                t_clean = (notif.get("title") or "").lower().strip()
+                if t_clean and t_clean not in existing_titles:
+                    merged_alerts.insert(0, {
+                        "id": f"notif-{notif.get('id', '0')}",
+                        "title": notif.get("title", ""),
+                        "category": notif.get("category", "Campus Notice"),
+                        "priority": notif.get("priority", "normal"),
+                        "message": notif.get("message", ""),
+                        "department": notif.get("department", "Administrative Desk"),
+                        "author": notif.get("author", "BIET Official"),
+                        "pinned": 1 if notif.get("priority") == "critical" else 0,
+                        "timestamp": notif.get("timestamp", datetime.now().strftime("%Y-%m-%d %H:%M")),
+                        "source_url": "https://www.bietdvg.edu"
+                    })
+                    existing_titles.add(t_clean)
+
+            self.send_json({"alerts": merged_alerts, "count": len(merged_alerts)})
             return
 
         # 3. API: Faculty / Professors
@@ -862,13 +923,15 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
 
-            LIVE_NOTIFICATIONS.append({
-                "id": f"pl-reg-{int(datetime.now().timestamp())}",
-                "title": f"💼 Placement Drive Registered",
-                "message": f"{student_name} ({usn}) registered for {company_name}. Token: {reg_code}",
-                "type": "info",
-                "timestamp": now_str
-            })
+            push_notification_and_alert(
+                title=f"💼 Placement Drive: {student_name} Registered",
+                message=f"{student_name} ({usn}) registered for {company_name} Recruitment Drive. Token: {reg_code}",
+                n_type="info",
+                category="Placement",
+                priority="high",
+                department="Training & Placement Cell",
+                author="Placement Officer"
+            )
 
             self.send_json({
                 "success": True,
@@ -1079,17 +1142,17 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             conn.commit()
             conn.close()
 
-            # DISPATCH POP-UP NOTIFICATION
+            # DISPATCH POP-UP NOTIFICATION & SAVE TO ALERTS
             emoji = "🟢 FOUND ITEM" if item_type == "found" else "🔴 LOST ITEM REPORT"
-            LIVE_NOTIFICATIONS.append({
-                "id": f"lf-{item_id}",
-                "title": f"{emoji}: {title}",
-                "message": f"Reported at {location_name}. Contact: {contact_name} ({contact_phone})",
-                "type": "lost_found",
-                "item_type": item_type,
-                "item_id": item_id,
-                "timestamp": created_at
-            })
+            push_notification_and_alert(
+                title=f"{emoji}: {title}",
+                message=f"Reported at {location_name}. Contact: {contact_name} ({contact_phone}). Verify at Lost & Found desk.",
+                n_type="lost_found",
+                category="Campus Notice",
+                priority="normal",
+                department="Lost & Found Desk",
+                author=contact_name
+            )
 
             self.send_json({
                 "success": True,
