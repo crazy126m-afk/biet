@@ -9,7 +9,7 @@ import os
 import json
 import sqlite3
 import urllib.parse
-from datetime import datetime
+from datetime import datetime, timedelta
 import mimetypes
 import zipfile
 import io
@@ -401,6 +401,140 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             mcqs = [dict(row) for row in cursor.fetchall()]
             conn.close()
             self.send_json({"success": True, "mcqs": mcqs, "count": len(mcqs)})
+            return
+
+        # 11d. API: Training & Placement Drives
+        if path == "/api/placements/drives":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            status = query.get("status", [None])[0]
+            search = query.get("search", [None])[0]
+
+            sql = "SELECT * FROM placement_drives WHERE 1=1"
+            params = []
+            if status and status.lower() != "all":
+                sql += " AND status = ?"
+                params.append(status)
+            if search:
+                sql += " AND (company_name LIKE ? OR role_title LIKE ? OR eligible_branches LIKE ?)"
+                params.extend([f"%{search}%", f"%{search}%", f"%{search}%"])
+
+            sql += " ORDER BY drive_date ASC"
+            cursor.execute(sql, params)
+            drives = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            self.send_json({"success": True, "drives": drives, "count": len(drives)})
+            return
+
+        # 11e. API: Weekly Class & Lab Timetable
+        if path == "/api/academics/timetable":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            dept = query.get("department", ["Computer Science & Engineering"])[0]
+            semester = query.get("semester", ["5th Sem"])[0]
+            section = query.get("section", ["A"])[0]
+            day = query.get("day", [None])[0]
+
+            sql = "SELECT * FROM academic_timetables WHERE department LIKE ? AND semester = ? AND section = ?"
+            params = [f"%{dept}%", semester, section]
+            if day and day.lower() != "all":
+                sql += " AND day_of_week = ?"
+                params.append(day.capitalize())
+
+            sql += " ORDER BY CASE day_of_week WHEN 'Monday' THEN 1 WHEN 'Tuesday' THEN 2 WHEN 'Wednesday' THEN 3 WHEN 'Thursday' THEN 4 WHEN 'Friday' THEN 5 WHEN 'Saturday' THEN 6 ELSE 7 END, start_hour ASC, start_minute ASC"
+            cursor.execute(sql, params)
+            schedule = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+
+            # Identify currently active slot in India Standard Time (UTC +5:30)
+            now_utc = datetime.utcnow()
+            now_ist = now_utc + timedelta(hours=5, minutes=30)
+            current_day = now_ist.strftime("%A")
+            current_hm = now_ist.hour * 60 + now_ist.minute
+
+            active_slot = None
+            next_slot = None
+            for item in schedule:
+                if item["day_of_week"] == current_day:
+                    slot_start = item["start_hour"] * 60 + item["start_minute"]
+                    slot_end = item["end_hour"] * 60 + item["end_minute"]
+                    if slot_start <= current_hm <= slot_end:
+                        active_slot = item
+                    elif slot_start > current_hm and not next_slot:
+                        next_slot = item
+
+            self.send_json({
+                "success": True, 
+                "schedule": schedule, 
+                "count": len(schedule),
+                "current_time_ist": now_ist.strftime("%Y-%m-%d %H:%M:%S"),
+                "current_day": current_day,
+                "active_slot": active_slot,
+                "next_slot": next_slot
+            })
+            return
+
+        # 11f. API: GATE & Exam Revision Cheat Sheets
+        if path == "/api/academics/cheat-sheets":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            dept = query.get("department", [None])[0]
+            category = query.get("category", [None])[0]
+            search = query.get("search", [None])[0]
+
+            sql = "SELECT * FROM cheat_sheets WHERE 1=1"
+            params = []
+            if dept and dept.lower() != "all":
+                sql += " AND (department LIKE ? OR department = 'Basic Science & Humanities')"
+                params.append(f"%{dept}%")
+            if category and category.lower() != "all":
+                sql += " AND category = ?"
+                params.append(category)
+            if search:
+                sql += " AND (subject_code LIKE ? OR subject_name LIKE ? OR title LIKE ? OR summary_content LIKE ?)"
+                params.extend([f"%{search}%", f"%{search}%", f"%{search}%", f"%{search}%"])
+
+            sql += " ORDER BY id ASC"
+            cursor.execute(sql, params)
+            sheets = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            self.send_json({"success": True, "sheets": sheets, "count": len(sheets)})
+            return
+
+        # 11g. API: VTU Curriculum Credits Matrix (for SGPA/CGPA Calculator)
+        if path == "/api/academics/curriculum-credits":
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            dept = query.get("department", ["Computer Science & Engineering"])[0]
+            semester = query.get("semester", ["5th Sem"])[0]
+
+            sql = "SELECT * FROM curriculum_credits WHERE (department LIKE ? OR department = 'Basic Science & Humanities') AND semester = ?"
+            cursor.execute(sql, [f"%{dept}%", semester])
+            credits_list = [dict(row) for row in cursor.fetchall()]
+            conn.close()
+            self.send_json({"success": True, "subjects": credits_list, "count": len(credits_list)})
+            return
+
+        # 11h. API: Digital Virtual Student ID Card
+        if path == "/api/students/id-card":
+            usn = query.get("usn", ["4BD23CS001"])[0].strip().upper()
+            conn = get_db_connection()
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM erp_records WHERE usn = ?", [usn])
+            student = cursor.fetchone()
+            conn.close()
+
+            if student:
+                st_dict = dict(student)
+                qr_payload = f"BIET|AUTONOMOUS|USN:{st_dict['usn']}|NAME:{st_dict['student_name']}|BRANCH:{st_dict['branch']}|VALID:2023-2027|VERIFIED:COE-BIET"
+                st_dict["qr_payload"] = qr_payload
+                st_dict["blood_group"] = "B+ (Rh Positive)"
+                st_dict["academic_years"] = "2023 - 2027"
+                st_dict["emergency_contact"] = "+91 8192-223461"
+                st_dict["college_affiliation"] = "Visvesvaraya Technological University (Autonomous)"
+                self.send_json({"success": True, "student": st_dict})
+            else:
+                self.send_json({"success": False, "message": "Student USN not found in verified registry"})
             return
 
         # 12. API: Appointments list (or faculty filtered)
@@ -1420,6 +1554,19 @@ def ensure_authentic_data():
                 build_all_papers.build_all_23_papers()
             except Exception as e:
                 print("Auto-generate PDFs warning:", e)
+
+        # 5. Ensure Placement Drives, Timetables, Cheat Sheets exist
+        try:
+            p_count = c.execute("SELECT count(*) FROM placement_drives").fetchone()[0]
+        except Exception:
+            p_count = 0
+
+        if p_count < 5:
+            try:
+                import seed_advanced_academic_features
+                seed_advanced_academic_features.seed_advanced_features(DB_PATH)
+            except Exception as e:
+                print("Advanced features seed error:", e)
 
         conn.commit()
         conn.close()

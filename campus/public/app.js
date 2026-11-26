@@ -311,7 +311,7 @@ function clearNotifications() {
 // ==========================================
 function switchView(viewName) {
   currentView = viewName;
-  const views = ['alerts', 'map', 'lostfound', 'faculty', 'erp', 'emergency', 'questionbank'];
+  const views = ['alerts', 'map', 'lostfound', 'faculty', 'erp', 'emergency', 'questionbank', 'placements', 'timetable', 'gpa', 'cheatsheets'];
   views.forEach(v => {
     const el = document.getElementById(`view-${v}`);
     if (el) el.classList.add('hidden');
@@ -342,6 +342,12 @@ function switchView(viewName) {
       onThreeWindowResize();
     }, 150);
   }
+
+  if (viewName === 'placements') loadPlacementDrives();
+  if (viewName === 'timetable') loadTimetableSchedule();
+  if (viewName === 'gpa') autoLoadGPACourses();
+  if (viewName === 'cheatsheets') loadCheatSheets();
+  if (viewName === 'questionbank' && (!allQuestionBanks || allQuestionBanks.length === 0)) loadQuestionBanks();
 
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
@@ -2544,3 +2550,580 @@ function nextMCQ() {
   currentMCQIndex++;
   renderCurrentMCQ();
 }
+
+
+/* =========================================================
+   FEATURE 1: CAMPUS RECRUITMENT & PLACEMENT DRIVES (T&P)
+========================================================= */
+let allPlacementDrives = [];
+let currentPlacementStatus = 'All';
+
+async function loadPlacementDrives() {
+  const container = document.getElementById('placement-cards-grid');
+  if (!container) return;
+  try {
+    const res = await fetch('/api/placements/drives');
+    const data = await res.json();
+    if (data.success && data.drives) {
+      allPlacementDrives = data.drives;
+      renderPlacementDrives(allPlacementDrives);
+    }
+  } catch (err) {
+    console.error('Error loading placement drives:', err);
+  }
+}
+
+function renderPlacementDrives(drives) {
+  const container = document.getElementById('placement-cards-grid');
+  if (!container) return;
+
+  if (drives.length === 0) {
+    container.innerHTML = `
+      <div class="col-span-full py-12 text-center text-slate-400">
+        <i class="fa-solid fa-briefcase text-3xl mb-2 text-slate-500"></i>
+        <p class="text-sm font-semibold">No placement drives found matching filter.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = drives.map(d => {
+    const rounds = (d.selection_rounds || '').split('|').map(r => r.trim());
+    return `
+      <div class="glass-panel p-5 rounded-3xl border border-white/10 hover:border-amber-500/40 transition flex flex-col justify-between gap-4 shadow-lg group">
+        <div class="space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-[#0a1733] border border-amber-500/40 overflow-hidden p-1 flex items-center justify-center shrink-0">
+                <i class="fa-solid fa-building text-amber-400 text-xl"></i>
+              </div>
+              <div>
+                <h4 class="font-black text-white text-sm group-hover:text-amber-400 transition leading-snug">${d.company_name}</h4>
+                <span class="text-[10px] text-slate-400 block"><i class="fa-solid fa-location-dot mr-1"></i>${d.job_location}</span>
+              </div>
+            </div>
+            <span class="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500/20 to-amber-600/20 text-amber-300 font-mono text-xs font-black border border-amber-500/40 shrink-0">
+              ${d.ctc_package}
+            </span>
+          </div>
+
+          <div class="p-2.5 rounded-2xl bg-white/5 border border-white/5">
+            <span class="text-[10px] text-slate-400 block font-semibold">Role / Designation</span>
+            <span class="text-xs font-bold text-white block">${d.role_title}</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 text-[11px]">
+            <div class="p-2 rounded-xl bg-black/40 border border-white/5">
+              <span class="text-[10px] text-slate-400 block">Min CGPA</span>
+              <span class="font-bold text-emerald-400">${d.min_cgpa} &amp; Above</span>
+            </div>
+            <div class="p-2 rounded-xl bg-black/40 border border-white/5">
+              <span class="text-[10px] text-slate-400 block">Max Backlogs</span>
+              <span class="font-bold ${d.max_backlogs === 0 ? 'text-amber-400' : 'text-slate-300'}">${d.max_backlogs === 0 ? '0 Backlogs (Strict)' : d.max_backlogs + ' Allowed'}</span>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-300">
+            <span class="text-[10px] text-slate-400 block">Eligible Engineering Branches:</span>
+            <span class="font-mono text-purple-300 font-semibold">${d.eligible_branches}</span>
+          </div>
+
+          <div class="space-y-1">
+            <span class="text-[10px] text-slate-400 block">Selection Procedure:</span>
+            <div class="space-y-1 text-[10px]">
+              ${rounds.map((rnd, idx) => `
+                <div class="flex items-center gap-1.5 text-slate-300">
+                  <span class="w-3.5 h-3.5 rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-[8px] font-bold font-mono">${idx+1}</span>
+                  <span class="truncate">${rnd}</span>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-2">
+          <div class="text-[10px] text-slate-400">
+            <span class="block">Drive Date: <strong class="text-white">${d.drive_date}</strong></span>
+            <span class="text-amber-300">Deadline: ${d.registration_deadline}</span>
+          </div>
+          <a href="${d.apply_link || '#'}" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-extrabold text-xs shadow-md shadow-amber-500/20 transition flex items-center gap-1">
+            <span>Register</span>
+            <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
+          </a>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function handlePlacementFilter() {
+  const q = (document.getElementById('placement-search-input')?.value || '').trim().toLowerCase();
+  let filtered = allPlacementDrives;
+
+  if (currentPlacementStatus !== 'All') {
+    filtered = filtered.filter(d => d.status.toLowerCase() === currentPlacementStatus.toLowerCase());
+  }
+  if (q) {
+    filtered = filtered.filter(d => 
+      d.company_name.toLowerCase().includes(q) ||
+      d.role_title.toLowerCase().includes(q) ||
+      d.eligible_branches.toLowerCase().includes(q)
+    );
+  }
+  renderPlacementDrives(filtered);
+}
+
+function setPlacementStatusFilter(status) {
+  currentPlacementStatus = status;
+  document.querySelectorAll('.placement-pill').forEach(btn => {
+    btn.classList.remove('bg-amber-500', 'text-black');
+    btn.classList.add('bg-white/5', 'text-slate-300');
+    if (btn.textContent.trim().toLowerCase().includes(status.toLowerCase())) {
+      btn.classList.add('bg-amber-500', 'text-black');
+      btn.classList.remove('bg-white/5', 'text-slate-300');
+    }
+  });
+  handlePlacementFilter();
+}
+
+
+/* =========================================================
+   FEATURE 2: CLASSROOM & LAB TIMETABLE
+========================================================= */
+let allTimetableSlots = [];
+let currentTimetableDay = 'All';
+
+async function loadTimetableSchedule() {
+  const container = document.getElementById('timetable-cards-grid');
+  if (!container) return;
+
+  const dept = document.getElementById('tt-dept-select')?.value || 'Computer Science & Engineering';
+  const sem = document.getElementById('tt-sem-select')?.value || '5th Sem';
+
+  try {
+    const res = await fetch(`/api/academics/timetable?department=${encodeURIComponent(dept)}&semester=${encodeURIComponent(sem)}`);
+    const data = await res.json();
+    if (data.success && data.schedule) {
+      allTimetableSlots = data.schedule;
+
+      const clockEl = document.getElementById('timetable-live-clock');
+      if (clockEl) clockEl.textContent = `Current IST: ${data.current_time_ist || 'Live'}`;
+
+      const activeTitle = document.getElementById('tt-active-title');
+      if (activeTitle) {
+        if (data.active_slot) {
+          activeTitle.innerHTML = `<span class="text-[#cba23e] font-mono mr-1">[${data.active_slot.subject_code}]</span> ${data.active_slot.subject_name} • <span class="text-cyan-300">${data.active_slot.room_no}</span> (${data.active_slot.faculty_name})`;
+        } else {
+          activeTitle.textContent = `No active classroom session right now (${data.current_day || 'Break / Recess'}).`;
+        }
+      }
+
+      const nextTitle = document.getElementById('tt-next-title');
+      if (nextTitle) {
+        if (data.next_slot) {
+          nextTitle.innerHTML = `${data.next_slot.time_slot}: <span class="text-white">${data.next_slot.subject_name}</span> (${data.next_slot.room_no})`;
+        } else {
+          nextTitle.textContent = 'Day schedule completed / Next slot tomorrow at 09:00 AM.';
+        }
+      }
+
+      renderTimetable(allTimetableSlots);
+    }
+  } catch (err) {
+    console.error('Error loading timetable:', err);
+  }
+}
+
+function renderTimetable(slots) {
+  const container = document.getElementById('timetable-cards-grid');
+  if (!container) return;
+
+  let displaySlots = slots;
+  if (currentTimetableDay !== 'All') {
+    displaySlots = displaySlots.filter(s => s.day_of_week.toLowerCase() === currentTimetableDay.toLowerCase());
+  }
+
+  if (displaySlots.length === 0) {
+    container.innerHTML = `
+      <div class="p-8 text-center text-slate-400 glass-panel rounded-2xl">
+        <i class="fa-solid fa-calendar-xmark text-3xl mb-2 text-slate-500"></i>
+        <p class="text-sm font-semibold">No scheduled lectures or labs for this day.</p>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = displaySlots.map(s => {
+    const isLab = s.is_lab === 1;
+    const badgeColor = isLab ? 'bg-purple-500/20 text-purple-300 border-purple-500/30' : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+    return `
+      <div class="glass-panel p-4 rounded-2xl border border-white/10 hover:border-cyan-500/40 transition flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+        <div class="flex items-start sm:items-center gap-3">
+          <div class="w-11 h-11 rounded-xl ${isLab ? 'bg-purple-500/20 text-purple-400' : 'bg-cyan-500/20 text-cyan-400'} flex items-center justify-center shrink-0 text-base border border-white/10">
+            <i class="fa-solid ${isLab ? 'fa-flask-vial' : 'fa-chalkboard'}"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-xs font-black text-[#cba23e] font-mono">${s.subject_code}</span>
+              <span class="text-xs font-extrabold text-white">${s.subject_name}</span>
+              <span class="px-2 py-0.5 rounded-full ${badgeColor} text-[9px] font-bold border">${isLab ? 'Practical Lab' : 'Theory'}</span>
+            </div>
+            <div class="flex items-center gap-3 text-[11px] text-slate-300 mt-1 flex-wrap">
+              <span><i class="fa-solid fa-user-tie text-slate-400 mr-1"></i>${s.faculty_name}</span>
+              <span>•</span>
+              <span class="text-[#e6c66d]"><i class="fa-solid fa-door-open mr-1"></i>${s.room_no}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex sm:flex-col items-center sm:items-end justify-between w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-white/10 gap-1">
+          <span class="text-[10px] text-slate-400 font-bold uppercase">${s.day_of_week}</span>
+          <span class="text-xs font-extrabold text-cyan-300 font-mono bg-cyan-950/40 border border-cyan-500/30 px-2 py-0.5 rounded-lg">${s.time_slot}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function setTimetableDay(day) {
+  currentTimetableDay = day;
+  document.querySelectorAll('.tt-day-pill').forEach(btn => {
+    btn.classList.remove('bg-cyan-500', 'text-black');
+    btn.classList.add('bg-white/5', 'text-slate-300');
+    if (btn.textContent.trim().toLowerCase().includes(day.toLowerCase())) {
+      btn.classList.add('bg-cyan-500', 'text-black');
+      btn.classList.remove('bg-white/5', 'text-slate-300');
+    }
+  });
+  renderTimetable(allTimetableSlots);
+}
+
+
+/* =========================================================
+   FEATURE 3: VTU AUTONOMOUS CGPA & SGPA CALCULATOR
+========================================================= */
+let currentGPASubjects = [];
+
+async function autoLoadGPACourses() {
+  const dept = document.getElementById('gpa-dept-select')?.value || 'Computer Science & Engineering';
+  const sem = document.getElementById('gpa-sem-select')?.value || '5th Sem';
+
+  try {
+    const res = await fetch(`/api/academics/curriculum-credits?department=${encodeURIComponent(dept)}&semester=${encodeURIComponent(sem)}`);
+    const data = await res.json();
+    if (data.success && data.subjects && data.subjects.length > 0) {
+      currentGPASubjects = data.subjects.map(s => ({
+        code: s.subject_code,
+        name: s.subject_name,
+        credits: s.credits,
+        grade: 'O'
+      }));
+    } else {
+      currentGPASubjects = [
+        { code: '21CS51', name: 'Automata Theory & Computability', credits: 3.0, grade: 'A+' },
+        { code: '21CS52', name: 'Computer Networks', credits: 4.0, grade: 'A+' },
+        { code: '21CS53', name: 'Database Management Systems', credits: 4.0, grade: 'O' },
+        { code: '21CS54', name: 'Artificial Intelligence & Principles', credits: 3.0, grade: 'A' },
+        { code: '21CSL55', name: 'Database Systems Lab', credits: 1.5, grade: 'O' },
+        { code: '21CS58', name: 'Mini Project', credits: 2.0, grade: 'O' }
+      ];
+    }
+    renderGPASubjects();
+    calculateSGPA();
+  } catch (err) {
+    console.error('Error auto-loading GPA subjects:', err);
+  }
+}
+
+function renderGPASubjects() {
+  const container = document.getElementById('gpa-subject-rows-container');
+  if (!container) return;
+
+  container.innerHTML = currentGPASubjects.map((sub, idx) => `
+    <div class="p-3 rounded-2xl bg-white/5 border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2 flex-grow">
+        <span class="w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center font-mono font-bold text-[10px] shrink-0">${idx+1}</span>
+        <div class="w-full">
+          <input type="text" value="${sub.code} - ${sub.name}" oninput="currentGPASubjects[${idx}].name = this.value" class="w-full bg-transparent font-bold text-white text-xs focus:outline-none focus:border-b border-emerald-400">
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 shrink-0 w-full sm:w-auto justify-between sm:justify-end">
+        <div class="flex items-center gap-1.5">
+          <span class="text-[10px] text-slate-400">Credits:</span>
+          <input type="number" step="0.5" min="0.5" max="6" value="${sub.credits}" oninput="currentGPASubjects[${idx}].credits = parseFloat(this.value) || 0; calculateSGPA();" class="w-14 px-2 py-1 rounded-lg bg-black/40 border border-white/10 text-white font-mono text-center font-bold text-xs">
+        </div>
+
+        <div class="flex items-center gap-1.5">
+          <span class="text-[10px] text-slate-400">Grade:</span>
+          <select onchange="currentGPASubjects[${idx}].grade = this.value; calculateSGPA();" class="px-2 py-1 rounded-lg bg-black/40 border border-white/10 text-emerald-300 font-bold text-xs">
+            <option value="O" ${sub.grade === 'O' ? 'selected' : ''}>O (10)</option>
+            <option value="A+" ${sub.grade === 'A+' ? 'selected' : ''}>A+ (9)</option>
+            <option value="A" ${sub.grade === 'A' ? 'selected' : ''}>A (8)</option>
+            <option value="B+" ${sub.grade === 'B+' ? 'selected' : ''}>B+ (7)</option>
+            <option value="B" ${sub.grade === 'B' ? 'selected' : ''}>B (6)</option>
+            <option value="C" ${sub.grade === 'C' ? 'selected' : ''}>C (5)</option>
+            <option value="P" ${sub.grade === 'P' ? 'selected' : ''}>P (4)</option>
+            <option value="F" ${sub.grade === 'F' ? 'selected' : ''}>F (0)</option>
+          </select>
+        </div>
+
+        <button onclick="removeGPASubject(${idx})" class="text-slate-400 hover:text-rose-400 p-1 transition" title="Delete Course">
+          <i class="fa-solid fa-trash-can text-xs"></i>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function addCustomGPASubject() {
+  currentGPASubjects.push({
+    code: `ELEC${currentGPASubjects.length + 1}`,
+    name: 'Elective Course / Open Elective',
+    credits: 3.0,
+    grade: 'A+'
+  });
+  renderGPASubjects();
+  calculateSGPA();
+}
+
+function removeGPASubject(idx) {
+  currentGPASubjects.splice(idx, 1);
+  renderGPASubjects();
+  calculateSGPA();
+}
+
+function calculateSGPA() {
+  const gradeMap = { 'O': 10, 'A+': 9, 'A': 8, 'B+': 7, 'B': 6, 'C': 5, 'P': 4, 'F': 0 };
+  let totalCredits = 0;
+  let totalPoints = 0;
+
+  currentGPASubjects.forEach(s => {
+    const pts = gradeMap[s.grade] !== undefined ? gradeMap[s.grade] : 0;
+    const cred = s.credits || 0;
+    totalCredits += cred;
+    totalPoints += pts * cred;
+  });
+
+  const sgpa = totalCredits > 0 ? (totalPoints / totalCredits).toFixed(2) : '0.00';
+
+  const disp = document.getElementById('gpa-result-display');
+  if (disp) disp.textContent = sgpa;
+
+  const totalCredEl = document.getElementById('gpa-total-credits');
+  if (totalCredEl) totalCredEl.textContent = totalCredits.toFixed(1);
+
+  const totalPtsEl = document.getElementById('gpa-total-points');
+  if (totalPtsEl) totalPtsEl.textContent = totalPoints.toFixed(1);
+
+  const verdictEl = document.getElementById('gpa-class-verdict');
+  if (verdictEl) {
+    const val = parseFloat(sgpa);
+    if (val >= 7.75) {
+      verdictEl.innerHTML = `<span class="text-emerald-400 font-bold">First Class with Distinction (FCD) 🌟</span>`;
+    } else if (val >= 6.75) {
+      verdictEl.innerHTML = `<span class="text-cyan-300 font-bold">First Class (FC) 🎯</span>`;
+    } else if (val >= 5.75) {
+      verdictEl.innerHTML = `<span class="text-blue-300 font-bold">Second Class (SC)</span>`;
+    } else if (val >= 4.00) {
+      verdictEl.innerHTML = `<span class="text-amber-400 font-bold">Pass Class (P)</span>`;
+    } else {
+      verdictEl.innerHTML = `<span class="text-rose-400 font-bold">Backlogs / Re-appear</span>`;
+    }
+  }
+}
+
+function calculateTargetCGPA() {
+  const currCGPA = parseFloat(document.getElementById('target-curr-cgpa')?.value || '8.5');
+  const doneSems = parseInt(document.getElementById('target-done-sems')?.value || '4');
+  const goalCGPA = parseFloat(document.getElementById('target-goal-cgpa')?.value || '9.0');
+  const totalSems = 8;
+  const remainingSems = totalSems - doneSems;
+
+  const resText = document.getElementById('target-result-text');
+  if (!resText) return;
+
+  if (remainingSems <= 0) {
+    resText.textContent = 'All 8 semesters completed.';
+    resText.classList.remove('hidden');
+    return;
+  }
+
+  const requiredSGPA = ((goalCGPA * totalSems) - (currCGPA * doneSems)) / remainingSems;
+
+  resText.classList.remove('hidden');
+  if (requiredSGPA > 10.0) {
+    resText.innerHTML = `<strong class="text-rose-400">Not Mathematically Attainable:</strong> You would need an average SGPA of <strong>${requiredSGPA.toFixed(2)}</strong> across the remaining ${remainingSems} semesters (Max possible is 10.00). Try adjusting target CGPA to ${( ((10.0 * remainingSems) + (currCGPA * doneSems)) / totalSems ).toFixed(2)}.`;
+  } else if (requiredSGPA <= 4.0) {
+    resText.innerHTML = `<strong class="text-emerald-400">Easily Achievable:</strong> Maintaining a minimum pass SGPA of <strong>4.00</strong> will fulfill your target.`;
+  } else {
+    resText.innerHTML = `To graduate with <strong>${goalCGPA.toFixed(2)} CGPA</strong>, you must score an average of <strong class="text-emerald-300 font-mono font-bold text-xs">${requiredSGPA.toFixed(2)} SGPA</strong> in each of the remaining <strong>${remainingSems} semesters</strong>.`;
+  }
+}
+
+function resetGPACalculator() {
+  autoLoadGPACourses();
+}
+
+
+/* =========================================================
+   FEATURE 4: GATE & EXAM CHEAT SHEETS
+========================================================= */
+let allCheatSheets = [];
+let currentCheatSheetCategory = 'All';
+
+async function loadCheatSheets() {
+  const container = document.getElementById('cheatsheets-grid');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/academics/cheat-sheets');
+    const data = await res.json();
+    if (data.success && data.sheets) {
+      allCheatSheets = data.sheets;
+      renderCheatSheets(allCheatSheets);
+    }
+  } catch (err) {
+    console.error('Error loading cheat sheets:', err);
+  }
+}
+
+function renderCheatSheets(sheets) {
+  const container = document.getElementById('cheatsheets-grid');
+  if (!container) return;
+
+  let displaySheets = sheets;
+  if (currentCheatSheetCategory !== 'All') {
+    displaySheets = displaySheets.filter(s => s.category.toLowerCase() === currentCheatSheetCategory.toLowerCase());
+  }
+
+  container.innerHTML = displaySheets.map(s => `
+    <div class="glass-panel p-5 rounded-3xl border border-white/10 hover:border-pink-500/40 transition flex flex-col justify-between gap-3 shadow-lg">
+      <div class="space-y-2.5">
+        <div class="flex items-center justify-between gap-2 flex-wrap">
+          <span class="px-2.5 py-1 rounded-xl bg-[#1f4178] text-[#cba23e] font-mono text-xs font-bold border border-[#cba23e]/40">${s.subject_code}</span>
+          <span class="px-2 py-0.5 rounded-full bg-pink-500/20 text-pink-300 text-[10px] font-bold border border-pink-500/30">${s.category}</span>
+        </div>
+        <h4 class="font-extrabold text-white text-sm leading-snug">${s.title}</h4>
+        <span class="text-[10px] text-slate-400 block">${s.subject_name} • ${s.department}</span>
+
+        <div class="p-3.5 rounded-2xl bg-black/50 border border-white/10 text-xs text-slate-200 font-mono leading-relaxed max-h-56 overflow-y-auto space-y-1">
+          ${s.summary_content}
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-white/10 flex items-center justify-between">
+        <span class="text-[10px] text-slate-400 font-mono">${s.downloads_count} students saved</span>
+        <button onclick="copyCheatSheetSummary(${s.id})" class="px-3 py-1.5 rounded-xl bg-pink-600/30 hover:bg-pink-600 border border-pink-500/40 text-pink-200 hover:text-white text-xs font-bold transition flex items-center gap-1.5">
+          <i class="fa-solid fa-copy"></i>
+          <span>Copy Sheet</span>
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function filterCheatSheets(cat) {
+  currentCheatSheetCategory = cat;
+  document.querySelectorAll('.cs-pill').forEach(btn => {
+    btn.classList.remove('bg-pink-600', 'text-white');
+    btn.classList.add('bg-white/5', 'text-slate-300');
+    if (btn.textContent.trim().toLowerCase().includes(cat.toLowerCase())) {
+      btn.classList.add('bg-pink-600', 'text-white');
+      btn.classList.remove('bg-white/5', 'text-slate-300');
+    }
+  });
+  renderCheatSheets(allCheatSheets);
+}
+
+function copyCheatSheetSummary(id) {
+  const sheet = allCheatSheets.find(s => s.id === id);
+  if (!sheet) return;
+  const cleanText = sheet.summary_content.replace(/<br\s*[\/]?>/gi, '\n').replace(/<[^>]+>/g, '');
+  navigator.clipboard.writeText(`${sheet.subject_code} - ${sheet.title}\n\n${cleanText}`);
+  showPopUpNotification({
+    title: 'Cheat Sheet Copied',
+    message: `Formula summary for ${sheet.subject_code} copied to clipboard!`,
+    type: 'general'
+  });
+}
+
+
+/* =========================================================
+   FEATURE 5: DIGITAL SMART STUDENT ID CARD BADGE
+========================================================= */
+async function openStudentIdCardModal(usn) {
+  const targetUSN = usn || (currentStudentData ? currentStudentData.usn : '4BD23CS001');
+
+  try {
+    const res = await fetch(`/api/students/id-card?usn=${encodeURIComponent(targetUSN)}`);
+    const data = await res.json();
+    if (data.success && data.student) {
+      const st = data.student;
+      document.getElementById('idc-student-name').textContent = st.student_name;
+      document.getElementById('idc-usn').textContent = st.usn;
+      document.getElementById('idc-branch').textContent = st.branch;
+      document.getElementById('idc-sem').textContent = `${st.semester} (Sec ${st.section || 'A'})`;
+      document.getElementById('idc-blood').textContent = st.blood_group || 'B+ Rh+';
+      document.getElementById('idc-validity').textContent = st.academic_years || '2023 - 2027';
+
+      const qrContainer = document.getElementById('idc-qr-container');
+      if (qrContainer) {
+        qrContainer.innerHTML = `
+          <svg class="w-14 h-14" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="100" height="100" fill="white"/>
+            <rect x="10" y="10" width="25" height="25" stroke="black" stroke-width="5"/>
+            <rect x="17" y="17" width="11" height="11" fill="black"/>
+            <rect x="65" y="10" width="25" height="25" stroke="black" stroke-width="5"/>
+            <rect x="72" y="17" width="11" height="11" fill="black"/>
+            <rect x="10" y="65" width="25" height="25" stroke="black" stroke-width="5"/>
+            <rect x="17" y="72" width="11" height="11" fill="black"/>
+            <rect x="42" y="15" width="6" height="6" fill="black"/>
+            <rect x="52" y="22" width="6" height="6" fill="black"/>
+            <rect x="42" y="42" width="16" height="16" fill="#0a1733"/>
+            <rect x="15" y="45" width="6" height="6" fill="black"/>
+            <rect x="25" y="52" width="6" height="6" fill="black"/>
+            <rect x="68" y="45" width="6" height="6" fill="black"/>
+            <rect x="78" y="55" width="6" height="6" fill="black"/>
+            <rect x="45" y="70" width="6" height="6" fill="black"/>
+            <rect x="55" y="78" width="6" height="6" fill="black"/>
+            <rect x="70" y="72" width="6" height="6" fill="black"/>
+          </svg>
+        `;
+      }
+      openModal('modal-student-id-card');
+    }
+  } catch (err) {
+    console.error('Error opening Student ID Card:', err);
+  }
+}
+
+function printStudentIdCard() {
+  const cardEl = document.getElementById('id-card-printable');
+  if (!cardEl) return;
+
+  const printWindow = window.open('', '_blank', 'width=600,height=700');
+  printWindow.document.write(`
+    <html>
+      <head>
+        <title>BIET Smart Student ID Badge</title>
+        <script src="https://cdn.tailwindcss.com"><\/script>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <style>
+          body { background: #f1f5f9; padding: 20px; display: flex; justify-content: center; }
+          @media print { body { padding: 0; background: white; } }
+        </style>
+      </head>
+      <body>
+        <div style="width: 380px;">
+          ${cardEl.outerHTML}
+        </div>
+        <script>
+          setTimeout(() => { window.print(); }, 400);
+        <\/script>
+      </body>
+    </html>
+  `);
+  printWindow.document.close();
+}
+

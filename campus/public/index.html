@@ -108,6 +108,18 @@
         <button onclick="switchView('questionbank')" id="desktop-nav-questionbank" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-book-bookmark mr-1 text-purple-400"></i> PYQ & MCQ
         </button>
+        <button onclick="switchView('placements')" id="desktop-nav-placements" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-briefcase mr-1 text-amber-400"></i> Placements
+        </button>
+        <button onclick="switchView('timetable')" id="desktop-nav-timetable" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-calendar-days mr-1 text-cyan-400"></i> Timetable
+        </button>
+        <button onclick="switchView('gpa')" id="desktop-nav-gpa" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-calculator mr-1 text-emerald-400"></i> CGPA Calc
+        </button>
+        <button onclick="switchView('cheatsheets')" id="desktop-nav-cheatsheets" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
+          <i class="fa-solid fa-file-code mr-1 text-pink-400"></i> Cheat Sheets
+        </button>
         <button onclick="switchView('faculty')" id="desktop-nav-faculty" class="px-3 py-1.5 rounded-xl font-medium text-slate-300 hover:text-white hover:bg-white/10 transition">
           <i class="fa-solid fa-chalkboard-user mr-1 text-blue-400"></i> Faculty
         </button>
@@ -267,8 +279,48 @@
         </div>
       </div>
 
-      <!-- Quick Launch Shortcuts (6 Modules) -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5">
+      <!-- Quick Launch Shortcuts (Campus Modules) -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-4 gap-2.5">
+        <button onclick="switchView('placements')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-amber-500/30 bg-amber-950/20 hover:bg-amber-900/30">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-briefcase"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">T&P Placements</span>
+            <span class="text-[10px] text-amber-300 block">Bosch, Cisco & Drives</span>
+          </div>
+        </button>
+
+        <button onclick="switchView('timetable')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-cyan-500/30 bg-cyan-950/20 hover:bg-cyan-900/30">
+          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">Live Timetable</span>
+            <span class="text-[10px] text-cyan-300 block">Class & Lab Routine</span>
+          </div>
+        </button>
+
+        <button onclick="switchView('gpa')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-900/30">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-calculator"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">VTU CGPA Calc</span>
+            <span class="text-[10px] text-emerald-300 block">SGPA & Target Matrix</span>
+          </div>
+        </button>
+
+        <button onclick="switchView('cheatsheets')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-pink-500/30 bg-pink-950/20 hover:bg-pink-900/30">
+          <div class="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-file-code"></i>
+          </div>
+          <div>
+            <span class="text-xs font-bold text-white block">GATE Cheat Sheets</span>
+            <span class="text-[10px] text-pink-300 block">Formula Quick Revision</span>
+          </div>
+        </button>
+
         <button onclick="switchView('questionbank')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-purple-500/30 bg-purple-950/20 hover:bg-purple-900/30">
           <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg shrink-0">
             <i class="fa-solid fa-book-bookmark"></i>
@@ -279,13 +331,13 @@
           </div>
         </button>
 
-        <button onclick="switchView('erp')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-emerald-500/30 bg-emerald-950/20 hover:bg-emerald-900/30">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg shrink-0">
-            <i class="fa-solid fa-graduation-cap"></i>
+        <button onclick="openStudentIdCardModal()" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left border border-[#cba23e]/40 bg-[#0a1733]/60 hover:bg-[#132854]">
+          <div class="w-10 h-10 rounded-xl bg-[#cba23e]/20 text-[#e6c66d] flex items-center justify-center text-lg shrink-0">
+            <i class="fa-solid fa-id-card"></i>
           </div>
           <div>
-            <span class="text-xs font-bold text-white block">Academic ERP</span>
-            <span class="text-[10px] text-emerald-300 block">USN Marks & Attendance</span>
+            <span class="text-xs font-bold text-white block">Digital Student ID</span>
+            <span class="text-[10px] text-[#e6c66d] block">Smart RFID Badge</span>
           </div>
         </button>
 
@@ -296,26 +348,6 @@
           <div>
             <span class="text-xs font-bold text-white block">Faculty Directory</span>
             <span class="text-[10px] text-slate-400 block">316 Profs & Papers</span>
-          </div>
-        </button>
-
-        <button onclick="switchView('lostfound')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-xl bg-pink-500/20 text-pink-400 flex items-center justify-center text-lg shrink-0">
-            <i class="fa-solid fa-box-open"></i>
-          </div>
-          <div>
-            <span class="text-xs font-bold text-white block">Lost & Found</span>
-            <span class="text-[10px] text-slate-400 block">Campus Desk & Items</span>
-          </div>
-        </button>
-
-        <button onclick="switchView('map')" class="glass-panel-interactive p-3 rounded-xl flex items-center gap-3 text-left">
-          <div class="w-10 h-10 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-lg shrink-0">
-            <i class="fa-solid fa-satellite"></i>
-          </div>
-          <div>
-            <span class="text-xs font-bold text-white block">Satellite Map</span>
-            <span class="text-[10px] text-slate-400 block">GPS & Buildings</span>
           </div>
         </button>
 
@@ -1060,6 +1092,308 @@
       </div>
     </section>
 
+    <!-- ========================================== -->
+    <!-- VIEW 8: TRAINING & PLACEMENT DRIVES HUB -->
+    <!-- ========================================== -->
+    <section id="view-placements" class="space-y-6 hidden">
+      <!-- Top Hero Header -->
+      <div class="glass-panel p-6 rounded-3xl border border-amber-500/30 bg-gradient-to-r from-[#0a1733]/90 via-[#1e1b4b]/80 to-[#0a1733]/90 shadow-2xl relative overflow-hidden">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div class="space-y-1.5">
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-xs font-bold border border-amber-500/30">
+                <i class="fa-solid fa-graduation-cap mr-1"></i> T&P Department
+              </span>
+              <span class="text-xs text-slate-300">Dr. Nirmala C. R. (Dean T&P) • Training & Placement Cell</span>
+            </div>
+            <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-2">
+              <i class="fa-solid fa-briefcase text-amber-400"></i> Campus Recruitment & Internship Drives
+            </h2>
+            <p class="text-xs text-slate-300 max-w-2xl">
+              Official on-campus and pooled recruitment schedules, eligibility criteria, CTC packages, and selection stages.
+            </p>
+          </div>
+
+          <!-- Placement Stats Badge -->
+          <div class="flex items-center gap-3 bg-white/5 border border-white/10 p-3 rounded-2xl">
+            <div class="text-center px-2">
+              <span class="text-lg font-black text-amber-400 block">14.5 LPA</span>
+              <span class="text-[10px] text-slate-400">Dream Package</span>
+            </div>
+            <div class="w-px h-8 bg-white/10"></div>
+            <div class="text-center px-2">
+              <span class="text-lg font-black text-emerald-400 block">120+</span>
+              <span class="text-[10px] text-slate-400">Recruiter Visits</span>
+            </div>
+            <div class="w-px h-8 bg-white/10"></div>
+            <div class="text-center px-2">
+              <span class="text-lg font-black text-cyan-400 block">92%</span>
+              <span class="text-[10px] text-slate-400">Eligible Placed</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter & Search Bar -->
+        <div class="mt-5 pt-4 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="relative w-full sm:w-80">
+            <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+            <input type="text" id="placement-search-input" oninput="handlePlacementFilter()" placeholder="Search company, role or branch..." class="w-full pl-9 pr-3 py-2 rounded-xl bg-black/40 border border-white/10 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-amber-400 transition">
+          </div>
+
+          <div class="flex items-center gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
+            <button onclick="setPlacementStatusFilter('All')" class="placement-pill active px-3 py-1.5 rounded-xl text-xs font-semibold bg-amber-500 text-black transition">All Drives</button>
+            <button onclick="setPlacementStatusFilter('Upcoming')" class="placement-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Upcoming</button>
+            <button onclick="setPlacementStatusFilter('Ongoing')" class="placement-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Ongoing</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Placement Cards Grid -->
+      <div id="placement-cards-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Dynamically populated -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 9: WEEKLY CLASSROOM & LAB TIMETABLE -->
+    <!-- ========================================== -->
+    <section id="view-timetable" class="space-y-6 hidden">
+      <!-- Live Status Hero -->
+      <div class="glass-panel p-6 rounded-3xl border border-cyan-500/30 bg-gradient-to-r from-[#0a1733]/90 via-[#0e3b5e]/80 to-[#0a1733]/90 shadow-2xl space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-mono text-xs font-bold border border-cyan-500/30">
+                <i class="fa-solid fa-clock mr-1"></i> Live Schedule System
+              </span>
+              <span id="timetable-live-clock" class="text-xs font-mono text-slate-300">IST: Loading...</span>
+            </div>
+            <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-1">
+              <i class="fa-solid fa-calendar-days text-cyan-400"></i> Classroom & Laboratory Timetable
+            </h2>
+          </div>
+
+          <!-- Controls: Dept & Semester -->
+          <div class="flex flex-wrap items-center gap-2">
+            <select id="tt-dept-select" onchange="loadTimetableSchedule()" class="px-3 py-2 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-cyan-400">
+              <option value="Computer Science & Engineering" selected>CSE Department</option>
+              <option value="Electronics & Communication Engg">ECE Department</option>
+            </select>
+            <select id="tt-sem-select" onchange="loadTimetableSchedule()" class="px-3 py-2 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-cyan-400">
+              <option value="5th Sem" selected>5th Semester (Section A)</option>
+              <option value="3rd Sem">3rd Semester (Section A)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Current Class & Next Class Ticker -->
+        <div id="tt-live-indicator-card" class="p-4 rounded-2xl bg-black/40 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0 text-lg border border-emerald-500/30 pulse-green">
+              <i class="fa-solid fa-chalkboard-user"></i>
+            </div>
+            <div>
+              <span class="text-[10px] text-emerald-400 font-bold uppercase tracking-wider block">Currently in Session</span>
+              <h4 id="tt-active-title" class="text-sm font-extrabold text-white">Detecting active lecture...</h4>
+            </div>
+          </div>
+          <div class="text-left sm:text-right">
+            <span class="text-[10px] text-slate-400 block">Next Upcoming Session</span>
+            <span id="tt-next-title" class="text-xs font-semibold text-cyan-300">Checking upcoming slots...</span>
+          </div>
+        </div>
+
+        <!-- Day Pills -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 pt-1" id="tt-day-pills">
+          <button onclick="setTimetableDay('All')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-cyan-500 text-black transition">Full Week</button>
+          <button onclick="setTimetableDay('Monday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Mon</button>
+          <button onclick="setTimetableDay('Tuesday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Tue</button>
+          <button onclick="setTimetableDay('Wednesday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Wed</button>
+          <button onclick="setTimetableDay('Thursday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Thu</button>
+          <button onclick="setTimetableDay('Friday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Fri</button>
+          <button onclick="setTimetableDay('Saturday')" class="tt-day-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Sat</button>
+        </div>
+      </div>
+
+      <!-- Timetable Grid -->
+      <div id="timetable-cards-grid" class="space-y-3">
+        <!-- Dynamically populated schedule slots -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 10: VTU AUTONOMOUS CGPA & SGPA CALCULATOR -->
+    <!-- ========================================== -->
+    <section id="view-gpa" class="space-y-6 hidden">
+      <!-- Calculator Hero Header -->
+      <div class="glass-panel p-6 rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-[#0a1733]/90 via-[#064e3b]/80 to-[#0a1733]/90 shadow-2xl space-y-4">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-xs font-bold border border-emerald-500/30">
+                <i class="fa-solid fa-graduation-cap mr-1"></i> VTU 2021 & 2022 NEP Autonomous
+              </span>
+              <span class="text-xs text-slate-300">Exact 10-Point Grade Matrix</span>
+            </div>
+            <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-1">
+              <i class="fa-solid fa-calculator text-emerald-400"></i> Semester SGPA & Target CGPA Calculator
+            </h2>
+            <p class="text-xs text-slate-300 max-w-2xl">
+              Select your department and semester to auto-load official course credits, or input custom courses to calculate accurate semester grades.
+            </p>
+          </div>
+
+          <!-- Quick Actions -->
+          <div class="flex items-center gap-2">
+            <select id="gpa-dept-select" onchange="autoLoadGPACourses()" class="px-3 py-2 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-emerald-400">
+              <option value="Computer Science & Engineering">CSE Department</option>
+              <option value="Basic Science & Humanities">1st Year (Physics / Chem Cycle)</option>
+            </select>
+            <select id="gpa-sem-select" onchange="autoLoadGPACourses()" class="px-3 py-2 rounded-xl bg-black/40 border border-white/15 text-xs text-white focus:outline-none focus:border-emerald-400">
+              <option value="5th Sem">5th Semester</option>
+              <option value="3rd Sem">3rd Semester</option>
+              <option value="1st Sem">1st Semester (Physics Cycle)</option>
+              <option value="2nd Sem">2nd Semester (Chemistry Cycle)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Grade Scale Legend -->
+        <div class="p-3 rounded-2xl bg-black/40 border border-white/10 text-[11px] text-slate-300 flex flex-wrap items-center justify-between gap-2">
+          <span class="font-bold text-white"><i class="fa-solid fa-scale-balanced mr-1 text-[#cba23e]"></i> VTU Grade Points:</span>
+          <span><strong class="text-emerald-400">O:</strong> 10 (90-100%)</span>
+          <span><strong class="text-emerald-300">A+:</strong> 9 (80-89%)</span>
+          <span><strong class="text-cyan-300">A:</strong> 8 (70-79%)</span>
+          <span><strong class="text-blue-300">B+:</strong> 7 (60-69%)</span>
+          <span><strong class="text-purple-300">B:</strong> 6 (55-59%)</span>
+          <span><strong class="text-amber-300">C:</strong> 5 (50-54%)</span>
+          <span><strong class="text-slate-400">P:</strong> 4 (40-49%)</span>
+          <span><strong class="text-rose-400">F:</strong> 0 (Fail)</span>
+        </div>
+      </div>
+
+      <!-- Main Calculator Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Subjects Table (2 Cols) -->
+        <div class="lg:col-span-2 glass-panel p-5 rounded-3xl border border-white/10 space-y-4">
+          <div class="flex items-center justify-between pb-3 border-b border-white/10">
+            <h3 class="font-extrabold text-sm text-white flex items-center gap-2">
+              <i class="fa-solid fa-book-open text-emerald-400"></i> Course Grades & Credits Matrix
+            </h3>
+            <button onclick="addCustomGPASubject()" class="px-3 py-1 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-semibold flex items-center gap-1 transition">
+              <i class="fa-solid fa-plus text-xs"></i> Add Subject
+            </button>
+          </div>
+
+          <!-- Dynamic Subject Rows -->
+          <div id="gpa-subject-rows-container" class="space-y-2.5">
+            <!-- Dynamically populated course input rows -->
+          </div>
+
+          <div class="flex items-center justify-between pt-4 border-t border-white/10">
+            <button onclick="resetGPACalculator()" class="px-4 py-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white text-xs font-semibold transition">
+              Reset Form
+            </button>
+            <button onclick="calculateSGPA()" class="px-6 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center gap-2">
+              <i class="fa-solid fa-calculator"></i> Calculate Semester SGPA
+            </button>
+          </div>
+        </div>
+
+        <!-- Result Card & Target Estimator (1 Col) -->
+        <div class="space-y-6">
+          <!-- Calculated SGPA Display Box -->
+          <div class="glass-panel p-6 rounded-3xl border border-emerald-500/40 bg-gradient-to-b from-[#0a1733] to-[#042f2e] text-center space-y-3 shadow-xl">
+            <span class="text-xs text-slate-300 font-bold uppercase tracking-wider block">Estimated Semester SGPA</span>
+            <div id="gpa-result-display" class="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 font-mono">
+              --.--
+            </div>
+            <div id="gpa-class-verdict" class="text-xs font-bold text-slate-300">
+              Input course grades and press Calculate
+            </div>
+
+            <div class="pt-3 border-t border-white/10 grid grid-cols-2 gap-2 text-xs text-slate-300 font-mono">
+              <div>
+                <span class="text-[10px] text-slate-400 block">Total Credits</span>
+                <span id="gpa-total-credits" class="font-bold text-white">0.0</span>
+              </div>
+              <div>
+                <span class="text-[10px] text-slate-400 block">Grade Points</span>
+                <span id="gpa-total-points" class="font-bold text-white">0.0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Target CGPA Estimator -->
+          <div class="glass-panel p-5 rounded-3xl border border-white/10 space-y-3 text-xs">
+            <h4 class="font-extrabold text-white text-xs flex items-center gap-1.5 pb-2 border-b border-white/10">
+              <i class="fa-solid fa-bullseye text-amber-400"></i> Target CGPA Goal Estimator
+            </h4>
+            <div class="space-y-2">
+              <div>
+                <label class="text-[10px] text-slate-400 block mb-0.5">Current Cumulative CGPA</label>
+                <input type="number" step="0.01" min="0" max="10" id="target-curr-cgpa" value="8.50" class="w-full px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs">
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-[10px] text-slate-400 block mb-0.5">Semesters Done</label>
+                  <input type="number" min="1" max="7" id="target-done-sems" value="4" class="w-full px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs">
+                </div>
+                <div>
+                  <label class="text-[10px] text-slate-400 block mb-0.5">Target CGPA Goal</label>
+                  <input type="number" step="0.01" min="0" max="10" id="target-goal-cgpa" value="9.00" class="w-full px-3 py-1.5 rounded-xl bg-black/40 border border-white/10 text-white text-xs">
+                </div>
+              </div>
+              <button onclick="calculateTargetCGPA()" class="w-full mt-2 py-2 rounded-xl bg-[#1f4178] border border-[#cba23e]/40 hover:bg-[#345798] text-white font-bold text-xs transition">
+                Estimate Required SGPA
+              </button>
+              <div id="target-result-text" class="p-2.5 rounded-xl bg-white/5 text-[11px] text-slate-300 hidden leading-relaxed">
+                <!-- Result populated here -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- VIEW 11: GATE & EXAM CHEAT SHEETS -->
+    <!-- ========================================== -->
+    <section id="view-cheatsheets" class="space-y-6 hidden">
+      <!-- Header -->
+      <div class="glass-panel p-6 rounded-3xl border border-pink-500/30 bg-gradient-to-r from-[#0a1733]/90 via-[#4a044e]/70 to-[#0a1733]/90 shadow-2xl relative">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-0.5 rounded-full bg-pink-500/20 text-pink-300 font-mono text-xs font-bold border border-pink-500/30">
+                <i class="fa-solid fa-bolt mr-1"></i> Rapid Revision Engine
+              </span>
+              <span class="text-xs text-slate-300">GATE / Autonomous Exam Quick Reference</span>
+            </div>
+            <h2 class="text-2xl font-black text-white tracking-tight flex items-center gap-2 mt-1">
+              <i class="fa-solid fa-file-code text-pink-400"></i> Core Engineering Formula & Key Cheat Sheets
+            </h2>
+            <p class="text-xs text-slate-300 max-w-2xl">
+              High-yield formula cheat sheets, algorithmic state transitions, network subnetting tables, and normalization rules.
+            </p>
+          </div>
+
+          <!-- Category Filter -->
+          <div class="flex items-center gap-2 overflow-x-auto pb-1">
+            <button onclick="filterCheatSheets('All')" class="cs-pill active px-3 py-1.5 rounded-xl text-xs font-semibold bg-pink-600 text-white transition">All Sheets</button>
+            <button onclick="filterCheatSheets('Formulas')" class="cs-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Formulas</button>
+            <button onclick="filterCheatSheets('GATE Revision')" class="cs-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">GATE Revision</button>
+            <button onclick="filterCheatSheets('Architecture')" class="cs-pill px-3 py-1.5 rounded-xl text-xs font-semibold bg-white/5 text-slate-300 hover:bg-white/10 transition">Architecture</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cheat Sheets Grid -->
+      <div id="cheatsheets-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Dynamically populated sheets -->
+      </div>
+    </section>
+
   </main>
 
   <!-- ========================================== -->
@@ -1089,6 +1423,18 @@
     <button onclick="switchView('questionbank')" id="nav-questionbank" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-book-bookmark text-base"></i>
       <span>PYQ & MCQ</span>
+    </button>
+    <button onclick="switchView('placements')" id="nav-placements" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
+      <i class="fa-solid fa-briefcase text-base"></i>
+      <span>Placement</span>
+    </button>
+    <button onclick="switchView('timetable')" id="nav-timetable" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
+      <i class="fa-solid fa-calendar-days text-base"></i>
+      <span>Schedule</span>
+    </button>
+    <button onclick="switchView('gpa')" id="nav-gpa" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-slate-400 text-[10px] font-medium transition">
+      <i class="fa-solid fa-calculator text-base"></i>
+      <span>CGPA</span>
     </button>
     <button onclick="switchView('emergency')" id="nav-emergency" class="nav-btn flex flex-col items-center gap-1 py-1 px-2.5 rounded-xl text-rose-400 text-[10px] font-medium transition">
       <i class="fa-solid fa-shield-heart text-base"></i>
@@ -1859,7 +2205,90 @@
     </div>
   </div>
 
+  <!-- MODAL: DIGITAL SMART STUDENT IDENTITY CARD -->
+  <div id="modal-student-id-card" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="glass-panel p-6 rounded-3xl max-w-md w-full border border-[#cba23e]/50 bg-[#071329] max-h-[95vh] overflow-y-auto space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between pb-2 border-b border-white/10">
+        <span class="text-xs font-extrabold text-[#cba23e] flex items-center gap-1.5">
+          <i class="fa-solid fa-id-card"></i> BIET Smart RFID Student Identity Badge
+        </span>
+        <button onclick="closeModal('modal-student-id-card')" class="text-slate-400 hover:text-white p-1">
+          <i class="fa-solid fa-xmark text-sm"></i>
+        </button>
+      </div>
+
+      <!-- Card Badge Container (Printable) -->
+      <div id="id-card-printable" class="rounded-3xl border-2 border-[#cba23e]/60 bg-gradient-to-b from-[#0a1733] via-[#0d224d] to-[#050d1f] p-5 shadow-2xl relative overflow-hidden space-y-4">
+        <!-- Golden Top Institute Crest -->
+        <div class="text-center space-y-1">
+          <div class="flex items-center justify-center gap-2">
+            <img src="/biet-logo.png" alt="BIET Emblem" class="w-9 h-9 object-contain">
+            <div class="text-left">
+              <h4 class="text-xs font-black text-white tracking-wide uppercase">Bapuji Institute of Engg. & Technology</h4>
+              <p class="text-[9px] text-[#e6c66d] tracking-wider font-semibold">Autonomous • Affiliated to VTU • Estd 1979</p>
+            </div>
+          </div>
+          <div class="w-full h-0.5 bg-gradient-to-r from-transparent via-[#cba23e]/80 to-transparent"></div>
+        </div>
+
+        <!-- Student Photo & Identification Details -->
+        <div class="flex items-center gap-4 pt-1">
+          <div class="relative w-20 h-24 rounded-2xl bg-[#0a1733] border-2 border-[#cba23e] overflow-hidden flex items-center justify-center shrink-0 shadow-lg">
+            <i class="fa-solid fa-user-graduate text-3xl text-slate-400"></i>
+            <span class="absolute bottom-0 inset-x-0 bg-emerald-600 text-white text-[8px] font-bold text-center py-0.5">VERIFIED</span>
+          </div>
+          <div class="space-y-1 text-xs">
+            <span id="idc-student-name" class="font-extrabold text-white text-sm block leading-tight">Student (4BD23CS001)</span>
+            <div class="text-[11px] font-mono font-bold text-[#cba23e]" id="idc-usn">4BD23CS001</div>
+            <div class="text-[10px] text-slate-300" id="idc-branch">Computer Science & Engineering</div>
+            <div class="flex items-center gap-2 text-[10px] text-slate-400">
+              <span id="idc-sem">5th Sem (Sec A)</span>
+              <span>•</span>
+              <span id="idc-blood" class="text-rose-400 font-bold">B+ Rh+</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scannable Verification QR Code & Institutional Stamp -->
+        <div class="pt-3 border-t border-white/10 flex items-center justify-between gap-3">
+          <div class="space-y-0.5">
+            <span class="text-[9px] text-slate-400 block">Valid Academic Tenure</span>
+            <span id="idc-validity" class="text-xs font-extrabold text-white font-mono block">2023 - 2027</span>
+            <span class="text-[8px] text-emerald-400 font-semibold block flex items-center gap-1">
+              <i class="fa-solid fa-circle-check"></i> Digital RFID Registry OK
+            </span>
+          </div>
+
+          <!-- Verified QR Code Canvas/SVG -->
+          <div class="p-1.5 bg-white rounded-xl shadow-md shrink-0 flex flex-col items-center justify-center">
+            <div id="idc-qr-container" class="w-16 h-16 flex items-center justify-center text-slate-900 font-mono text-[8px] text-center font-bold">
+              <!-- Dynamically populated QR Code -->
+            </div>
+            <span class="text-[7px] text-slate-800 font-mono font-bold mt-0.5">COE VERIFIED</span>
+          </div>
+        </div>
+
+        <!-- Card Security Footer -->
+        <div class="pt-2 border-t border-white/10 text-center text-[9px] text-slate-400 flex items-center justify-between">
+          <span>Controller of Examinations</span>
+          <span class="text-[#cba23e] font-mono">ID: BIET-AUT-2026</span>
+          <span>Dean Academics</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex items-center justify-between pt-2">
+        <button onclick="closeModal('modal-student-id-card')" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-300 text-xs font-semibold">
+          Close
+        </button>
+        <button onclick="printStudentIdCard()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-[#cba23e] to-[#a37f2a] text-black font-extrabold text-xs shadow-lg shadow-[#cba23e]/20 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-print"></i> Print / Download Badge
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- Main JavaScript Logic -->
-  <script src="/app.js?v=4.3.0"></script>
+  <script src="/app.js?v=4.4.0"></script>
 </body>
 </html>
