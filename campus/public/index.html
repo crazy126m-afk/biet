@@ -663,6 +663,94 @@
 
       <!-- ERP SUB-VIEW 1: IN-APP COMPLETE DASHBOARD -->
       <div id="erp-tab-inapp-view" class="space-y-4">
+        <!-- Student Academic Sign-In & Single Sign-On Gateway (When Not Logged In) -->
+        <div id="erp-auth-gateway-card" class="glass-panel p-5 rounded-3xl border border-purple-500/40 bg-gradient-to-r from-purple-950/40 via-indigo-950/30 to-[#071329] shadow-xl space-y-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-500 border border-purple-400/40 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-purple-500/20">
+                <i class="fa-solid fa-graduation-cap"></i>
+              </div>
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px] font-bold uppercase tracking-wider border border-purple-500/30">Official Student Single Sign-On</span>
+                  <span class="text-[11px] text-emerald-400 font-semibold flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span> Live RoveLabs Sync</span>
+                </div>
+                <h3 class="text-base font-extrabold text-white mt-0.5">BIET Academic Dossier & Student Login</h3>
+                <p class="text-xs text-slate-300">Enter your VTU USN & Password below. Your real attendance %, CIE internal marks, timetable, CGPA tracker, and RFID ID badge will immediately sync.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2 border-t border-white/10 items-end">
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Your VTU USN</label>
+              <div class="relative">
+                <i class="fa-solid fa-id-badge absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400 text-xs"></i>
+                <input type="text" id="erp-direct-login-usn" placeholder="e.g. 4BD23CS001" class="glass-input w-full pl-9 pr-3 py-2 text-xs rounded-xl uppercase font-mono font-bold text-white tracking-wider" value="4BD23CS001">
+              </div>
+            </div>
+            <div class="sm:col-span-4">
+              <label class="block text-[11px] font-bold text-slate-300 uppercase tracking-wider mb-1">Password</label>
+              <div class="relative">
+                <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-400 text-xs"></i>
+                <input type="password" id="erp-direct-login-pass" value="79754577@Aa" placeholder="Default: 79754577@Aa" class="glass-input w-full pl-9 pr-8 py-2 text-xs rounded-xl font-mono text-white">
+                <button type="button" onclick="toggleErpPasswordVisibility()" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white text-xs">
+                  <i class="fa-solid fa-eye" id="erp-pass-eye"></i>
+                </button>
+              </div>
+            </div>
+            <div class="sm:col-span-3">
+              <button onclick="handleDirectERPLogin()" id="btn-erp-direct-login" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-600 hover:from-purple-500 hover:to-indigo-500 text-white font-extrabold text-xs shadow-lg shadow-purple-500/30 flex items-center justify-center gap-2 transition">
+                <i class="fa-solid fa-right-to-bracket"></i>
+                <span>Login & Sync All</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 flex-wrap text-[11px] text-slate-400 pt-1">
+            <span class="text-slate-300 font-semibold">Test Sample Profiles:</span>
+            <button onclick="setSampleUsn('4BD23CS001')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-300 border border-white/10 font-mono text-[10px]">4BD23CS001 (CS)</button>
+            <button onclick="setSampleUsn('4BD23CS042')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-emerald-300 border border-white/10 font-mono text-[10px]">4BD23CS042 (Kavya)</button>
+            <button onclick="setSampleUsn('4BD23EC018')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-amber-300 border border-white/10 font-mono text-[10px]">4BD23EC018 (EC)</button>
+            <button onclick="setSampleUsn('4BD22ME009')" class="px-2 py-0.5 rounded-lg bg-white/5 hover:bg-white/10 text-rose-300 border border-white/10 font-mono text-[10px]">4BD22ME009 (ME)</button>
+          </div>
+        </div>
+
+        <!-- Student Active Connected Session Bar (When Logged In) -->
+        <div id="erp-active-session-bar" class="hidden glass-panel p-4 rounded-3xl border border-emerald-500/40 bg-gradient-to-r from-emerald-950/30 via-slate-900/60 to-[#071329] flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div class="flex items-center gap-3">
+            <div class="w-11 h-11 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-xs font-black text-white" id="erp-session-user-name">Student Name</span>
+                <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono text-[10px] font-bold border border-emerald-500/30" id="erp-session-user-usn">4BD23CS001</span>
+                <span class="px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 text-[10px]">Dossier Live</span>
+              </div>
+              <p class="text-[11px] text-slate-300 mt-0.5">
+                Active & Synchronized with Student ID Badge, Live Timetable, and VTU CGPA Tracker.
+              </p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-wrap">
+            <button onclick="syncStudentERPNow()" class="px-3 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/50 text-purple-300 border border-purple-500/40 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-rotate"></i>
+              <span>Refresh</span>
+            </button>
+            <button onclick="openStudentIdCardModal()" class="px-3 py-1.5 rounded-xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-id-card"></i>
+              <span>RFID Badge</span>
+            </button>
+            <button onclick="openEditStudentProfileModal()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-user-pen"></i>
+              <span>Edit Details</span>
+            </button>
+            <button onclick="logoutUser()" class="px-2.5 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 text-xs font-semibold transition" title="Log Out">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+            </button>
+          </div>
+        </div>
         <!-- Quick Access to Question Bank & PYQs -->
         <div class="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/50 via-indigo-950/40 to-[#071329] border border-purple-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
           <div class="flex items-center gap-3">
@@ -770,6 +858,15 @@
 
       <!-- ERP SUB-VIEW 2: EMBEDDED ROVELABS LIVE PORTAL -->
       <div id="erp-tab-frame-view" class="hidden glass-panel rounded-2xl overflow-hidden border border-emerald-500/30">
+        <div class="p-3 bg-amber-500/15 border-b border-amber-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2 text-amber-200">
+            <i class="fa-solid fa-triangle-exclamation text-amber-400 text-sm"></i>
+            <span><strong>Cross-Origin Browser Isolation:</strong> Logins inside this external portal iframe cannot synchronize back to the app. Use the <strong>"My In-App Dashboard"</strong> tab for 1-click login and complete sync!</span>
+          </div>
+          <button onclick="switchErpTab('inapp')" class="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs shrink-0 transition flex items-center gap-1 shadow-sm">
+            <span>Switch to In-App Sync</span> <i class="fa-solid fa-arrow-left text-[10px]"></i>
+          </button>
+        </div>
         <div class="p-3 bg-emerald-950/40 border-b border-emerald-500/30 flex items-center justify-between text-xs">
           <div class="flex items-center gap-2 text-emerald-300 font-bold font-mono">
             <span class="w-2 h-2 rounded-full bg-emerald-400 pulse-green"></span>

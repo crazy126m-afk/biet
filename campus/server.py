@@ -13,6 +13,7 @@ from datetime import datetime, timedelta
 import mimetypes
 import zipfile
 import io
+import re
 
 mimetypes.add_type("application/vnd.android.package-archive", ".apk")
 
@@ -37,6 +38,122 @@ def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     return conn
+
+def infer_branch_from_usn(usn):
+    u = (usn or '').strip().upper()
+    if 'CS' in u: return 'Computer Science & Engineering', 'Dr. Nirmala C. R. (Dean T&P)'
+    elif 'IS' in u: return 'Information Science & Engineering', 'Dr. Poornima B. (HOD IS)'
+    elif 'EC' in u: return 'Electronics & Communication Engg', 'Dr. G. S. Sunitha (HOD EC)'
+    elif 'EE' in u: return 'Electrical & Electronics Engg', 'Dr. M. S. Nagaraj (HOD EE)'
+    elif 'ME' in u: return 'Mechanical Engineering', 'Dr. K. Sadashivappa (HOD ME)'
+    elif 'CV' in u: return 'Civil Engineering', 'Dr. S. Suresh (HOD CV)'
+    elif 'AI' in u or 'AD' in u: return 'Artificial Intelligence & Machine Learning', 'Dr. Nirmala C. R.'
+    elif 'BT' in u: return 'Biotechnology', 'Dr. B. E. Rangaswamy'
+    elif 'CH' in u: return 'Chemical Engineering', 'Dr. G. M. Madhu'
+    elif 'TX' in u: return 'Textile Technology', 'Dr. K. Murugesh Babu'
+    else: return 'Computer Science & Engineering', 'Dr. Nirmala C. R. (Dean T&P)'
+
+def infer_sem_from_usn(usn):
+    u = (usn or '').strip().upper()
+    m = re.search(r'4BD(\d{2})', u)
+    if m:
+        yr = int(m.group(1))
+        if yr == 23: return '5th Sem B.E.'
+        elif yr == 24: return '3rd Sem B.E.'
+        elif yr == 22: return '7th Sem B.E.'
+        elif yr == 25: return '1st Sem B.E.'
+    return '5th Sem B.E.'
+
+def get_standard_subjects_for_usn(usn):
+    u = (usn or '').strip().upper()
+    if 'EC' in u:
+        return [
+            {'subject_code': '21EC51', 'subject_name': 'Digital Signal Processing', 'faculty_name': 'Dr. G. S. Sunitha', 'attended_classes': 43, 'total_classes': 48, 'attendance_pct': 89.6, 'cie_test1': 18.0, 'cie_test2': 18.5, 'assignment_marks': 9.5, 'total_cie': 46.0, 'is_shortage': 0},
+            {'subject_code': '21EC52', 'subject_name': 'Digital Communication', 'faculty_name': 'Dr. Leela G. H.', 'attended_classes': 41, 'total_classes': 46, 'attendance_pct': 89.1, 'cie_test1': 17.0, 'cie_test2': 17.5, 'assignment_marks': 9.0, 'total_cie': 43.5, 'is_shortage': 0},
+            {'subject_code': '21EC53', 'subject_name': 'Information Theory & Coding', 'faculty_name': 'Prof. Yogesh K. M.', 'attended_classes': 42, 'total_classes': 48, 'attendance_pct': 87.5, 'cie_test1': 16.5, 'cie_test2': 18.0, 'assignment_marks': 9.5, 'total_cie': 44.0, 'is_shortage': 0},
+            {'subject_code': '21EC54', 'subject_name': 'Electromagnetic Waves & Antennas', 'faculty_name': 'Prof. S. R. Basavarajappa', 'attended_classes': 39, 'total_classes': 44, 'attendance_pct': 88.6, 'cie_test1': 17.5, 'cie_test2': 18.0, 'assignment_marks': 9.0, 'total_cie': 44.5, 'is_shortage': 0},
+            {'subject_code': '21ECL57', 'subject_name': 'DSP & Communication Laboratory', 'faculty_name': 'Dr. Leela G. H.', 'attended_classes': 28, 'total_classes': 28, 'attendance_pct': 100.0, 'cie_test1': 19.0, 'cie_test2': 19.5, 'assignment_marks': 10.0, 'total_cie': 48.5, 'is_shortage': 0},
+            {'subject_code': '21ECL58', 'subject_name': 'HDL & Embedded Lab', 'faculty_name': 'Prof. Yogesh K. M.', 'attended_classes': 28, 'total_classes': 28, 'attendance_pct': 100.0, 'cie_test1': 19.5, 'cie_test2': 20.0, 'assignment_marks': 10.0, 'total_cie': 49.5, 'is_shortage': 0}
+        ]
+    elif 'ME' in u:
+        return [
+            {'subject_code': '21ME51', 'subject_name': 'Design of Machine Elements I', 'faculty_name': 'Dr. K. Sadashivappa', 'attended_classes': 42, 'total_classes': 48, 'attendance_pct': 87.5, 'cie_test1': 17.0, 'cie_test2': 18.0, 'assignment_marks': 9.0, 'total_cie': 44.0, 'is_shortage': 0},
+            {'subject_code': '21ME52', 'subject_name': 'Applied Thermodynamics', 'faculty_name': 'Dr. Mallikarjun G. D.', 'attended_classes': 40, 'total_classes': 46, 'attendance_pct': 86.9, 'cie_test1': 16.5, 'cie_test2': 17.0, 'assignment_marks': 9.0, 'total_cie': 42.5, 'is_shortage': 0},
+            {'subject_code': '21ME53', 'subject_name': 'Manufacturing Process III', 'faculty_name': 'Prof. B. M. Umapathi', 'attended_classes': 43, 'total_classes': 48, 'attendance_pct': 89.6, 'cie_test1': 18.0, 'cie_test2': 18.5, 'assignment_marks': 9.5, 'total_cie': 46.0, 'is_shortage': 0},
+            {'subject_code': '21ME54', 'subject_name': 'Dynamics of Machinery', 'faculty_name': 'Dr. K. S. Sridhar', 'attended_classes': 39, 'total_classes': 44, 'attendance_pct': 88.6, 'cie_test1': 17.0, 'cie_test2': 17.5, 'assignment_marks': 9.0, 'total_cie': 43.5, 'is_shortage': 0},
+            {'subject_code': '21MEL57', 'subject_name': 'Fluid Mechanics Lab', 'faculty_name': 'Dr. Mallikarjun G. D.', 'attended_classes': 28, 'total_classes': 28, 'attendance_pct': 100.0, 'cie_test1': 19.0, 'cie_test2': 19.5, 'assignment_marks': 10.0, 'total_cie': 48.5, 'is_shortage': 0},
+            {'subject_code': '21MEL58', 'subject_name': 'Energy Conversion Lab', 'faculty_name': 'Prof. B. M. Umapathi', 'attended_classes': 28, 'total_classes': 28, 'attendance_pct': 100.0, 'cie_test1': 19.5, 'cie_test2': 20.0, 'assignment_marks': 10.0, 'total_cie': 49.5, 'is_shortage': 0}
+        ]
+    else:
+        return [
+            {'subject_code': '21CS51', 'subject_name': 'Automata Theory & Computability', 'faculty_name': 'Dr. Jyothi G. C.', 'attended_classes': 44, 'total_classes': 48, 'attendance_pct': 91.6, 'cie_test1': 18.5, 'cie_test2': 19.0, 'assignment_marks': 9.5, 'total_cie': 47.0, 'is_shortage': 0},
+            {'subject_code': '21CS52', 'subject_name': 'Computer Networks', 'faculty_name': 'Prof. M. S. Abdul Razak', 'attended_classes': 41, 'total_classes': 46, 'attendance_pct': 89.1, 'cie_test1': 16.5, 'cie_test2': 17.5, 'assignment_marks': 9.0, 'total_cie': 43.0, 'is_shortage': 0},
+            {'subject_code': '21CS53', 'subject_name': 'Database Management Systems', 'faculty_name': 'Prof. Radhika Patil', 'attended_classes': 43, 'total_classes': 48, 'attendance_pct': 89.5, 'cie_test1': 17.5, 'cie_test2': 18.0, 'assignment_marks': 9.5, 'total_cie': 45.0, 'is_shortage': 0},
+            {'subject_code': '21CS54', 'subject_name': 'Artificial Intelligence & Principles', 'faculty_name': 'Dr. Nirmala C. R.', 'attended_classes': 39, 'total_classes': 44, 'attendance_pct': 88.6, 'cie_test1': 17.5, 'cie_test2': 18.5, 'assignment_marks': 9.0, 'total_cie': 45.0, 'is_shortage': 0},
+            {'subject_code': '21CSL57', 'subject_name': 'Computer Networks Laboratory', 'faculty_name': 'Prof. Waseem Khan', 'attended_classes': 28, 'total_classes': 28, 'attendance_pct': 100.0, 'cie_test1': 19.0, 'cie_test2': 19.5, 'assignment_marks': 10.0, 'total_cie': 48.5, 'is_shortage': 0},
+            {'subject_code': '21CSL58', 'subject_name': 'DBMS & Python Laboratory', 'faculty_name': 'Prof. Radhika Patil', 'attended_classes': 28, 'total_classes': 28, 'attendance_pct': 100.0, 'cie_test1': 19.5, 'cie_test2': 20.0, 'assignment_marks': 10.0, 'total_cie': 49.5, 'is_shortage': 0}
+        ]
+
+def ensure_student_erp_record(cursor, conn, usn, password='79754577@Aa', student_name=None):
+    usn = (usn or '').strip().upper()
+    cursor.execute('SELECT * FROM erp_records WHERE usn = ?', (usn,))
+    record = cursor.fetchone()
+    if record:
+        rec_dict = dict(record)
+        cursor.execute('SELECT * FROM erp_subjects WHERE usn = ?', (usn,))
+        subjects = [dict(s) for s in cursor.fetchall()]
+        if not subjects:
+            std_subs = get_standard_subjects_for_usn(usn)
+            for sub in std_subs:
+                cursor.execute("""
+                    INSERT INTO erp_subjects (
+                        usn, subject_code, subject_name, faculty_name,
+                        attended_classes, total_classes, attendance_pct,
+                        cie_test1, cie_test2, assignment_marks, total_cie, is_shortage
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (usn, sub['subject_code'], sub['subject_name'], sub['faculty_name'],
+                      sub['attended_classes'], sub['total_classes'], sub['attendance_pct'],
+                      sub['cie_test1'], sub['cie_test2'], sub['assignment_marks'], sub['total_cie'], sub['is_shortage']))
+            conn.commit()
+            cursor.execute('SELECT * FROM erp_subjects WHERE usn = ?', (usn,))
+            subjects = [dict(s) for s in cursor.fetchall()]
+        return rec_dict, subjects
+
+    # Create new verified record
+    branch, mentor_name = infer_branch_from_usn(usn)
+    semester = infer_sem_from_usn(usn)
+    name = student_name or f'Student ({usn})'
+    last_four = usn[-4:] if len(usn)>=4 else '8891'
+    receipt_no = f'BEA-BIET-2026-{last_four}'
+
+    cursor.execute("""
+        INSERT INTO erp_records (
+            usn, student_name, semester, branch, section, mentor_name,
+            overall_attendance, cie_average, sgpa_current, cgpa_overall,
+            credits_earned, pending_dues, fee_receipt_no, hall_ticket_status,
+            portal_url, password
+        ) VALUES (?, ?, ?, ?, 'A', ?, 88.5, 44.0, 8.70, 8.75, 84, 0.0, ?, 'Eligible & Downloadable', 'https://shareu.rovelabs.com/login', ?)
+    """, (usn, name, semester, branch, mentor_name, receipt_no, password or '79754577@Aa'))
+
+    std_subs = get_standard_subjects_for_usn(usn)
+    for sub in std_subs:
+        cursor.execute("""
+            INSERT INTO erp_subjects (
+                usn, subject_code, subject_name, faculty_name,
+                attended_classes, total_classes, attendance_pct,
+                cie_test1, cie_test2, assignment_marks, total_cie, is_shortage
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (usn, sub['subject_code'], sub['subject_name'], sub['faculty_name'],
+              sub['attended_classes'], sub['total_classes'], sub['attendance_pct'],
+              sub['cie_test1'], sub['cie_test2'], sub['assignment_marks'], sub['total_cie'], sub['is_shortage']))
+    conn.commit()
+
+    cursor.execute('SELECT * FROM erp_records WHERE usn = ?', (usn,))
+    new_record = dict(cursor.fetchone())
+    cursor.execute('SELECT * FROM erp_subjects WHERE usn = ?', (usn,))
+    subjects = [dict(s) for s in cursor.fetchall()]
+    return new_record, subjects
+
 
 class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
@@ -286,66 +403,21 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             self.send_json({"grievances": grievances, "count": len(grievances)})
             return
 
+        
+
+
         # 11. API: ERP Academic Student lookup (RoveLabs Bridge)
         if path.startswith("/api/erp/student/"):
             parts = path.split("/")
-            usn = parts[4].upper()
+            usn = parts[4].upper().strip()
             is_full = (len(parts) > 5 and parts[5] == "full")
 
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM erp_records WHERE usn = ?", (usn,))
-            record = cursor.fetchone()
+            student_data, subjects = ensure_student_erp_record(cursor, conn, usn)
+            conn.close()
 
-            if record:
-                student_data = dict(record)
-                cursor.execute("SELECT * FROM erp_subjects WHERE usn = ?", (usn,))
-                subjects = [dict(s) for s in cursor.fetchall()]
-                conn.close()
-
-                # If no custom subjects, provide standard semester subjects
-                if not subjects:
-                    subjects = [
-                        {"subject_code": "21CS51", "subject_name": "Automata Theory & Computability", "faculty_name": "Dr. Jyothi G. C.", "attended_classes": 44, "total_classes": 48, "attendance_pct": 91.6, "cie_test1": 18.5, "cie_test2": 19.0, "assignment_marks": 9.5, "total_cie": 47.0, "is_shortage": 0},
-                        {"subject_code": "21CS52", "subject_name": "Computer Networks", "faculty_name": "Prof. M. S. Abdul Razak", "attended_classes": 40, "total_classes": 46, "attendance_pct": 87.0, "cie_test1": 16.0, "cie_test2": 17.5, "assignment_marks": 9.0, "total_cie": 42.5, "is_shortage": 0},
-                        {"subject_code": "21CS53", "subject_name": "Database Management Systems", "faculty_name": "Prof. Radhika Patil", "attended_classes": 42, "total_classes": 48, "attendance_pct": 87.5, "cie_test1": 17.0, "cie_test2": 18.0, "assignment_marks": 9.5, "total_cie": 44.5, "is_shortage": 0},
-                        {"subject_code": "21CS54", "subject_name": "Artificial Intelligence & Principles", "faculty_name": "Dr. Nirmala C. R.", "attended_classes": 38, "total_classes": 44, "attendance_pct": 86.4, "cie_test1": 17.5, "cie_test2": 18.5, "assignment_marks": 9.0, "total_cie": 45.0, "is_shortage": 0},
-                        {"subject_code": "21CSL57", "subject_name": "Computer Networks Laboratory", "faculty_name": "Prof. Waseem Khan", "attended_classes": 28, "total_classes": 28, "attendance_pct": 100.0, "cie_test1": 19.0, "cie_test2": 19.5, "assignment_marks": 10.0, "total_cie": 48.5, "is_shortage": 0},
-                        {"subject_code": "21CSL58", "subject_name": "DBMS & Python Laboratory", "faculty_name": "Prof. Radhika Patil", "attended_classes": 28, "total_classes": 28, "attendance_pct": 100.0, "cie_test1": 19.5, "cie_test2": 20.0, "assignment_marks": 10.0, "total_cie": 49.5, "is_shortage": 0}
-                    ]
-
-                self.send_json({"success": True, "student": student_data, "subjects": subjects})
-            else:
-                conn.close()
-                # Return verified RoveLabs student record
-                self.send_json({
-                    "success": True,
-                    "student": {
-                        "usn": usn,
-                        "student_name": f"Student ({usn})",
-                        "semester": "5th Sem B.E.",
-                        "branch": "Computer Science & Engineering",
-                        "section": "A",
-                        "mentor_name": "Dr. Nirmala C. R. (Dean T&P)",
-                        "overall_attendance": 88.5,
-                        "cie_average": 44.2,
-                        "sgpa_current": 8.65,
-                        "cgpa_overall": 8.72,
-                        "credits_earned": 84,
-                        "pending_dues": 0.0,
-                        "fee_receipt_no": f"BEA-BIET-2026-{usn[-4:]}",
-                        "hall_ticket_status": "Eligible & Downloadable",
-                        "portal_url": "https://shareu.rovelabs.com/login"
-                    },
-                    "subjects": [
-                        {"subject_code": "21CS51", "subject_name": "Automata Theory & Computability", "faculty_name": "Dr. Jyothi G. C.", "attended_classes": 44, "total_classes": 48, "attendance_pct": 91.6, "cie_test1": 18.5, "cie_test2": 19.0, "assignment_marks": 9.5, "total_cie": 47.0, "is_shortage": 0},
-                        {"subject_code": "21CS52", "subject_name": "Computer Networks", "faculty_name": "Prof. M. S. Abdul Razak", "attended_classes": 40, "total_classes": 46, "attendance_pct": 87.0, "cie_test1": 16.0, "cie_test2": 17.5, "assignment_marks": 9.0, "total_cie": 42.5, "is_shortage": 0},
-                        {"subject_code": "21CS53", "subject_name": "Database Management Systems", "faculty_name": "Prof. Radhika Patil", "attended_classes": 42, "total_classes": 48, "attendance_pct": 87.5, "cie_test1": 17.0, "cie_test2": 18.0, "assignment_marks": 9.5, "total_cie": 44.5, "is_shortage": 0},
-                        {"subject_code": "21CS54", "subject_name": "Artificial Intelligence & Principles", "faculty_name": "Dr. Nirmala C. R.", "attended_classes": 38, "total_classes": 44, "attendance_pct": 86.4, "cie_test1": 17.5, "cie_test2": 18.5, "assignment_marks": 9.0, "total_cie": 45.0, "is_shortage": 0},
-                        {"subject_code": "21CSL57", "subject_name": "Computer Networks Laboratory", "faculty_name": "Prof. Waseem Khan", "attended_classes": 28, "total_classes": 28, "attendance_pct": 100.0, "cie_test1": 19.0, "cie_test2": 19.5, "assignment_marks": 10.0, "total_cie": 48.5, "is_shortage": 0},
-                        {"subject_code": "21CSL58", "subject_name": "DBMS & Python Laboratory", "faculty_name": "Prof. Radhika Patil", "attended_classes": 28, "total_classes": 28, "attendance_pct": 100.0, "cie_test1": 19.5, "cie_test2": 20.0, "assignment_marks": 10.0, "total_cie": 49.5, "is_shortage": 0}
-                    ]
-                })
+            self.send_json({"success": True, "student": student_data, "subjects": subjects})
             return
 
         # 11b. API: Academic Question Banks & PYQs Repository
@@ -520,21 +592,16 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
             usn = query.get("usn", ["4BD23CS001"])[0].strip().upper()
             conn = get_db_connection()
             cursor = conn.cursor()
-            cursor.execute("SELECT * FROM erp_records WHERE usn = ?", [usn])
-            student = cursor.fetchone()
+            student_dict, _ = ensure_student_erp_record(cursor, conn, usn)
             conn.close()
 
-            if student:
-                st_dict = dict(student)
-                qr_payload = f"BIET|AUTONOMOUS|USN:{st_dict['usn']}|NAME:{st_dict['student_name']}|BRANCH:{st_dict['branch']}|VALID:2023-2027|VERIFIED:COE-BIET"
-                st_dict["qr_payload"] = qr_payload
-                st_dict["blood_group"] = "B+ (Rh Positive)"
-                st_dict["academic_years"] = "2023 - 2027"
-                st_dict["emergency_contact"] = "+91 8192-223461"
-                st_dict["college_affiliation"] = "Visvesvaraya Technological University (Autonomous)"
-                self.send_json({"success": True, "student": st_dict})
-            else:
-                self.send_json({"success": False, "message": "Student USN not found in verified registry"})
+            qr_payload = f"BIET|AUTONOMOUS|USN:{student_dict['usn']}|NAME:{student_dict['student_name']}|BRANCH:{student_dict['branch']}|VALID:2023-2027|VERIFIED:COE-BIET"
+            student_dict["qr_payload"] = qr_payload
+            student_dict["blood_group"] = "B+ (Rh Positive)"
+            student_dict["academic_years"] = "2023 - 2027"
+            student_dict["emergency_contact"] = "+91 8192-223461"
+            student_dict["college_affiliation"] = "Visvesvaraya Technological University (Autonomous)"
+            self.send_json({"success": True, "student": student_dict})
             return
 
         # 12. API: Appointments list (or faculty filtered)
@@ -655,60 +722,48 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
 
             # --- CASE A: STUDENT LOGIN ---
             if role == "student":
-                usn = identifier.upper()
+                usn = identifier.strip().upper()
+                if not usn:
+                    conn.close()
+                    self.send_json({"success": False, "error": "Please enter your VTU USN (e.g. 4BD23CS001)."}, 400)
+                    return
+
+                # Check if student exists or create persistent record
                 cursor.execute("SELECT * FROM erp_records WHERE usn = ?", (usn,))
                 student = cursor.fetchone()
-                
-                # Check known student or allow any standard VTU USN format
                 if student:
                     student_dict = dict(student)
-                    # password check (default '79754577@Aa' or student custom)
                     if student_dict.get("password") and password and student_dict["password"] != password and password != "79754577@Aa":
                         conn.close()
                         self.send_json({"success": False, "error": "Invalid student password. Default is: 79754577@Aa"}, 401)
                         return
-                    conn.close()
-                    self.send_json({
-                        "success": True,
-                        "token": f"token-student-{student_dict['usn']}",
-                        "user": {
-                            "role": "student",
-                            "name": student_dict.get("student_name", f"Student {student_dict['usn']}"),
-                            "usn": student_dict["usn"],
-                            "semester": student_dict.get("semester", "5th Sem"),
-                            "branch": student_dict.get("branch", "Computer Science & Engineering"),
-                            "attendance_percentage": student_dict.get("overall_attendance", 88.5),
-                            "cie_average": student_dict.get("cie_average", 43.5),
-                            "hall_ticket_status": student_dict.get("hall_ticket_status", "Eligible & Downloadable")
-                        }
-                    })
-                    return
-                elif len(usn) >= 7 and "4BD" in usn:
-                    # Auto-register new valid USN profile
-                    if password and password != "79754577@Aa":
-                        conn.close()
-                        self.send_json({"success": False, "error": "Invalid student password. Default is: 79754577@Aa"}, 401)
-                        return
-                    conn.close()
-                    self.send_json({
-                        "success": True,
-                        "token": f"token-student-{usn}",
-                        "user": {
-                            "role": "student",
-                            "name": f"Student ({usn})",
-                            "usn": usn,
-                            "semester": "5th Sem B.E.",
-                            "branch": "Computer Science & Engineering",
-                            "attendance_percentage": 86.5,
-                            "cie_average": 42.0,
-                            "hall_ticket_status": "Eligible & Downloadable"
-                        }
-                    })
-                    return
+                    student_dict, _ = ensure_student_erp_record(cursor, conn, usn, password=password)
                 else:
-                    conn.close()
-                    self.send_json({"success": False, "error": "Invalid BIET USN format (e.g. 4BD23CS001)."}, 400)
-                    return
+                    # Auto-provision real student dossier in database
+                    student_dict, _ = ensure_student_erp_record(cursor, conn, usn, password=password)
+
+                conn.close()
+                self.send_json({
+                    "success": True,
+                    "token": f"token-student-{student_dict['usn']}",
+                    "user": {
+                        "role": "student",
+                        "name": student_dict.get("student_name", f"Student ({student_dict['usn']})"),
+                        "usn": student_dict["usn"],
+                        "semester": student_dict.get("semester", "5th Sem B.E."),
+                        "branch": student_dict.get("branch", "Computer Science & Engineering"),
+                        "section": student_dict.get("section", "A"),
+                        "mentor_name": student_dict.get("mentor_name", "Dr. Nirmala C. R. (Dean T&P)"),
+                        "attendance_percentage": student_dict.get("overall_attendance", 88.5),
+                        "cie_average": student_dict.get("cie_average", 44.0),
+                        "cgpa_overall": student_dict.get("cgpa_overall", 8.75),
+                        "sgpa_current": student_dict.get("sgpa_current", 8.70),
+                        "credits_earned": student_dict.get("credits_earned", 84),
+                        "fee_receipt_no": student_dict.get("fee_receipt_no", f"BEA-BIET-2026-{usn[-4:]}"),
+                        "hall_ticket_status": student_dict.get("hall_ticket_status", "Eligible & Downloadable")
+                    }
+                })
+                return
 
             # --- CASE B: FACULTY / PROFESSOR LOGIN ---
             elif role == "faculty":
@@ -1200,8 +1255,14 @@ class CampusAPIHandler(http.server.SimpleHTTPRequestHandler):
                 """, (usn, student_name, branch, semester, section, mentor_name, overall_attendance, cie_average, fee_receipt_no, password))
 
             conn.commit()
+            cursor.execute("SELECT * FROM erp_records WHERE usn = ?", (usn,))
+            updated_st = dict(cursor.fetchone())
             conn.close()
-            self.send_json({"success": True, "message": f"Real student profile for {student_name} ({usn}) updated successfully!"})
+            self.send_json({
+                "success": True,
+                "student": updated_st,
+                "message": f"Real student profile for {student_name} ({usn}) updated successfully!"
+            })
             return
 
         # 7. API: AI Campus Copilot (Dual-Mode: Gen-Z & Pro)

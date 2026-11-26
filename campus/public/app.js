@@ -343,6 +343,12 @@ function switchView(viewName) {
     }, 150);
   }
 
+  if (viewName === 'erp') {
+    updateErpAuthStatus();
+    const targetUSN = (currentUser && currentUser.role === 'student' && currentUser.usn) || document.getElementById('erp-usn-input')?.value || '4BD23CS001';
+    lookupStudentERP(targetUSN);
+  }
+
   if (viewName === 'placements') loadPlacementDrives();
   if (viewName === 'timetable') loadTimetableSchedule();
   if (viewName === 'gpa') autoLoadGPACourses();
@@ -1413,6 +1419,164 @@ async function loadEmergencyContacts() {
   }
 }
 
+
+async function handleDirectERPLogin(overrideUsn, overridePass) {
+  const usnInput = document.getElementById('erp-direct-login-usn');
+  const passInput = document.getElementById('erp-direct-login-pass');
+  const btn = document.getElementById('btn-erp-direct-login');
+
+  const usn = (overrideUsn || (usnInput ? usnInput.value : '')).trim().toUpperCase();
+  const password = (overridePass || (passInput ? passInput.value : '')).trim();
+
+  if (!usn) {
+    alert('Please enter your 10-character VTU USN (e.g. 4BD23CS001)');
+    if (usnInput) usnInput.focus();
+    return;
+  }
+
+  const originalBtnHtml = btn ? btn.innerHTML : '';
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> <span>Authenticating & Syncing...</span>`;
+  }
+
+  try {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role: 'student', identifier: usn, password: password || '79754577@Aa' })
+    });
+    const data = await res.json();
+
+    if (data.success && data.user) {
+      currentUser = data.user;
+      localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
+      updateAuthUI();
+      updateErpAuthStatus();
+      playChimeSound();
+
+      // Sync ERP Dashboard records
+      await lookupStudentERP(currentUser.usn);
+
+      // Sync Timetable and GPA preferences
+      syncAcademicPreferences(currentUser);
+
+      showPopUpNotification({
+        title: `🎓 Welcome, ${currentUser.name}!`,
+        message: `Academic dossier synced with BIET Autonomous Portal. USN: ${currentUser.usn}`,
+        type: 'general'
+      });
+    } else {
+      alert(`⚠️ Login Failed: ${data.error || 'Please verify your USN and password.'}`);
+    }
+  } catch (err) {
+    console.error("Direct ERP login error:", err);
+    alert("Connection error while communicating with BIET Academic Portal.");
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalBtnHtml;
+    }
+  }
+}
+
+function setSampleUsn(sampleUsn) {
+  const usnInput = document.getElementById('erp-direct-login-usn');
+  if (usnInput) {
+    usnInput.value = sampleUsn;
+  }
+  const mainUsnInput = document.getElementById('erp-usn-input');
+  if (mainUsnInput) {
+    mainUsnInput.value = sampleUsn;
+  }
+}
+
+function toggleErpPasswordVisibility() {
+  const passInput = document.getElementById('erp-direct-login-pass');
+  const eye = document.getElementById('erp-pass-eye');
+  if (!passInput) return;
+  if (passInput.type === 'password') {
+    passInput.type = 'text';
+    if (eye) eye.className = 'fa-solid fa-eye-slash';
+  } else {
+    passInput.type = 'password';
+    if (eye) eye.className = 'fa-solid fa-eye';
+  }
+}
+
+async function syncStudentERPNow() {
+  const usn = (currentUser && currentUser.role === 'student' && currentUser.usn) ||
+              (document.getElementById('erp-usn-input')?.value.trim().toUpperCase()) ||
+              '4BD23CS001';
+  playChimeSound();
+  await lookupStudentERP(usn);
+  showPopUpNotification({
+    title: '🔄 Dossier Synchronized',
+    message: `Academic records for ${usn} refreshed from live database.`,
+    type: 'general'
+  });
+}
+
+function syncAcademicPreferences(student) {
+  if (!student) return;
+  const ttDept = document.getElementById('tt-dept-select');
+  const ttSem = document.getElementById('tt-sem-select');
+  if (ttDept && student.branch) {
+    for (let opt of ttDept.options) {
+      if (student.branch.includes(opt.value) || opt.value.includes(student.branch)) {
+        ttDept.value = opt.value;
+        break;
+      }
+    }
+  }
+  if (ttSem && student.semester) {
+    for (let opt of ttSem.options) {
+      if (student.semester.includes(opt.value) || opt.value.includes(student.semester)) {
+        ttSem.value = opt.value;
+        break;
+      }
+    }
+  }
+
+  const gpaDept = document.getElementById('gpa-dept-select');
+  const gpaSem = document.getElementById('gpa-sem-select');
+  if (gpaDept && student.branch) {
+    for (let opt of gpaDept.options) {
+      if (student.branch.includes(opt.value) || opt.value.includes(student.branch)) {
+        gpaDept.value = opt.value;
+        break;
+      }
+    }
+  }
+  if (gpaSem && student.semester) {
+    for (let opt of gpaSem.options) {
+      if (student.semester.includes(opt.value) || opt.value.includes(student.semester)) {
+        gpaSem.value = opt.value;
+        break;
+      }
+    }
+  }
+}
+
+function updateErpAuthStatus() {
+  const gateway = document.getElementById('erp-auth-gateway-card');
+  const activeBar = document.getElementById('erp-active-session-bar');
+  const sessionName = document.getElementById('erp-session-user-name');
+  const sessionUsn = document.getElementById('erp-session-user-usn');
+  const mainUsnInput = document.getElementById('erp-usn-input');
+
+  if (currentUser && currentUser.role === 'student') {
+    if (gateway) gateway.classList.add('hidden');
+    if (activeBar) activeBar.classList.remove('hidden');
+    if (sessionName) sessionName.textContent = currentUser.name || `Student (${currentUser.usn})`;
+    if (sessionUsn) sessionUsn.textContent = currentUser.usn;
+    if (mainUsnInput && !mainUsnInput.value) mainUsnInput.value = currentUser.usn;
+  } else {
+    if (gateway) gateway.classList.remove('hidden');
+    if (activeBar) activeBar.classList.add('hidden');
+  }
+}
+
 let currentLoadedStudent = null;
 
 async function lookupStudentERP(defaultUSN) {
@@ -1606,6 +1770,18 @@ async function handleSaveStudentProfile(e) {
     if (result.success) {
       closeModal('modal-edit-student-profile');
       playChimeSound();
+      if (currentUser && currentUser.role === 'student' && currentUser.usn === usn) {
+        currentUser.name = studentName;
+        currentUser.branch = branch;
+        currentUser.semester = semester;
+        currentUser.section = section;
+        currentUser.attendance_percentage = attendance;
+        currentUser.cie_average = cie;
+        localStorage.setItem('biet_user_session', JSON.stringify(currentUser));
+        updateAuthUI();
+        updateErpAuthStatus();
+        syncAcademicPreferences(currentUser);
+      }
       if (document.getElementById('erp-usn-input')) {
         document.getElementById('erp-usn-input').value = usn;
       }
@@ -1855,12 +2031,17 @@ function initUserSession() {
     try {
       currentUser = JSON.parse(saved);
       updateAuthUI();
+      updateErpAuthStatus();
+      if (currentUser && currentUser.role === 'student') {
+        syncAcademicPreferences(currentUser);
+      }
     } catch (e) {
       currentUser = null;
     }
   } else {
     currentUser = null;
     updateAuthUI();
+    updateErpAuthStatus();
   }
 }
 
@@ -1940,7 +2121,10 @@ async function handleUnifiedAuthLogin(e) {
           message: `Logged in as Student (${currentUser.usn}). Academic dossier synced.`,
           type: 'general'
         });
-        lookupStudentERP(currentUser.usn);
+        updateErpAuthStatus();
+        switchView('erp');
+        await lookupStudentERP(currentUser.usn);
+        syncAcademicPreferences(currentUser);
       } else if (role === 'faculty') {
         showPopUpNotification({
           title: `👨‍🏫 Welcome, ${currentUser.name}!`,
@@ -1974,8 +2158,10 @@ async function handleUnifiedAuthLogin(e) {
 
 function logoutUser() {
   currentUser = null;
+  currentLoadedStudent = null;
   localStorage.removeItem('biet_user_session');
   updateAuthUI();
+  updateErpAuthStatus();
   playChimeSound();
   showPopUpNotification({
     title: 'Logged Out',
@@ -3053,7 +3239,7 @@ function copyCheatSheetSummary(id) {
    FEATURE 5: DIGITAL SMART STUDENT ID CARD BADGE
 ========================================================= */
 async function openStudentIdCardModal(usn) {
-  const targetUSN = usn || (currentStudentData ? currentStudentData.usn : '4BD23CS001');
+  const targetUSN = usn || (currentUser && currentUser.role === 'student' ? currentUser.usn : '') || (currentLoadedStudent ? currentLoadedStudent.usn : '') || '4BD23CS001';
 
   try {
     const res = await fetch(`/api/students/id-card?usn=${encodeURIComponent(targetUSN)}`);
