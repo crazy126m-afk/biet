@@ -1315,9 +1315,20 @@ function renderLostFound(items) {
 
   if (items.length === 0) {
     container.innerHTML = `
-      <div class="col-span-full py-12 text-center text-slate-400 space-y-2">
-        <i class="fa-solid fa-box-open text-3xl text-purple-400/50"></i>
-        <p class="text-xs">No lost or found belongings matching this filter.</p>
+      <div class="col-span-full py-16 text-center text-slate-400 space-y-3 glass-panel rounded-3xl border border-white/10 p-8 card-appear">
+        <div class="w-14 h-14 rounded-2xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-2xl mx-auto shadow-inner">
+          <i class="fa-solid fa-box-open"></i>
+        </div>
+        <h4 class="text-sm font-bold text-white">Lost & Found Depository Clean</h4>
+        <p class="text-xs text-slate-300 max-w-md mx-auto">There are no reported lost or found belongings currently active on campus. All previous items were returned or claimed.</p>
+        <div class="flex items-center justify-center gap-2 pt-2">
+          <button onclick="openPostLostFoundModal('found')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-bold text-xs shadow-md shadow-emerald-500/20 hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-hand-holding-hand"></i> Report Found Item
+          </button>
+          <button onclick="openPostLostFoundModal('lost')" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-pink-600 text-white font-bold text-xs shadow-md shadow-rose-500/20 hover:scale-105 active:scale-95 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-magnifying-glass-location"></i> Report Lost Item
+          </button>
+        </div>
       </div>
     `;
     return;
